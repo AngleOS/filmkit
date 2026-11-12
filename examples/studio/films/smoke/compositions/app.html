@@ -1,0 +1,49 @@
+<template>
+  <!-- A film's own composition: a product's UI rebuilt from film.css's fk- pieces in the ui scene's light window
+       (AL.app("center").body), then a dialog whose button the cursor presses. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ap-body { position: absolute; display: flex; flex-direction: column; gap: 32px; padding: 40px; }
+    #ap-head { display: flex; align-items: center; justify-content: space-between; }
+    #ap-row { display: flex; gap: 16px; }
+    #ap-row .fk-input { flex: 1; }
+    #ap-dialog { width: 720px; max-width: calc(100% - 80px); }
+  </style>
+  <div id="root" class="on-paper" data-composition-id="app">
+    <div id="ap-body">
+      <div id="ap-head">
+        <div class="fk-tabs"><span class="on">Films</span><span>Renders</span></div>
+        <span class="fk-badge outline">4 formats</span>
+      </div>
+      <div class="fk-card"><h3>Launch film</h3><p>Checked in every frame, with captions.</p></div>
+      <div id="ap-row"><div class="fk-input">launch</div><span class="fk-btn">Render</span><span class="fk-btn outline">Preview</span></div>
+    </div>
+    <div id="ap-dialog" class="fk-dialog">
+      <h3>Render four formats?</h3>
+      <p>Each with captions.</p>
+      <div class="foot"><span class="fk-btn ghost">Cancel</span><span id="ap-ok" class="fk-btn">Render</span></div>
+    </div>
+    <img id="ap-cursor" class="fk-cursor" src="kit/assets/cursor.svg" alt="" />
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const $ = (id) => document.getElementById(id);
+      const B = AL.app("center").body;
+      gsap.set($("ap-body"), { left: B.left, top: B.top, width: B.width, height: B.height });
+      // The dialog sits on the body's floor, so its button's centre is known before the fonts load.
+      const width = Math.min(720, B.width - 80), right = B.left + (B.width + width) / 2, bottom = B.top + B.height - 40;
+      gsap.set($("ap-dialog"), { left: right - width, bottom: AL.H - bottom, width });
+      const ok = [right - 42 - 60, bottom - 42 - 32];
+      gsap.set($("ap-cursor"), { x: ok[0] + 170, y: AL.H + 100 });
+
+      KM.arrive(tl, $("ap-body"), 0.3);
+      KM.arrive(tl, $("ap-dialog"), 1.4);
+      KM.cursorIn(tl, $("ap-cursor"), ok[0], ok[1], 2.3);
+      KM.press(tl, $("ap-ok"), $("ap-cursor"), 2.4);
+      tl.to($("ap-dialog"), { opacity: 0, duration: 0.2, ease: "power2.in" }, 2.6);
+      KM.cursorOut(tl, $("ap-cursor"), 2.7);
+      window.__timelines["app"] = tl;
+    })();
+  </script>
+</template>

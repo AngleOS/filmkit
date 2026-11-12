@@ -18,6 +18,7 @@ const BUILT_IN = /^[a-z0-9-]+$/;
  * @typedef {{ family: string, weight?: number, tracking?: string, leading?: number }} Font
  * @typedef {{ grounds: Record<string, string>, accent: string, accentOn?: { paper?: string },
  *   text: { ink: string, muted: string, onPaper: string, mutedOnPaper: string, wordmark?: string },
+ *   code?: Record<string, string>, codeOn?: { paper?: Record<string, string> },
  *   fonts: { dir?: string, display: Font, ui: Font, mono: Font, faces?: { family: string, weight: number, style?: string, file: string }[] },
  *   label?: string } & Record<string, unknown>} ThemeValues
  * @typedef {{ name: string, dirs: string[], values: ThemeValues }} Theme
@@ -101,7 +102,7 @@ function missingFaces({ fonts }, dirs) {
  * theme.css: @font-face for each face, then the custom properties the kit reads, and their values on paper.
  * @param {ThemeValues} theme a loaded theme's values
  */
-export function themeCss({ label, grounds, accent, accentOn, text, fonts }) {
+export function themeCss({ label, grounds, accent, accentOn, text, code, codeOn, fonts }) {
   const faces = (fonts.faces ?? []).map(
     (f) => `@font-face { font-family: "${f.family}"; src: url("${f.file}"); font-weight: ${f.weight};${f.style ? ` font-style: ${f.style};` : ""} }\n`,
   );
@@ -120,6 +121,7 @@ export function themeCss({ label, grounds, accent, accentOn, text, fonts }) {
     "brand-mark": accent,
     "brand-word": text.wordmark ?? text.ink,
     "brand-line": accent,
+    ...codeProps(code),
   };
   const paper = {
     foreground: text.onPaper,
@@ -128,8 +130,12 @@ export function themeCss({ label, grounds, accent, accentOn, text, fonts }) {
     "brand-mark": paperAccent,
     "brand-word": text.onPaper,
     "brand-line": paperAccent,
+    ...codeProps(codeOn?.paper),
   };
   /** @param {Record<string, string | number>} props */
   const block = (props) => Object.entries(props).map(([k, v]) => `  --${k}: ${v};\n`).join("");
   return `/* The ${label ?? "studio's"} theme, compiled by filmkit from theme.json: change that, not this file. */\n${faces.join("")}\n:root {\n${block(root)}}\n\n.on-paper {\n${block(paper)}}\n`;
 }
+
+/** The code scene's syntax colours, as --code-keyword… @param {Record<string, string>} [code] */
+const codeProps = (code = {}) => Object.fromEntries(Object.entries(code).map(([k, v]) => [`code-${k}`, v]));

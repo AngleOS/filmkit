@@ -22,6 +22,11 @@
   --brand-mark: #ff7a45;
   --brand-word: #f3f1ea;
   --brand-line: #ff7a45;
+  --code-keyword: #ffab8a;
+  --code-string: #a5d6ff;
+  --code-title: #d2a8ff;
+  --code-number: #79c0ff;
+  --code-attr: #ffd08a;
 }
 
 .on-paper {
@@ -31,4 +36,9 @@
   --brand-mark: #c2410c;
   --brand-word: #16171c;
   --brand-line: #c2410c;
+  --code-keyword: #b42318;
+  --code-string: #0a3069;
+  --code-title: #6639ba;
+  --code-number: #0550ae;
+  --code-attr: #8a4b00;
 }

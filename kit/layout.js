@@ -27,11 +27,11 @@
     V: { left: safe.left, width: W - safe.left - safe.right, bottom: safe.bottom + 24, fontSize: 52 },
   });
 
-  // The content column: where a product's messages, code and forms sit.
+  // The content column: where a product's messages, code and forms sit, clear of 9:16's action rail.
   const column = pick({
     L: { left: 310, width: 1300 },
-    S: { left: 64, width: W - 128 },
-    V: { left: 64, width: W - 128 },
+    S: { left: safe.left, width: W - safe.left - safe.right },
+    V: { left: safe.left, width: W - safe.left - safe.right },
   });
 
   // Where a product shot sits under a title placed at the top ("place": "top"): the rest of the safe box, below room
@@ -41,11 +41,43 @@
     return { left: safe.left, top, width: W - safe.left - safe.right, height: H - safe.bottom - top };
   })();
 
-  // A scene's ground: one of the theme's fills (ink, accent-dark, paper), or none for an overlay. Paper is light, so
-  // the theme's .on-paper turns the text dark over it.
+  // The composer, 180 px tall, low in the safe box, as in a chat, leaving room above for a title
+  // and below for two lines of captions; `send` is the point the cursor aims for.
+  const composer = (() => {
+    const { left, width } = column, height = 180, top = H - safe.bottom - height - pick({ L: 140, S: 150, V: 200 });
+    return { left, top, width, height, send: [left + width - 62, top + height - 56] };
+  })();
+
+  // The app window (the ui scene): on the stage under a top title, or filling the safe box. `body` is the part below
+  // its title bar, where a film's own composition rebuilds the product's UI.
+  const app = (place) => {
+    const box = place === "stage" ? stage : { left: safe.left, top: safe.top, width: W - safe.left - safe.right, height: H - safe.top - safe.bottom };
+    const bar = pick({ L: 64, S: 60, V: 60 });
+    return { ...box, bar, body: { left: box.left, top: box.top + bar, width: box.width, height: box.height - bar } };
+  };
+
+  // Where a chart sits: the stage, stopped above the caption block (two lines in 16:9 and the square frames, three in
+  // 9:16) so a number never lands under a caption, burned in or the feed's own. Its source line takes the floor. The
+  // Angle films' 9:16 and 1:1 cuts broke here: source lines against captions.
+  const chart = (() => {
+    const floor = H - captions.bottom - R(captions.fontSize * 1.3 * pick({ L: 2, S: 2, V: 3 })) - 28;
+    return { left: stage.left, top: stage.top, width: stage.width, height: floor - stage.top };
+  })();
+  // A chart's source line, on the chart box's floor: left-aligned in 16:9 (under a left-aligned title), centred
+  // elsewhere. One line, so `check` flags one too long for the frame. Returns the room it takes, so the chart stops
+  // above it.
+  const source = (el, text) => {
+    const size = pick({ L: 28, S: 28, V: 30 }), h = R(size * 1.3);
+    el.textContent = text;
+    gsap.set(el, { position: "absolute", left: chart.left, width: chart.width, top: chart.top + chart.height - h, fontSize: size, lineHeight: 1.3, color: "var(--muted-foreground)", textAlign: mode === "L" ? "left" : "center", whiteSpace: "nowrap" });
+    return text ? h + 24 : 0;
+  };
+
+  // A scene's ground: one of the theme's fills (ink, accent-dark, paper), or none for an overlay (over-paper for one
+  // over a paper scene). Paper is light, so the theme's .on-paper turns the text dark over it.
   const ground = (el, name) => {
-    el.classList.toggle("on-paper", name === "paper");
-    el.style.background = name === "none" ? "transparent" : `var(--${name})`;
+    el.classList.toggle("on-paper", name === "paper" || name === "over-paper");
+    el.style.background = name === "none" || name === "over-paper" ? "transparent" : `var(--${name})`;
   };
 
   // A scene's variables: its declared defaults under the host's values. HyperFrames 0.8.186 drops a scene file's
@@ -55,5 +87,5 @@
     return { ...Object.fromEntries(declared.map((d) => [d.id, d.default])), ...hf.getVariables() };
   };
 
-  window.AL = { W, H, mode, pick, safe, captions, column, stage, ground, vars };
+  window.AL = { W, H, mode, pick, safe, captions, column, composer, stage, app, chart, source, ground, vars };
 })();

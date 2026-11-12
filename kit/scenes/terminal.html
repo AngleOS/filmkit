@@ -1,0 +1,48 @@
+<template>
+  <!-- A terminal: the command is typed at reading speed after the prompt, then its output prints line by line and a
+       fresh prompt waits. With `answer`, the last line is a question the command asks instead, and the answer is
+       typed after it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #tm-box { position: absolute; background: var(--fk-card); border: 2px solid var(--fk-border); border-radius: 22px; color: var(--foreground); font-family: var(--font-mono); line-height: 1.6; overflow: hidden; }
+    #tm-bar { display: flex; gap: 12px; padding: 18px 24px; border-bottom: 2px solid var(--fk-border); }
+    #tm-bar i { width: 16px; height: 16px; border-radius: 50%; background: var(--fk-border); }
+    #tm-box pre { margin: 0; padding: 24px 30px; white-space: pre-wrap; font: inherit; }
+    .tm-ps { color: var(--accent); }
+  </style>
+  <div id="root" data-composition-id="terminal" data-composition-variables='[
+    {"id":"command","type":"string","label":"Command","default":"npx filmkit check launch"},
+    {"id":"output","type":"string","label":"Output (one line each)","default":"── launch 16x9\n── launch 9x16\n── launch 1x1\n── launch 4x5\n✓ launch: 16x9, 9x16, 1x1, 4x5"},
+    {"id":"answer","type":"string","label":"Typed after the last line (empty: a fresh prompt)","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"none","label":"None (overlay)"}]}
+  ]'>
+    <div id="tm-box">
+      <div id="tm-bar"><i></i><i></i><i></i></div>
+      <pre><span class="tm-ps">$ </span><span id="tm-cmd"></span><span id="tm-caret" class="fk-caret"></span><span id="tm-out"></span></pre>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, safe, column } = AL;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+      const width = pick({ L: 1500, V: column.width });
+      gsap.set($("tm-box"), { left: Math.round((W - width) / 2), width, top: pick({ L: 300, S: Math.round(H * 0.3), V: safe.top + 340 }), fontSize: pick({ L: 34, V: 28 }) });
+      const lines = v.output.split("\n");
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      const ask = '<span id="tm-ans"></span><span class="fk-caret"></span>';
+      $("tm-out").innerHTML = lines.map((s, i) => `<div class="tm-line">${esc(s) || " "}${v.answer && i === lines.length - 1 ? ask : ""}</div>`).join("") +
+        (v.answer ? "" : '<div class="tm-line"><span class="tm-ps">$ </span></div>');
+
+      KM.arrive(tl, $("tm-box"), 0.05);
+      const typed = KM.type(tl, $("tm-cmd"), v.command, 0.4, 15);
+      tl.set($("tm-caret"), { display: "none" }, typed + 0.3);
+      const rows = document.querySelectorAll(".tm-line");
+      tl.fromTo(rows, { opacity: 0 }, { opacity: 1, duration: 0.01, stagger: 0.12, ease: "none" }, typed + 0.35);
+      if (v.answer) KM.type(tl, $("tm-ans"), v.answer, typed + 0.35 + 0.12 * (rows.length - 1) + 0.7, 15);
+      window.__timelines["terminal"] = tl;
+    })();
+  </script>
+</template>

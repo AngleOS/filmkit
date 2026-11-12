@@ -1,0 +1,84 @@
+<template>
+  <!-- Before → after: two bars on one scale, each number rolling up as its bar grows, the after bar in the accent, then
+       the delta lands under them. Sits in AL.chart, under a title placed at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #st-box { position: absolute; display: flex; flex-direction: column; }
+    .st-head { display: flex; align-items: baseline; justify-content: space-between; gap: 24px; }
+    .st-track { position: relative; border-radius: 10px; overflow: hidden; }
+    .st-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 10px; transform-origin: 0 50%; }
+    #st-delta { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); color: var(--accent); white-space: nowrap; }
+  </style>
+  <div id="root" data-composition-id="stat" data-composition-variables='[
+    {"id":"before","type":"number","label":"Before","default":28.7},
+    {"id":"after","type":"number","label":"After","default":50},
+    {"id":"beforeLabel","type":"string","label":"What before is","default":"Before"},
+    {"id":"afterLabel","type":"string","label":"What after is","default":"After"},
+    {"id":"prefix","type":"string","label":"Before each number, such as $","default":""},
+    {"id":"suffix","type":"string","label":"After each number, such as %","default":"%"},
+    {"id":"decimals","type":"number","label":"Decimal places","default":1},
+    {"id":"format","type":"enum","label":"Number format","default":"grouped","options":[{"value":"grouped","label":"Grouped: 12,345"},{"value":"plain","label":"Plain: 2026"},{"value":"compact","label":"Compact: 12.3K, 4.5M"}]},
+    {"id":"delta","type":"enum","label":"The delta","default":"difference","options":[{"value":"difference","label":"Difference, in the numbers own units (percentages in points)"},{"value":"percent","label":"Relative change, in percent"},{"value":"times","label":"Times as much"},{"value":"none","label":"None"}]},
+    {"id":"max","type":"number","label":"Top of the scale (0 = the larger number)","default":0},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="st-box">
+      <div class="st-head"><span id="st-a-label" class="chart-label"></span><span id="st-a-num" class="chart-num"></span></div>
+      <div id="st-a-track" class="st-track chart-track"><i id="st-a-fill" class="st-fill chart-mark"></i></div>
+      <div id="st-b-head" class="st-head"><span id="st-b-label" class="chart-label"></span><span id="st-b-num" class="chart-num"></span></div>
+      <div id="st-b-track" class="st-track chart-track"><i id="st-b-fill" class="st-fill chart-mark hi"></i></div>
+      <div id="st-delta"></div>
+    </div>
+    <div id="st-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const fmt = (x) => KC.format(x, v);
+      const room = AL.source($("st-source"), v.source);
+      const width = Math.min(chart.width, pick({ L: 1300, S: chart.width, V: chart.width }));
+      const [a, b] = KC.lengths([v.before, v.after], width, { max: v.max });
+      $("st-a-label").textContent = v.beforeLabel;
+      $("st-b-label").textContent = v.afterLabel;
+      $("st-delta").textContent = v.delta === "none" ? "" : KC.delta(v.before, v.after, v.delta, v);
+
+      // Before is set smaller than after, and the delta largest: the eye lands where the change is.
+      const label = pick({ L: 34, S: 30, V: 36 }), numA = pick({ L: 56, S: 48, V: 60 }), numB = pick({ L: 80, S: 68, V: 88 });
+      const track = pick({ L: 56, S: 48, V: 56 }), deltaSize = pick({ L: 96, S: 80, V: 104 });
+      const gap = pick({ L: 56, S: 44, V: 60 });
+      gsap.set([$("st-a-label"), $("st-b-label")], { fontSize: label });
+      gsap.set($("st-a-num"), { fontSize: numA, lineHeight: 1.2 });
+      gsap.set($("st-b-num"), { fontSize: numB, lineHeight: 1.2 });
+      gsap.set([$("st-a-track"), $("st-b-track")], { height: track, marginTop: 12 });
+      gsap.set($("st-b-head"), { marginTop: gap });
+      gsap.set($("st-a-fill"), { width: a });
+      gsap.set($("st-b-fill"), { width: b });
+      gsap.set($("st-delta"), { fontSize: deltaSize, lineHeight: 1.1, marginTop: gap, textAlign: mode === "L" ? "left" : "center", display: v.delta === "none" ? "none" : "block" });
+      // Centred in the room the source leaves, so the group sits on the chart box's middle in every frame.
+      const height = 2 * (track + 12) + R(numA * 1.2) + R(numB * 1.2) + gap + (v.delta === "none" ? 0 : gap + R(deltaSize * 1.1));
+      const left = mode === "L" ? chart.left : R(chart.left + (chart.width - width) / 2);
+      gsap.set($("st-box"), { left, width, top: chart.top + Math.max(0, R((chart.height - room - height) / 2)) });
+
+      KM.arrive(tl, $("st-box"), 0.1);
+      const grow = (fill, num, value, t) => {
+        tl.fromTo(fill, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, t);
+        return KC.roll(tl, num, 0, value, t, 0.6, fmt, "expo.out");
+      };
+      $("st-a-num").textContent = $("st-b-num").textContent = fmt(0);
+      grow($("st-a-fill"), $("st-a-num"), v.before, 0.5);
+      const landed = grow($("st-b-fill"), $("st-b-num"), v.after, 1.3);
+      if (v.delta !== "none") KM.arrive(tl, $("st-delta"), landed + 0.1);
+      tl.fromTo($("st-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("st-box"), $("st-source")], v.out);
+      window.__timelines["stat"] = tl;
+    })();
+  </script>
+</template>

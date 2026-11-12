@@ -62,6 +62,7 @@ test("a theme that can't be found, or that breaks the schema, says what's wrong"
   const bad = (/** @type {object} */ json) => () => loadTheme(studio({ "t/theme.json": json }), "./t");
   assert.throws(bad({ extends: "angle", accent: "pear" }), /t\/theme\.json: accent: "pear" should be a hex colour such as "#e3ef26"/);
   assert.throws(bad({ extends: "angle", grounds: { foreground: "#000" } }), /grounds\.foreground: should be a ground name/);
+  assert.throws(bad({ extends: "angle", grounds: { "over-paper": "#000" } }), /grounds\.over-paper: should be a ground name/);
   assert.throws(bad({ extends: "angle", colour: "#000" }), /colour: unknown key/);
   assert.throws(bad({ extends: "angle", motif: "waves" }), /motif: "waves" should be one of lines, grid, dots, none/);
   assert.throws(bad({ extends: "angle", fonts: { display: { family: 'Inter"; }' } } }), /fonts\.display\.family: .* should be a font family name/);

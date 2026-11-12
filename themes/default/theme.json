@@ -10,6 +10,8 @@
   "accent": "#ff7a45",
   "accentOn": { "paper": "#c2410c" },
   "text": { "ink": "#f3f1ea", "muted": "#a7a8b0", "onPaper": "#16171c", "mutedOnPaper": "#5b5d66" },
+  "code": { "keyword": "#ffab8a", "string": "#a5d6ff", "title": "#d2a8ff", "number": "#79c0ff", "attr": "#ffd08a" },
+  "codeOn": { "paper": { "keyword": "#b42318", "string": "#0a3069", "title": "#6639ba", "number": "#0550ae", "attr": "#8a4b00" } },
   "fonts": {
     "dir": "fonts",
     "display": { "family": "Geist", "weight": 600, "tracking": "-0.035em", "leading": 1.02 },

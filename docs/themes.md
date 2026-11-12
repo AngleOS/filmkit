@@ -25,11 +25,15 @@ command opens the studio. A mistake is a usage error (exit 2) that names the key
   - `extends`: the theme this one is based on, a built-in name or a folder (from this one). Its values are the base,
     this file's go over them key by key, and its files are copied first, so a folder holds only what differs;
   - `grounds`: the fills a scene stands on. `ink` (the dark ground), `accent-dark` and `paper` are the ones the kit's
-    scenes offer; a theme can name more, such as `jet`. Each becomes a custom property, `--ink`, `--jet`…;
+    scenes offer; a theme can name more, such as `jet`, but not a name the kit uses (`none`, `over-paper`, `accent`…). Each becomes a custom property, `--ink`, `--jet`…;
   - `accent`: one word per title, the motif, the mark. `accentOn.paper` is the accent on paper, when the accent doesn't
     read on it;
   - `text`: `ink` and `muted` on the dark grounds, `onPaper` and `mutedOnPaper` on paper, and `wordmark`, the
     wordmark's colour on the dark grounds (`ink` when not given);
+  - `code` and `codeOn.paper`: the `code` scene's syntax colours (`keyword`, `string`, `title`, `number`, `attr`).
+    Without them, keywords take the accent and the rest the text colour. The product UI (`kit/film.css`'s `fk-`
+    components, the `chat`, `composer`, `terminal` and `ui` scenes) works out its surfaces and borders from the ground
+    and text colours, so a theme needs nothing more for it;
   - `fonts`: `display` (`family`, `weight`, `tracking`, `leading`: the title type), `ui` and `mono` (`family`), and
     `faces`, the font files in `fonts.dir` (`fonts` by default). Each folder's faces add to its base's, so a brand
     folder can bring its display face and keep the base's UI and mono;
@@ -63,6 +67,7 @@ the merged `theme.json`: an `@font-face` per face, then
 | `--title-weight`, `--title-tracking`, `--title-leading` | `fonts.display` (600, -0.035em and 1.02 when not given) |
 | `--brand-mark`, `--brand-line` | the accent, on paper too |
 | `--brand-word` | `text.wordmark`; on paper, `text.onPaper` |
+| `--code-keyword`, `--code-string`, … | `code`; on paper, `codeOn.paper` (only the ones given) |
 
 The values on paper are under `.on-paper`, the class a scene's paper ground sets. Never write a `theme.css` by hand:
 the build replaces it.
