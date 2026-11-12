@@ -105,5 +105,23 @@ appropriate and cool." The repo stays private for now; the owner adds collaborat
 This revises D-003 and the "No Angle content" constraint. Angle's *product* films, their claims and the rebuilt Angle
 app UI (`picker`, the Angle composer) still stay in `angle-ai`.
 
+## D-008 · 2026-11-12 · One command (or one prompt) from nothing to a first film in your brand
+**Decision (owner, 2026-11-12):** "should be a one line command install with walkthroughs and automatic setup with
+mcp with popular tools the user may want to use with it. or also a prompt to give your agent to install and
+configure it with the brand and stuff."
+
+How it works:
+- `install.sh` and `install.ps1`, or `npx filmkit setup`;
+- `filmkit setup`: requirements, then MCP registration in every detected agent tool (Claude Code, Claude Desktop, Codex,
+  Cursor, VS Code/Copilot, Windsurf, Zed, Gemini CLI, opencode), then studio, then brand onboarding (`filmkit brand`,
+  from a URL or questions), then a first film;
+- `filmkit prompt` and `docs/install-with-your-agent.md`, so the user's agent does all of it.
+
+Design §8 has the details. `setup`, `brand` and `tour` may prompt in a terminal. They are the exception to "the CLI
+never prompts", and every prompt has a flag, so `--yes` runs them unattended.
+
+**Why:** the people this is for (the owner's friend, other founders) have an agent but won't hand-edit four tools'
+MCP configs or write a theme file.
+
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]

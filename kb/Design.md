@@ -91,7 +91,8 @@ user's films.
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 
-Every command prints what it wrote, and `--json` prints it machine-readably.
+Every command prints what it wrote, and `--json` prints it machine-readably. How it feels to use (copy, errors,
+progress, speed) is set by [[projects/filmkit/Experience]].
 
 ### 4. The MCP server (`filmkit mcp`)
 **Tools:**
@@ -140,6 +141,55 @@ and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), loc
 `angle` (the full brand; the reference implementation is `themes/angle/`), `default` (Angle's look with the studio's
 logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points to its own folder, and can override
 single values. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
+
+### 8. Install, setup and onboarding (D-008)
+The goal is that someone with an agent goes from nothing to a first film in their brand **in one command, or one
+prompt to their agent**.
+
+- **One line:**
+  - macOS and Linux: `curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh`;
+  - Windows: `irm …/install.ps1 | iex`;
+  - with Node: `npx -y filmkit setup`. While the repo is private, collaborators use `npx -y github:AngleOS/filmkit setup`
+    with their git credentials.
+
+  The script:
+  1. checks Node ≥ 20 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
+  2. checks ffmpeg the same way;
+  3. runs `filmkit setup`.
+- **`filmkit setup`:** a guided walkthrough in a terminal; with `--yes` and flags (`--agents`, `--studio`, `--brand-url`,
+  `--name`), it runs unattended for agents. Its steps:
+  1. **Requirements:** Node, ffmpeg, and Chrome for HyperFrames (fetched once).
+  2. **Agents:** it detects the agent tools installed on the machine and offers to register the `filmkit` MCP server in
+     each, idempotently, keeping a backup of every config it edits. `filmkit setup --remove` undoes it.
+     - **Claude Code:** `claude mcp add -s user filmkit -- npx -y filmkit mcp`, plus the skill in `~/.claude/skills/filmkit`.
+     - **Claude Desktop:** `claude_desktop_config.json` `mcpServers`.
+     - **Codex:** `~/.codex/config.toml` `[mcp_servers.filmkit]`, plus the skill.
+     - **Cursor:** `~/.cursor/mcp.json`.
+     - **VS Code (Copilot agent mode):** user `mcp.json`, or `code --add-mcp`.
+     - **Windsurf:** `~/.codeium/windsurf/mcp_config.json`.
+     - **Zed:** `context_servers`.
+     - **Gemini CLI:** `~/.gemini/settings.json`.
+     - **opencode:** its `mcp` config.
+
+     Each tool's config location is verified against its current docs when it is implemented. The list lives in one
+     table, so adding a tool is one row.
+  3. **Studio:** where it goes (`./<name>-films` by default), then `filmkit init`.
+  4. **Brand:** `filmkit brand`. Give it a website URL and it pulls the brand from the site:
+     - the logo (SVG first, from the site's icons, `og:image` and header);
+     - `theme-color`, CSS custom properties and the dominant colours;
+     - the web fonts (only open-licence fonts are copied; others become a suggested open match).
+
+     Or answer a few questions (name, logo file, accent, light or dark). It writes `brand/` and `filmkit.json`'s theme,
+     then shows a still in the new theme for a yes or no.
+  5. **First film:** `filmkit new hello --template statement` with the brand name, `check`, and a contact sheet opened
+     in the browser. It prints how to talk to the agent next, for example *"Make a 30-second launch film for …"*.
+- **`filmkit prompt`** prints the agent setup prompt (`docs/install-with-your-agent.md`), so a person can paste it into
+  any agent. That agent runs setup with `--yes`, asks the person only for their brand details, and finishes with a
+  first film.
+- **Walkthroughs:**
+  - `docs/getting-started.md`: one page per path (one line, `npx`, with your agent);
+  - `docs/agents/<tool>.md`: per tool, what setup wrote and how to do it by hand;
+  - `filmkit tour`: an in-terminal tour that builds the first film step by step, explaining each command.
 
 ## What stays in Angle
 Angle's *product* films, their claims, and the rebuilt Angle app UI (`picker`, the Angle composer) stay in
