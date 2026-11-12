@@ -16,7 +16,7 @@ const VERSION = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8")).
  * @param {string} format
  */
 export function formatHash(studio, film, format) {
-  const hash = createHash("sha256").update(`${format}\0${HYPERFRAMES}\0filmkit@${VERSION}\0`);
+  const hash = createHash("sha256").update(`${format}\0${HYPERFRAMES}\0filmkit@${VERSION}\0${JSON.stringify(studio.theme.values)}\0`);
   // A source itself may be a link (a film folder kept elsewhere): its contents count, as assemble copies them.
   for (const [name, path] of Object.entries(sources(studio, film))) add(hash, name, realpathSync(path));
   return hash.digest("hex");
