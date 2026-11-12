@@ -1,0 +1,27 @@
+name: "Feature"
+description: "New capability or improvement"
+type: Feature
+projects: ["AngleOS/5"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Problem / why"
+      description: "Who needs this, and what hurts today?"
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: "Proposal"
+      description: "What should exist when this is done?"
+  - type: textarea
+    id: done
+    attributes:
+      label: "Done when"
+      placeholder: "- [ ] …"
+  - type: input
+    id: kb
+    attributes:
+      label: "Related kb page"
+      description: "Vault path, e.g. projects/every-election/02 - Decisions"

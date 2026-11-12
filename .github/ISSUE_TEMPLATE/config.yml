@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Angle board
+    url: https://github.com/orgs/AngleOS/projects/5
+    about: All AngleOS work — triage, priorities, roadmap.

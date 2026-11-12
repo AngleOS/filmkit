@@ -1,0 +1,35 @@
+name: "Agent task (ca-server)"
+description: "Hand a well-scoped task to a Claude session on ca-server (label `agent`)"
+type: Task
+labels: ["agent"]
+projects: ["AngleOS/5"]
+body:
+  - type: markdown
+    attributes:
+      value: "Submitting starts a Claude session on **ca-server** within a minute (agentd): worktree, branch `claude/issue-<n>`, a PR with `Fixes #<n>`, a thread in Mattermost `#agents`. Watch or steer it from the Claude app; review the PR to give feedback. Remove the `agent` label to stop it."
+  - type: textarea
+    id: goal
+    attributes:
+      label: "Goal"
+      description: "What the agent should achieve, and why. One PR's worth of work."
+    validations:
+      required: true
+  - type: textarea
+    id: done
+    attributes:
+      label: "Done when"
+      description: "How the agent (and you) can tell it's finished — tests, behaviour, files."
+      placeholder: "- [ ] …"
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: "Constraints"
+      description: "What not to touch, approaches to avoid, decisions already made."
+  - type: textarea
+    id: context
+    attributes:
+      label: "Context links"
+      description: "kb pages (vault path or GitHub link), related issues/PRs, files, docs."
+      placeholder: "- https://github.com/AngleOS/<repo>/blob/HEAD/kb/02%20-%20Decisions.md\n- #12"

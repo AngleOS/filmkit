@@ -1,0 +1,31 @@
+name: "Bug"
+description: "Something is broken or behaves wrong"
+type: Bug
+projects: ["AngleOS/5"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: "What happened?"
+      description: "Include error text, screenshots, links."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: "What should have happened?"
+  - type: textarea
+    id: repro
+    attributes:
+      label: "Steps to reproduce"
+      placeholder: "1. …\n2. …"
+  - type: dropdown
+    id: where
+    attributes:
+      label: "Where"
+      options: ["production", "dev mirror", "local", "ca-server", "other"]
+  - type: input
+    id: kb
+    attributes:
+      label: "Related kb page"
+      description: "Vault path, e.g. projects/every-election/02 - Decisions"
