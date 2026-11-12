@@ -16,7 +16,7 @@ export async function run({ args, options, json, log }) {
   if (!at || !(+at >= 0)) throw new FilmkitError("say when, in seconds: stills <film> <t> [formats…]");
   const checked = checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), log);
   if (!checked.ok) return { ...checked, stills: [] };
-  const renders = join(studio.dir, "renders");
+  const renders = studio.renders;
   mkdirSync(renders, { recursive: true });
   const failed = [];
   const stills = [];

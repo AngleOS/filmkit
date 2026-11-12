@@ -1,17 +1,16 @@
 {
   "name": "angle",
   "label": "Angle",
-  "description": "Angle's brand: Night ground, Pear accent, Geist type, the brand lines and the ANGLE lockup. Angle Filmkit's own films and the example studio use it; the default theme shares its look with the studio's own logo.",
+  "description": "Angle's brand: Night ground (ink), Castleton (accent-dark), Pear accent, Geist type, the brand lines and the ANGLE lockup. Angle Filmkit's own films and the example studio use it; the default theme shares its look with the studio's own logo.",
   "grounds": {
-    "night": "#07120f",
-    "castleton": "#145237",
+    "ink": "#07120f",
+    "accent-dark": "#145237",
     "jet": "#2c2c2c",
     "paper": "#ffffff"
   },
-  "ground": "night",
   "accent": "#e3ef26",
   "accentOn": { "paper": "#145237" },
-  "text": { "ink": "#eef3ec", "muted": "#a9bdb2", "onPaper": "#07120f", "mutedOnPaper": "#56665e" },
+  "text": { "ink": "#eef3ec", "muted": "#a9bdb2", "onPaper": "#07120f", "mutedOnPaper": "#56665e", "wordmark": "#ffffff" },
   "fonts": {
     "dir": "fonts",
     "display": { "family": "Geist", "weight": 600, "tracking": "-0.035em", "leading": 1.02 },

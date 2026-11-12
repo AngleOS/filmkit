@@ -1,0 +1,31 @@
+{
+  "name": "default",
+  "label": "Default",
+  "description": "filmkit's default theme: an ink ground, an orange accent, Geist type, a corner grid motif and a placeholder logo.",
+  "grounds": {
+    "ink": "#101114",
+    "accent-dark": "#1b2550",
+    "paper": "#f3f1ea"
+  },
+  "accent": "#ff7a45",
+  "accentOn": { "paper": "#c2410c" },
+  "text": { "ink": "#f3f1ea", "muted": "#a7a8b0", "onPaper": "#16171c", "mutedOnPaper": "#5b5d66" },
+  "fonts": {
+    "dir": "fonts",
+    "display": { "family": "Geist", "weight": 600, "tracking": "-0.035em", "leading": 1.02 },
+    "ui": { "family": "Geist" },
+    "mono": { "family": "Geist Mono" },
+    "faces": [
+      { "family": "Geist", "weight": 400, "file": "Geist-Regular.woff2" },
+      { "family": "Geist", "weight": 500, "file": "Geist-Medium.woff2" },
+      { "family": "Geist", "weight": 600, "file": "Geist-SemiBold.woff2" },
+      { "family": "Geist", "weight": 700, "file": "Geist-Bold.woff2" },
+      { "family": "Geist Mono", "weight": 400, "file": "GeistMono-Regular.woff2" },
+      { "family": "Geist Mono", "weight": 500, "file": "GeistMono-Medium.woff2" }
+    ]
+  },
+  "logo": { "mark": "logo/logo.svg" },
+  "brand": "brand.js",
+  "motif": "grid",
+  "credit": "Made with Angle Filmkit"
+}

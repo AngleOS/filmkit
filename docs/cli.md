@@ -4,7 +4,7 @@
 the one `--studio <dir>` names.
 
 ```
-filmkit.json        { "name": "Acme", "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
+filmkit.json        { "name": "Acme", "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default", "renders": "renders" }
 brand/              the logo and the brand's own files
 films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), assets
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
@@ -13,6 +13,11 @@ AGENTS.md           points an agent at the filmkit skill, in .claude/skills/film
 build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
+
+`filmkit.json` is checked against `schema/filmkit.schema.json` whenever a command opens the studio: `name`, the
+default `formats`, the `theme` (a built-in name, a theme folder, or single values over one: see
+[themes](themes.md)) and `renders`, the folder renders go to (`renders` by default). A key it doesn't know, or a value
+it can't use, is a usage error (exit 2) that says what the value should be.
 
 | Command | What it does |
 |---|---|

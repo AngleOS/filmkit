@@ -1,10 +1,11 @@
-// build/<film>/<format>/ is a HyperFrames project: the film, a copy of the kit with the studio's theme, and the
-// format's canvas size on the root composition. The kit is copied, never linked, because HyperFrames won't read a
-// scene through a symlink that leaves the project.
+// build/<film>/<format>/ is a HyperFrames project: the film, a copy of the kit with the studio's theme (its folders
+// and the theme.css compiled from them), and the format's canvas size on the root composition. The kit is copied,
+// never linked, because HyperFrames won't read a scene through a symlink that leaves the project.
 import { cpSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
 import { PACKAGE, SIZES } from "../studio.js";
+import { themeCss } from "../theme.js";
 import { setRootSize } from "./html.js";
 
 const GSAP = createRequire(import.meta.url).resolve("gsap/dist/gsap.min.js");
@@ -23,7 +24,8 @@ export function assemble(studio, film, format) {
   mkdirSync(out, { recursive: true });
   cpSync(join(PACKAGE, "kit"), join(out, "kit"), { recursive: true });
   cpSync(GSAP, join(out, "kit", "vendor", "gsap.min.js"));
-  cpSync(studio.themeDir, join(out, "kit", "theme"), { recursive: true });
+  for (const dir of studio.theme.dirs) cpSync(dir, join(out, "kit", "theme"), { recursive: true });
+  writeFileSync(join(out, "kit", "theme", "theme.css"), themeCss(studio.theme.values));
   for (const entry of readdirSync(film.dir)) {
     if (!OWN.has(entry)) cpSync(join(film.dir, entry), join(out, entry), { recursive: true });
   }
