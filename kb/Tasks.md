@@ -4,10 +4,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
-- [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
-
-## In Progress
-
 - [seed: the filmkit package, CLI core and kit core, ported from angle-ai's video kit](https://github.com/AngleOS/filmkit/issues/3) `filmkit#3` · High
 
 ## Todo
@@ -25,3 +21,13 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
 - [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
 - [Owner: make filmkit public and publish it to npm](https://github.com/AngleOS/filmkit/issues/15) `filmkit#15` · Medium
+- [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
+- [setup: register the filmkit MCP server and skill in every detected agent tool](https://github.com/AngleOS/filmkit/issues/20) `filmkit#20` · High
+- [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
+- [speed: parallel formats, skip unchanged formats, resumable renders, one live progress line](https://github.com/AngleOS/filmkit/issues/23) `filmkit#23` · High
+- [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
+- [preview: live reload on save, a format switcher, and the film's scenes as a timeline](https://github.com/AngleOS/filmkit/issues/25) `filmkit#25` · Medium
+
+## Done
+
+- [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
