@@ -146,3 +146,15 @@ performance checks, a11y."
 
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
+
+## D-009 · 2026-11-12 · The site lives at filmkit.anglehq.net, on GitHub Pages
+
+**Decision:** the marketing one-pager (`site/`, Next.js static export) deploys from `.github/workflows/site.yml` to GitHub
+Pages and is served at the root of `https://filmkit.anglehq.net/`. `site/public/CNAME` carries the domain, and the
+repo's Pages settings set it too, with HTTPS enforced. DNS is a `filmkit` CNAME → `angleos.github.io` in the
+`anglehq.net` Cloudflare zone, **DNS only (grey cloud)**, so GitHub can issue the certificate. The specific record
+overrides the proxied `*.anglehq.net` wildcard that sends everything else to the cloudflared tunnel.
+**Why:** a domain under the Angle brand, with no server of ours in the path (Pages is free, global and survives
+ca-server reboots), and GitHub-only deploys. Pages serves the site publicly while the repo stays private.
+**Consequences:** the build needs no base path (`SITE_BASE_PATH` stays for a build served under a path). Canonical,
+OG and sitemap URLs come from `SITE_URL` in `site/src/lib/content.ts`.
