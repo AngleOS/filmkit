@@ -1,6 +1,7 @@
 # The filmkit CLI
 
-`filmkit` works on the studio in the current directory:
+`filmkit` works on the studio: the nearest directory with a `filmkit.json`, walking up from the current directory, or
+the one `--studio <dir>` names.
 
 ```
 filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
@@ -11,8 +12,8 @@ renders/            git-ignored: <film>-<format>.mp4
 
 | Command | What it does |
 |---|---|
-| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it; exits non-zero when any format fails |
-| `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snapshots/<format>/` |
+| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings |
+| `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `preview <film> [format]` | HyperFrames Studio on one format |
 | `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality |
 
@@ -26,9 +27,13 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js` and
 `kit/motion.js`: see `examples/studio/films/smoke`.
 
-**Output.** Every command prints what it wrote. With `--json` it prints one JSON result on stdout (`"ok"` and what it
-made), and HyperFrames' own output goes to stderr. A failure exits non-zero, with `{"ok": false, "error": …}` under
-`--json`. Nothing prompts.
+**Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
+`kb/Interfaces.md`, with absolute paths; progress and HyperFrames' own output go to stderr. Global options (`--json`,
+`--studio`) may come before or after the command. Nothing prompts.
+
+**Exit codes.** `0` ok, `1` the film failed a check, `2` a usage error (no studio, an unknown film, format or option),
+`3` a missing requirement, `4` a render (or snapshot) failed. A failure prints `{"ok": false, "error": …}` under
+`--json` when there's no result to give.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.

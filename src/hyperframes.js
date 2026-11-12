@@ -1,6 +1,7 @@
 // HyperFrames renders every film, run through npx at one pinned version: the pin is what makes a re-render identical.
 // Move it only for a fix that matters, then check every example film in every format.
 import { spawnSync } from "node:child_process";
+import { RequirementError } from "./studio.js";
 
 export const HYPERFRAMES = "hyperframes@0.8.186";
 
@@ -8,16 +9,21 @@ export const HYPERFRAMES = "hyperframes@0.8.186";
 Object.assign(process.env, { DO_NOT_TRACK: "1", HYPERFRAMES_NO_TELEMETRY: "1", HYPERFRAMES_SKIP_SKILLS: "1" });
 
 /**
- * Runs the pinned HyperFrames CLI in `cwd` and returns whether it succeeded. Its output streams to the terminal; with
- * `toStderr` it goes to stderr, so stdout stays clean for --json.
+ * Runs the pinned HyperFrames CLI in `cwd`. Its output streams to the terminal; with `toStderr` it goes to stderr, so
+ * stdout stays clean for --json, and with `capture` its stdout is returned instead (for its own --json).
  * @param {string[]} args
- * @param {{ cwd: string, toStderr?: boolean }} options
+ * @param {{ cwd: string, toStderr?: boolean, capture?: boolean }} options
  */
-export function hyperframes(args, { cwd, toStderr = false }) {
-  const { status, error } = spawnSync("npx", ["--yes", HYPERFRAMES, ...args], {
+export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
+  const { status, stdout, error } = spawnSync("npx", ["--yes", HYPERFRAMES, ...args], {
     cwd,
-    stdio: toStderr ? ["ignore", 2, 2] : "inherit",
+    stdio: capture ? ["ignore", "pipe", 2] : toStderr ? ["ignore", 2, 2] : "inherit",
+    encoding: "utf8",
+    maxBuffer: 64 * 1024 * 1024,
   });
+  if (/** @type {NodeJS.ErrnoException | undefined} */ (error)?.code === "ENOENT") {
+    throw new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)");
+  }
   if (error) throw error;
-  return status === 0;
+  return { ok: status === 0, stdout: stdout ?? "" };
 }

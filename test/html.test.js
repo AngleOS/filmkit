@@ -35,3 +35,10 @@ test("setRootSize adds a size the root doesn't declare", () => {
     `<div data-composition-id="main" data-width="1080" data-height="1920">`,
   );
 });
+
+test("a malformed tag with many attributes is read in linear time", () => {
+  const tag = `<div ${Array.from({ length: 40 }, (_, i) => `data-a${i}="${i}"`).join(" ")} data-duration= >`;
+  const start = performance.now();
+  startTags(tag);
+  assert.ok(performance.now() - start < 200);
+});

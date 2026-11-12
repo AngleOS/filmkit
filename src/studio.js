@@ -1,7 +1,7 @@
 // The studio is the user's own repo, and the CLI works on the one in the current directory: filmkit.json, films/<name>/
 // (index.html is the master every format is laid out from), build/ (assembled formats) and renders/ (the output).
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { rootTag } from "./build/html.js";
 
@@ -12,7 +12,10 @@ export const PACKAGE = fileURLToPath(new URL("..", import.meta.url));
 export const SIZES = /** @type {const} */ ({ "16x9": [1920, 1080], "9x16": [1080, 1920], "1x1": [1080, 1080], "4x5": [1080, 1350] });
 export const FORMATS = Object.keys(SIZES);
 
+/** A usage error: no studio, an unknown film or format, a bad option. The CLI exits 2. */
 export class FilmkitError extends Error {}
+/** A missing requirement (Node's npx, ffmpeg, Chrome). The CLI exits 3. */
+export class RequirementError extends Error {}
 
 /**
  * @typedef {{ dir: string, formats: string[], theme: string, themeDir: string }} Studio
@@ -20,13 +23,14 @@ export class FilmkitError extends Error {}
  */
 
 /**
- * The studio in `dir`, from its filmkit.json.
- * @param {string} dir
+ * The studio: `dir` when given (--studio), else the nearest directory with a filmkit.json, walking up from the cwd.
+ * @param {string} [dir]
  * @returns {Studio}
  */
 export function openStudio(dir) {
-  const file = join(dir, "filmkit.json");
-  if (!existsSync(file)) throw new FilmkitError(`no filmkit.json in ${dir}: run filmkit in a studio`);
+  const root = dir ? resolve(dir) : findStudio(process.cwd());
+  const file = join(root, "filmkit.json");
+  if (!root || !existsSync(file)) throw new FilmkitError(`no filmkit.json in ${dir ? root : `${process.cwd()} or above`}: run filmkit in a studio`);
   let config;
   try {
     config = JSON.parse(readFileSync(file, "utf8"));
@@ -38,7 +42,15 @@ export function openStudio(dir) {
   if (!existsSync(join(themeDir, "theme.css"))) {
     throw new FilmkitError(`filmkit.json: no theme "${theme}" (${readdirSync(join(PACKAGE, "themes")).join(", ")})`);
   }
-  return { dir, formats: checkFormats(config.formats ?? FORMATS, "filmkit.json formats"), theme, themeDir };
+  return { dir: root, formats: checkFormats(config.formats ?? FORMATS, "filmkit.json formats"), theme, themeDir };
+}
+
+/** @param {string} from @returns {string} the directory, or "" when there's none */
+function findStudio(from) {
+  for (let dir = from; ; dir = dirname(dir)) {
+    if (existsSync(join(dir, "filmkit.json"))) return dir;
+    if (dirname(dir) === dir) return "";
+  }
 }
 
 /**

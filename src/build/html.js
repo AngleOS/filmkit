@@ -1,8 +1,10 @@
 // Just enough HTML reading for a film's master: its start tags and their attributes. Films are written by agents and
 // the kit, not scraped from the web, so a tag scanner is enough and keeps filmkit free of a parser dependency.
 
-const TAG = /<([a-zA-Z][\w-]*)((?:\s+[^\s=>/]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+))?)*)\s*\/?>/g;
-const ATTR = /([^\s=>/]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+)))?/g;
+// An unquoted value can't start with a quote, so the value alternatives never overlap: overlapping ones backtrack
+// exponentially on a malformed tag.
+const TAG = /<([a-zA-Z][\w-]*)((?:\s+[^\s"'=<>/`]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s"'=<>`]+))?)*)\s*\/?>/g;
+const ATTR = /([^\s"'=<>/`]+)(?:\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s"'=<>`]+)))?/g;
 // Comments and script or style bodies are blanked, not removed, so tag positions stay true to the page.
 const OPAQUE = /<!--[\s\S]*?-->|(<(?:script|style)\b[^>]*>)([\s\S]*?)(?=<\/(?:script|style)>)/gi;
 const ENTITY = /&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos);/gi;
@@ -54,7 +56,7 @@ export function setRootSize(html, width, height) {
   const root = rootTag(html);
   let tag = root.source;
   for (const [name, value] of [["data-width", width], ["data-height", height]]) {
-    const attr = new RegExp(`(\\s${name}\\s*=\\s*)("[^"]*"|'[^']*'|[^\\s>]+)`);
+    const attr = new RegExp(`(\\s${name}\\s*=\\s*)("[^"]*"|'[^']*'|[^\\s"'=<>\`]+)`);
     tag = attr.test(tag) ? tag.replace(attr, `$1"${value}"`) : tag.replace(/\s*\/?>$/, ` ${name}="${value}"$&`);
   }
   return html.slice(0, root.index) + tag + html.slice(root.index + root.source.length);
