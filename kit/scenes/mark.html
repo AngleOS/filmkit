@@ -1,0 +1,39 @@
+<template>
+  <!-- The logo reveal: the theme's motif draws in, the mark's two pieces meet at `contact` (put the sound's hit there),
+       the wordmark wipes in, then a short line under it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--ink); }
+    #mk-motif { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #mk-lockup { position: absolute; }
+    #mk-line { position: absolute; left: 0; right: 0; text-align: center; color: var(--foreground); }
+  </style>
+  <div id="root" data-composition-id="mark" data-composition-variables='[
+    {"id":"line","type":"string","label":"Line under the logo","default":"Made for *you.*"},
+    {"id":"contact","type":"number","label":"The pieces meet at (s)","default":1},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <svg id="mk-motif" data-layout-ignore></svg>
+    <svg id="mk-lockup" data-layout-allow-overflow></svg>
+    <div id="mk-line" class="display"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { H, pick } = AL;
+      const motif = document.getElementById("mk-motif"), svg = document.getElementById("mk-lockup"), line = document.getElementById("mk-line");
+      const L = KB.lockupBox(pick({ L: 840, S: 720, V: 760 }), pick({ L: 540, S: Math.round(H * 0.46), V: Math.round(H * 0.44) }));
+      gsap.set(svg, { left: L.left, top: L.top, width: L.w, height: L.h });
+      gsap.set(line, { top: L.top + L.h + pick({ L: 70, S: 60, V: 80 }), fontSize: pick({ L: 64, S: 60, V: 72 }) });
+      line.innerHTML = KM.wordSpans(v.line);
+
+      const c = v.contact;
+      KM.drawMotif(tl, KB.motif(motif), Math.max(0, c - 0.66));
+      tl.to(motif, { opacity: 0.22, duration: 0.5, ease: "power2.out" }, c);
+      KM.assemble(tl, svg, KB.lockup(svg), L, c);
+      KM.words(tl, line.querySelectorAll(".word"), c + 0.95);
+      if (v.out > 0) KM.out(tl, [svg, line, motif], v.out);
+      window.__timelines["mark"] = tl;
+    })();
+  </script>
+</template>
