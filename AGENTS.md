@@ -24,9 +24,9 @@ kb/            design, decisions, constraints (part of the hub vault)
 - Red, green, refactor. New behaviour comes with tests, and a bug fix starts with a test that reproduces it.
 - Node's built-in test runner (`node --test`). Tests are offline and deterministic. Fixtures are small HTML films and
   JSON cue sheets.
-- **A kit or scene change** is checked by `filmkit check` on the smoke film (it mounts every scene) and on
-  `examples/` in all four formats. Look at contact sheets of each before calling it done. Renders go to a temp
-  directory, never into git.
+- **A kit or scene change** is checked by `filmkit check` on the smoke films (`smoke` and `infographics` mount every
+  scene between them) and on `examples/` in all four formats. Look at contact sheets of each before calling it done.
+  Renders go to a temp directory, never into git.
 
 ## Code that reads well
 - Plain ESM JavaScript with JSDoc types, and `tsc --checkJs` in CI. No build step for the kit: it runs in the

@@ -4,14 +4,20 @@
 the one `--studio <dir>` names.
 
 ```
-filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
-films/<name>/       index.html (the master), compositions/ (the film's own scenes), assets
+filmkit.json        { "name": "Acme", "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
+brand/              the logo and the brand's own files
+films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), assets
+CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
+POSTING.md          where each render goes, with its copy per platform
+AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/
 build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
 | Command | What it does |
 |---|---|
+| `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
+| `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
 | `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `preview <film> [format]` | HyperFrames Studio on one format |
@@ -25,10 +31,11 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `snapshot` and `preview` take the first.
 
 **Assembly.** Each format is a HyperFrames project in `build/<film>/<format>/`: the film, a copy of the kit
-(`kit/layout.js`, `kit/motion.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
+(`kit/layout.js`, `kit/motion.js`, `kit/chart.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
-`kit/motion.js` and `kit/theme/brand.js`: see `examples/studio/films/smoke`.
+`kit/motion.js`, `kit/chart.js` (for the infographic scenes) and `kit/theme/brand.js`: see
+`examples/studio/films/infographics`.
 
 **Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop. It
 hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version) and
@@ -52,7 +59,7 @@ as `renders/<film>.srt` and `.vtt`: one pair serves every format, to upload as c
 scene gets no files. With `burn` the scene also draws them into the picture, in `AL.captions`.
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
-`kb/Interfaces.md` (`captions` and `stills` as the MCP tools of the same name, `doctor` as
+`kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`, `new` as `{ ok, film, template, files }`, `captions` and `stills` as the MCP tools of the same name, `doctor` as
 `{ ok, checks: [{ name, ok, detail, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
 
