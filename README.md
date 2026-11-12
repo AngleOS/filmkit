@@ -33,6 +33,22 @@ you can retheme them completely.
   - an MCP server whose tools return the frames as images, so the model can see what it made;
   - a skill that teaches the whole brief → research → build → check → look → render workflow.
 
+## Examples
+Short films made with the kit. Each one is a few dozen lines of HTML, and the data is example data.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/assets/examples/chart.gif" alt="An infographic on a light theme: 'Signups tripled this quarter.' Four bars rise in turn, their values rolling up to 1.2k, 1.9k, 2.6k and 3.7k; the last bar is in the accent colour."><br><sub><b>Infographic</b> · bars drawn to scale with rolling values, on the light Paper theme</sub></td>
+<td width="50%"><img src="docs/assets/examples/terminal.gif" alt="'One command. Every format.' A terminal types npx filmkit render launch; the output lists the check passing in four formats, four MP4 renders and the captions."><br><sub><b>Developer promo</b> · a terminal typed at reading speed</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/assets/examples/chat.gif" alt="'Your product, rebuilt.' A composer types 'Write a launch post for our new app', the cursor presses Send, and the reply streams in."><br><sub><b>Product promo</b> · product UI rebuilt from tokens, never screen-recorded</sub></td>
+<td width="50%" align="center"><img src="docs/assets/examples/hook.gif" width="60%" alt="A 9:16 hook: 'Make it read on mute.' A counter ticks to 7 as seven of ten dots light up, with an example-data source line."><br><sub><b>9:16 hook</b> · laid out for the vertical frame, not cropped from 16:9</sub></td>
+</tr>
+</table>
+
+Their sources are in [`brand/films/`](brand/films). The header animation is a film too.
+
 ## Quick start (target for v0.1)
 ```sh
 npx filmkit init my-studio && cd my-studio      # your brand in filmkit.json, a smoke film, the agent skill

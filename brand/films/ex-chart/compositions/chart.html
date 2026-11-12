@@ -1,0 +1,53 @@
+<template>
+  <!-- An infographic on Paper: a title, four bars drawn to scale with values rolling up, the last one in the accent,
+       and a source line. Example data. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: #ffffff; }
+    #ch-title { position: absolute; color: #07120f; }
+    #ch-title .pear { color: #145237; }
+    .ch-bar { position: absolute; background: #c9d3cc; border-radius: 10px 10px 0 0; transform-origin: 50% 100%; }
+    .ch-bar.hi { background: #145237; }
+    .ch-val { position: absolute; text-align: center; font: 600 44px var(--ui); color: #07120f; letter-spacing: -0.02em; }
+    .ch-lab { position: absolute; text-align: center; font: 500 32px var(--ui); color: #56665e; }
+    #ch-axis { position: absolute; height: 3px; background: #e1e6df; }
+    #ch-src { position: absolute; font: 400 28px var(--ui); color: #56665e; }
+  </style>
+  <div id="root" data-composition-id="chart">
+    <div id="ch-title" class="display"></div>
+    <div id="ch-axis"></div>
+    <div id="ch-src"><span>Example data · source line goes here</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const $ = (id) => document.getElementById(id);
+      const root = $("root"), { W, H, safe } = AL;
+      const data = [["Jan", 1200], ["Feb", 1900], ["Mar", 2600], ["Apr", 3700]];
+      const max = 4000, base = 900, top = 360, maxH = base - top, bw = 210, gap = 90;
+      const left = W - safe.right - 40 - data.length * bw - (data.length - 1) * gap;
+      gsap.set($("ch-title"), { left: safe.left + 40, top: 330, width: 720, fontSize: 104 });
+      $("ch-title").innerHTML = KM.wordSpans("Signups *tripled*\nthis quarter.");
+      gsap.set($("ch-axis"), { left: left - 30, top: base, width: data.length * bw + (data.length - 1) * gap + 60 });
+      gsap.set($("ch-src"), { left: left - 30, top: base + 90 });
+      let t = 0.2;  // the title is on screen at frame 0: it's the thumbnail
+      data.forEach(([label, value], i) => {
+        const x = left + i * (bw + gap), h = Math.round((value / max) * maxH), at = 0.9 + i * 0.28;
+        const bar = document.createElement("div"); bar.className = "ch-bar" + (i === data.length - 1 ? " hi" : "");
+        const val = document.createElement("div"); val.className = "ch-val"; val.textContent = "0";
+        const lab = document.createElement("div"); lab.className = "ch-lab"; lab.innerHTML = `<span>${label}</span>`;
+        root.append(bar, val, lab);
+        gsap.set(bar, { left: x, top: base - h, width: bw, height: h });
+        gsap.set(val, { left: x - 20, width: bw + 40, top: base - h - 64 });
+        gsap.set(lab, { left: x, width: bw, top: base + 22 });
+        tl.fromTo(bar, { scaleY: 0 }, { scaleY: 1, duration: 0.7, ease: "expo.out" }, at);
+        tl.fromTo(val, { opacity: 0, y: h * 0.6 }, { opacity: 1, y: 0, duration: 0.7, ease: "expo.out" }, at);
+        const n = { v: 0 };
+        tl.to(n, { v: value, duration: 0.7, ease: "expo.out", onUpdate: () => { val.textContent = (n.v / 1000).toFixed(1) + "k"; } }, at);
+        tl.set(val, { textContent: (value / 1000).toFixed(1) + "k" }, at + 0.7);
+        KM.arrive(tl, lab, at + 0.1);
+      });
+      KM.arrive(tl, $("ch-src"), 2.4);
+      window.__timelines["chart"] = tl;
+    })();
+  </script>
+</template>

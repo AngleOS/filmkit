@@ -11,3 +11,11 @@ with the kit it came from (`AngleOS/angle-ai` `marketing/video`, `./video.sh sti
 render it with `filmkit stills hero 0.5`.
 
 The Angle name and logo are trademarks: see `TRADEMARKS.md`.
+- `films/ex-*`: the README's example GIFs (`docs/assets/examples/`):
+  - `ex-chart`: an infographic on Paper;
+  - `ex-terminal`: a developer promo;
+  - `ex-chat`: a product promo;
+  - `ex-hook`: a 9:16 hook.
+
+  They use example data. GIFs are made from the renders at 720 px (360 px for the 9:16), 20 fps, with a 48–64 colour
+  palette.
