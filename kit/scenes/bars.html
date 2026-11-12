@@ -1,0 +1,137 @@
+<template>
+  <!-- A bar chart drawn to scale: vertical bars over their labels, or horizontal bars under theirs. Each value rolls up
+       as its bar grows; one bar can take the accent, and a dashed reference line (a cap, a target, last year) is
+       drawn first, so the bars rise to meet it. Sits in AL.chart, under a title placed at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ba-box, #ba-bars { position: absolute; }
+    #ba-head { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; gap: 32px; }
+    #ba-legend { display: flex; align-items: center; gap: 14px; }
+    #ba-swatch { width: 44px; border-top-width: 3px; }
+    .ba-bar { border-radius: 8px; }
+  </style>
+  <div id="root" data-composition-id="bars" data-composition-variables='[
+    {"id":"data","type":"string","label":"Bars, one \"label: value\" a line","default":"2022: 1200\n2023: 1900\n2024: 2600\n2025: 3700"},
+    {"id":"direction","type":"enum","label":"Direction","default":"vertical","options":[{"value":"vertical","label":"Vertical bars over their labels"},{"value":"horizontal","label":"Horizontal bars under their labels"}]},
+    {"id":"highlight","type":"string","label":"The bar in the accent (its label; empty for none)","default":""},
+    {"id":"prefix","type":"string","label":"Before each value, such as $","default":""},
+    {"id":"suffix","type":"string","label":"After each value, such as % or /mo","default":""},
+    {"id":"decimals","type":"number","label":"Decimal places","default":0},
+    {"id":"format","type":"enum","label":"Number format","default":"grouped","options":[{"value":"grouped","label":"Grouped: 12,345"},{"value":"plain","label":"Plain: 2026"},{"value":"compact","label":"Compact: 12.3K, 4.5M"}]},
+    {"id":"axis","type":"string","label":"What the values measure, over the chart","default":""},
+    {"id":"ref","type":"number","label":"Reference line at (0 = none)","default":0},
+    {"id":"refLabel","type":"string","label":"Reference line label, such as price cap","default":""},
+    {"id":"max","type":"number","label":"Top of the scale (0 = the largest value)","default":0},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="ba-box">
+      <div id="ba-head"><span id="ba-axis" class="chart-label"></span><span id="ba-legend"><i id="ba-swatch" class="chart-ref"></i><span id="ba-reflabel" class="chart-label"></span></span></div>
+      <div id="ba-bars"></div>
+    </div>
+    <div id="ba-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const data = KC.rows(v.data), n = data.length, values = data.map((d) => d.value);
+      const fmt = (x) => KC.format(x, v);
+      const scale = { max: v.max, ref: v.ref };
+      const vertical = v.direction === "vertical";
+      const room = AL.source($("ba-source"), v.source);
+      // 16:9 sets the chart left under its left-aligned title, no wider than the bars need; the narrow frames centre it.
+      const width = Math.min(chart.width, pick({ L: vertical ? n * 300 : 1300, S: chart.width, V: chart.width }));
+      const box = { left: mode === "L" ? chart.left : R(chart.left + (chart.width - width) / 2), top: chart.top, width, height: chart.height - room };
+      gsap.set($("ba-box"), box);
+
+      // The head: what the values measure, and the reference line's key.
+      const small = pick({ L: 28, S: 28, V: 30 }), hasRef = v.ref > 0;
+      $("ba-axis").textContent = v.axis;
+      $("ba-reflabel").textContent = v.refLabel;
+      gsap.set([$("ba-axis"), $("ba-reflabel")], { fontSize: small });
+      gsap.set($("ba-legend"), { display: hasRef && v.refLabel ? "flex" : "none" });
+      const headH = v.axis || (hasRef && v.refLabel) ? R(small * 1.3) + 24 : 0;
+      const plot = { top: headH, width, height: box.height - headH };
+      gsap.set($("ba-bars"), { left: 0, top: plot.top, width: plot.width, height: plot.height });
+
+      const make = (cls, text) => {
+        const el = document.createElement("div");
+        el.className = cls;
+        el.style.position = "absolute";
+        if (text !== undefined) el.textContent = text;
+        $("ba-bars").appendChild(el);
+        return el;
+      };
+      const bars = [];
+      let rule, ref;
+      if (vertical) {
+        // Values over the bars and labels under them, each sized to fit its slot.
+        const slot = plot.width / n;
+        const valueSize = KC.fit(values.map(fmt), slot * 0.94, pick({ L: 40, S: 34, V: 38 }));
+        const labelSize = KC.fit(data.map((d) => d.label), slot * 0.94, pick({ L: 30, S: 28, V: 30 }));
+        const valueH = R(valueSize * 1.3) + 8, labelH = R(labelSize * 1.3) + 14;
+        const floor = plot.height - labelH, tall = floor - valueH;
+        const heights = KC.lengths(values, tall, scale);
+        const refY = v.ref > 0 ? floor - R((v.ref / KC.top(values, scale)) * tall) : -1;
+        KC.bands(n, plot.width, { most: pick({ L: 150, S: 120, V: 120 }) }).forEach((b, i) => {
+          const bar = make("ba-bar chart-mark" + (data[i].label === v.highlight ? " hi" : ""));
+          gsap.set(bar, { left: b.start, width: b.size, top: floor - heights[i], height: heights[i], transformOrigin: "50% 100%" });
+          const value = make("chart-num", fmt(0));
+          gsap.set(value, { left: R(b.centre - slot / 2), width: R(slot), textAlign: "center", top: KC.clear(floor - heights[i] - valueH, valueH, refY), fontSize: valueSize });
+          const label = make("chart-label", data[i].label);
+          gsap.set(label, { left: R(b.centre - slot / 2), width: R(slot), textAlign: "center", top: floor + 14, fontSize: labelSize });
+          bars.push({ bar, value, grow: { scaleY: 0 } });
+        });
+        rule = make("chart-rule");
+        gsap.set(rule, { left: 0, width: plot.width, top: floor, borderTopWidth: 3, transformOrigin: "0 50%" });
+        if (hasRef) {
+          ref = make("chart-ref");
+          gsap.set(ref, { left: -12, width: plot.width + 24, top: refY - 1, borderTopWidth: 3, transformOrigin: "0 50%" });
+        }
+      } else {
+        // A row a bar: its label and value on a line, the bar under them across the plot's width.
+        const slot = plot.height / n, size = pick({ L: 34, S: 32, V: 36 });
+        const lineH = R(size * 1.3) + 12, track = Math.max(16, Math.min(pick({ L: 52, S: 44, V: 52 }), R(slot * 0.82) - lineH));
+        const rowH = lineH + track, gap = slot - rowH;
+        const widths = KC.lengths(values, plot.width, scale);
+        data.forEach((d, i) => {
+          const top = R(slot * i + gap / 2);
+          const label = make("chart-label", d.label);
+          gsap.set(label, { left: 0, top, fontSize: size, color: "var(--foreground)" });
+          const value = make("chart-num", fmt(0));
+          gsap.set(value, { right: 0, top: top - 4, fontSize: size + 4, lineHeight: 1.3 });
+          const back = make("chart-track");
+          gsap.set(back, { left: 0, width: plot.width, top: top + lineH, height: track, borderRadius: 8 });
+          const bar = make("ba-bar chart-mark" + (d.label === v.highlight ? " hi" : ""));
+          gsap.set(bar, { left: 0, width: widths[i], top: top + lineH, height: track, transformOrigin: "0 50%" });
+          bars.push({ bar, value, grow: { scaleX: 0 } });
+        });
+        if (hasRef) {
+          ref = make("chart-ref");
+          gsap.set(ref, { left: R((v.ref / KC.top(values, scale)) * plot.width) - 1, top: R(gap / 2) - 8, height: R(plot.height - gap) + 16, borderLeftWidth: 3, transformOrigin: "50% 0" });
+        }
+      }
+
+      // The frame and the reference first, then each bar grows as its value rolls up, 0.25 s apart.
+      tl.fromTo($("ba-head"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 0.1);
+      if (rule) tl.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, 0.1);
+      if (ref) tl.fromTo(ref, vertical ? { scaleX: 0 } : { scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" }, 0.3);
+      bars.forEach((b, i) => {
+        const t = 0.5 + 0.25 * i;
+        tl.fromTo(b.bar, b.grow, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" }, t);
+        tl.fromTo(b.value, { opacity: 0 }, { opacity: 1, duration: 0.2, ease: "none" }, t);
+        KC.roll(tl, b.value, 0, values[i], t, 0.6, fmt, "expo.out");
+      });
+      tl.fromTo($("ba-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("ba-box"), $("ba-source")], v.out);
+      window.__timelines["bars"] = tl;
+    })();
+  </script>
+</template>
