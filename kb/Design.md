@@ -52,7 +52,10 @@ user's films.
 
   All arrivals use expo.out over 0.5–0.7 s.
 - **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
-  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time.
+  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time; a grid's
+  cells (the largest square that fits, filled a column at a time so a bracket spans the lit columns), ticks evenly or
+  to scale, labels spread clear of each other, and a line's wrap.
+- **icons.js (`KI`)**: a small lucide set (ISC) for `cards` and `grid`, stroked in the text colour.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;

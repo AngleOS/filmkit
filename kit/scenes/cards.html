@@ -1,0 +1,85 @@
+<template>
+  <!-- Up to three cards flipping in, each an icon, a line and a small source line: a row in 16:9, a stack in the narrow
+       frames (icon beside the words). One card can take the accent. Sits in AL.chart, under a title placed at the
+       top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ca-box { position: absolute; display: flex; }
+    .ca-card { display: flex; background: color-mix(in srgb, var(--foreground) 6%, transparent); border: 2px solid color-mix(in srgb, var(--foreground) 14%, transparent); border-radius: 22px; }
+    .ca-card.hi { border-color: var(--accent); }
+    .ca-icon { flex: none; color: var(--foreground); line-height: 0; }
+    .ca-card.hi .ca-icon { color: var(--accent); }
+    .ca-words { display: flex; flex-direction: column; flex: 1; }
+    .ca-line { font-family: var(--font-ui); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; color: var(--foreground); text-wrap: balance; }
+    .ca-src { margin-top: auto; font-family: var(--font-ui); line-height: 1.3; color: var(--muted-foreground); }
+  </style>
+  <div id="root" data-composition-id="cards" data-composition-variables='[
+    {"id":"cards","type":"string","label":"Up to 3 cards, one \"icon | line | source\" a line; kit/icons.js lists the icons","default":"users | Organizations only. | Not for individuals\nlock | Data retention is required. | So misuse can be found\nfile-text | And the logs are kept. | Up to three years"},
+    {"id":"highlight","type":"number","label":"The card in the accent (1 to 3; 0 for none)","default":0},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="ca-box"></div>
+    <div id="ca-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const items = KC.fields(v.cards).slice(0, 3), n = items.length;
+      const room = AL.source($("ca-source"), v.source);
+      const row = mode === "L", gap = pick({ L: 28, S: 18, V: 24 }), pad = pick({ L: 34, S: 24, V: 30 });
+      const width = row ? Math.min(560, R((chart.width - gap * (n - 1)) / n)) : chart.width;
+      const iconSize = pick({ L: 56, S: 44, V: 52 }), iconGap = pick({ L: 24, S: 20, V: 24 });
+      // The words' width: under the icon in a row, beside it in a stack.
+      const wordsW = width - 2 * pad - (row ? 0 : iconSize + iconGap);
+      const height = chart.height - room;
+      // The largest line size, down to 28 px, at which every card fits: a row's tallest card, or the whole stack.
+      const tall = (size) => {
+        const src = Math.max(28, R(size * 0.7));
+        const each = items.map(([, line = "", source = ""]) => {
+          const words = KC.lines(line, wordsW, size) * R(size * 1.2) + (source ? 14 + KC.lines(source, wordsW, src) * R(src * 1.3) : 0);
+          return 2 * pad + (row ? iconSize + iconGap + words : Math.max(iconSize, words));
+        });
+        return { src, each, sum: row ? Math.max(...each) : each.reduce((a, b) => a + b, 0) + gap * (n - 1) };
+      };
+      let size = pick({ L: 42, S: 36, V: 44 });
+      while (size > 28 && tall(size).sum > height) size -= 2;
+      const fit = tall(size);
+
+      const cards = items.map(([icon = "", line = "", source = ""], i) => {
+        const card = document.createElement("div");
+        card.className = "ca-card" + (i + 1 === v.highlight ? " hi" : "");
+        card.innerHTML = `<div class="ca-icon">${KI.svg(icon, iconSize)}</div><div class="ca-words"><div class="ca-line"></div><div class="ca-src"></div></div>`;
+        card.querySelector(".ca-line").textContent = line;
+        card.querySelector(".ca-src").textContent = source;
+        gsap.set(card, { width, height: row ? fit.sum : fit.each[i], padding: `${pad}px`, flexDirection: row ? "column" : "row", gap: `${iconGap}px`, transformPerspective: 1600 });
+        gsap.set(card.querySelector(".ca-line"), { fontSize: size });
+        gsap.set(card.querySelector(".ca-src"), { fontSize: fit.src, marginTop: row ? "auto" : 14 });
+        $("ca-box").appendChild(card);
+        return card;
+      });
+      // gap and padding go to gsap as px strings: it leaves a bare number on these shorthands unset.
+      // 16:9 sets the row left under its left-aligned title; the stack spans the narrow frames. Both sit on the middle
+      // of the room the source leaves.
+      const top = chart.top + Math.max(0, R((height - fit.sum) / 2));
+      gsap.set($("ca-box"), { left: chart.left, top, width: chart.width, gap: `${gap}px`, flexDirection: row ? "row" : "column" });
+
+      // Each card flips in about its upright, 0.6 s after the last, and its source line follows once it reads.
+      cards.forEach((c, i) => {
+        const t = 0.15 + i * 0.6;
+        tl.fromTo(c, { opacity: 0, rotationY: -82, y: 20 }, { opacity: 1, rotationY: 0, y: 0, duration: 0.62, ease: "expo.out" }, t);
+        tl.fromTo(c.querySelector(".ca-src"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, t + 0.5);
+      });
+      tl.fromTo($("ca-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("ca-box"), $("ca-source")], v.out);
+      window.__timelines["cards"] = tl;
+    })();
+  </script>
+</template>

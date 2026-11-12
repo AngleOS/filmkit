@@ -31,10 +31,10 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `snapshot` and `preview` take the first.
 
 **Assembly.** Each format is a HyperFrames project in `build/<film>/<format>/`: the film, a copy of the kit
-(`kit/layout.js`, `kit/motion.js`, `kit/chart.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
+(`kit/layout.js`, `kit/motion.js`, `kit/chart.js`, `kit/icons.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
-`kit/motion.js`, `kit/chart.js` (for the infographic scenes) and `kit/theme/brand.js`: see
+`kit/motion.js`, `kit/chart.js` (for the infographic scenes), `kit/icons.js` (for `grid` icons and `cards`) and `kit/theme/brand.js`: see
 `examples/studio/films/infographics`.
 
 **Loops.** A film whose root has `data-loop="true"` is a hook loop: it plays again from frame 0 as soon as it ends, so
