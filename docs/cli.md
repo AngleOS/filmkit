@@ -6,7 +6,7 @@ the one `--studio <dir>` names.
 ```
 filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
 films/<name>/       index.html (the master), compositions/ (the film's own scenes), assets
-build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
+build/              git-ignored: build/<film>/<format>/ and build/<film>/preview/, rebuilt on every run; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
@@ -14,7 +14,7 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 |---|---|
 | `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
-| `preview <film> [format]` | HyperFrames Studio on one format |
+| `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
 | `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
@@ -29,6 +29,13 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
 `kit/motion.js` and `kit/theme/brand.js`: see `examples/studio/films/smoke`.
+
+**Preview.** `preview` assembles `build/<film>/preview/` once and starts HyperFrames Studio on it, opening the browser
+when it runs in a terminal (`--open` or `--no-open` to choose). It then watches `films/<film>/`, the kit and the theme
+and copies each saved file into the build, where Studio sees it and reloads, within about 2 s of the save. It prints
+`Showing 9x16 · press f for the next format · q to quit`: `f` resizes the master for the film's next format in the
+same tab, and `q` (or Ctrl+C) stops Studio. Keys are read from stdin, so an agent can pipe them in. With `--json` it
+prints `{ film, format, ok, dir, url }` when it stops, `format` being the last one shown.
 
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as
 `start-end text`, one per line, in seconds of the scene. `render` and `captions` write them, moved to the film's time,

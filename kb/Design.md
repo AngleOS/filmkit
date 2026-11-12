@@ -83,7 +83,7 @@ user's films.
 | `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format, and the seam gate for loops; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [--every 2s]` | one contact sheet per format, the quickest full review |
-| `preview <film> [format]` | HyperFrames Studio |
+| `preview <film> [format]` | HyperFrames Studio, live: reloads on save of the film, kit or theme; `f` switches format |
 | `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt` |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
