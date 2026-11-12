@@ -144,7 +144,7 @@ export const CATALOGUE = {
     message: () => "ffmpeg isn't on the PATH.",
     fix: ({ platform }) => ["Install it with", install("ffmpeg", platform)],
     why: "Filmkit uses the ffmpeg on the PATH for the work HyperFrames doesn't do itself, such as the stills' " +
-      "thumbnail. Install it with your package manager (brew, winget or apt), then `filmkit doctor` checks it.",
+      "thumbnail and the seam's frames. Install it with your package manager (brew, winget or apt), then `filmkit doctor` checks it.",
   },
   hyperframes_offline: {
     exit: 3,
