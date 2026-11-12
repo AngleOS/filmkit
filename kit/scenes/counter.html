@@ -1,0 +1,69 @@
+<template>
+  <!-- One big number rolling to its value, in the accent: a line that says what it counts over it, a unit beside it
+       ("billion", "homes") and a line under it. Sits in AL.chart, under a title placed at the top, or alone. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #co-box { position: absolute; display: flex; flex-direction: column; justify-content: center; gap: 12px; }
+    #co-lead { color: var(--foreground); white-space: normal; text-wrap: balance; }
+    #co-row { display: flex; align-items: baseline; gap: 0.25em; }
+    #co-num { font-family: var(--font-display); color: var(--accent); line-height: 1.05; }
+    #co-unit { font-family: var(--font-ui); font-weight: 500; color: var(--foreground); }
+  </style>
+  <div id="root" data-composition-id="counter" data-composition-variables='[
+    {"id":"value","type":"number","label":"The number it rolls to","default":1280},
+    {"id":"from","type":"number","label":"The number it starts from","default":0},
+    {"id":"prefix","type":"string","label":"Before the number, such as $","default":""},
+    {"id":"suffix","type":"string","label":"After the number, such as % or +","default":""},
+    {"id":"decimals","type":"number","label":"Decimal places","default":0},
+    {"id":"format","type":"enum","label":"Number format","default":"grouped","options":[{"value":"grouped","label":"Grouped: 12,345"},{"value":"plain","label":"Plain: 2026"},{"value":"compact","label":"Compact: 12.3K, 4.5M"}]},
+    {"id":"unit","type":"string","label":"A word beside the number, such as billion","default":""},
+    {"id":"lead","type":"string","label":"What it counts, over the number","default":"Films made this month"},
+    {"id":"sub","type":"string","label":"A line under the number","default":""},
+    {"id":"duration","type":"number","label":"Roll time (s)","default":1.5},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="co-box">
+      <div id="co-lead" class="chart-label"></div>
+      <div id="co-row"><span id="co-num" class="chart-num"></span><span id="co-unit"></span></div>
+      <div id="co-sub" class="chart-label"></div>
+    </div>
+    <div id="co-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const fmt = (x) => KC.format(x, v);
+      const room = AL.source($("co-source"), v.source);
+      const wide = mode === "L";
+      gsap.set($("co-box"), { left: chart.left, top: chart.top, width: chart.width, height: chart.height - room, alignItems: wide ? "flex-start" : "center", textAlign: wide ? "left" : "center" });
+      // The number as large as fits beside its unit, at the widest it gets as it rolls (the start may be longer).
+      const unitSize = pick({ L: 64, S: 52, V: 60 });
+      const numWidth = chart.width - (v.unit ? KC.textWidth(" " + v.unit, unitSize) : 0);
+      gsap.set($("co-num"), { fontSize: KC.fit([fmt(v.value), fmt(v.from)], numWidth, pick({ L: 220, S: 168, V: 200 })) });
+      gsap.set($("co-unit"), { fontSize: unitSize });
+      gsap.set($("co-lead"), { fontSize: pick({ L: 44, S: 38, V: 46 }), color: "var(--foreground)" });
+      gsap.set($("co-sub"), { fontSize: pick({ L: 30, S: 28, V: 32 }) });
+      gsap.set($("co-row"), { justifyContent: wide ? "flex-start" : "center" });
+      $("co-lead").textContent = v.lead;
+      $("co-unit").textContent = v.unit;
+      $("co-sub").textContent = v.sub;
+      $("co-num").textContent = fmt(v.from);
+
+      // The line arrives, then the number rolls on a long ease-out, so its last digits settle where they can be read.
+      if (v.lead) KM.arrive(tl, $("co-lead"), 0.1);
+      KM.arrive(tl, $("co-row"), 0.25);
+      KC.roll(tl, $("co-num"), v.from, v.value, 0.35, v.duration, fmt);
+      if (v.sub) tl.fromTo($("co-sub"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.35 + v.duration);
+      tl.fromTo($("co-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("co-box"), $("co-source")], v.out);
+      window.__timelines["counter"] = tl;
+    })();
+  </script>
+</template>

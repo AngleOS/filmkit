@@ -30,6 +30,14 @@ piece. The brand comes from the studio's theme (`filmkit.json`); never hard-code
   visibly.
 - **Nothing decorative moves on UI.** No floating, no wobble.
 
+## Infographics
+- **Use the kit's scenes** (`bars`, `counter`, `stat`) under a title placed at the top (`"place": "top"`, `"ground":
+  "none"`, or `"over-paper"` over a paper chart). They sit in `AL.chart`, which stops above the caption block.
+- **Every chart has a `source`**: one short line, on the chart's floor. Keep it to one line in 9:16 (about 55
+  characters); `check` flags one that runs out of the frame.
+- **One highlight,** in the accent: the bar the title is about, the counter's number, the after bar and its delta.
+- **Values are drawn to scale** from zero; a reference line (a cap, a goal) is drawn before the bars rise to it.
+
 ## Motion
 - **Arrivals:** `expo.out` over 0.5–0.7 s. Exits mirror them, faster.
 - **Words blur in** from 6 px to 0, 0.07 s apart.
