@@ -2,20 +2,22 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assemble, buildDir } from "../../build/assemble.js";
 import { formatHash } from "../../build/hash.js";
+import { isLoop, measureSeam } from "../../build/seam.js";
 import { hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "check <film> [formats…] [--force]";
-export const summary = "assemble each format and run `hyperframes check` on it, skipping formats unchanged since they passed (--force checks all); exits 1 when any format fails";
+export const summary = "assemble each format and run `hyperframes check` on it, and a loop's seam gate, skipping formats unchanged since they passed (--force checks all); exits 1 when any format fails";
 export const options = { force: { type: /** @type {const} */ ("boolean") } };
 
-/** Where a format's last pass is kept: the hash of its inputs and the warnings it passed with. */
+/** Where a format's last pass is kept: the hash of its inputs, and the warnings and seam it passed with. */
 const PASSED = ".filmkit-hash";
 
 /**
  * @typedef {{ code: string, message: string, selector?: string }} Finding
- * @typedef {{ format: string, dir: string, ok: boolean, errors: Finding[], warnings: Finding[] }} FormatCheck
+ * @typedef {import("../../build/seam.js").Seam | { ok: false, error: string }} SeamCheck
+ * @typedef {{ format: string, dir: string, ok: boolean, errors: Finding[], warnings: Finding[], seam?: SeamCheck }} FormatCheck
  */
 
 /** @param {import("../index.js").Context} ctx */
@@ -40,6 +42,13 @@ export async function checkFilm(studio, film, formats, log, force = false) {
   return { film: film.name, ok: !failed.length, formats: checked };
 }
 
+/** @param {SeamCheck} seam */
+function seamLine(seam) {
+  if ("error" in seam) return `  ✗ seam: ${seam.error}`;
+  const measured = `step ${seam.step}, limit ${seam.limit} (median step at the ends ${seam.median})`;
+  return seam.ok ? `  ✓ seam: ${measured}` : `  ✗ seam: the last frame doesn't flow into frame 0: ${measured}`;
+}
+
 /**
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
@@ -56,24 +65,30 @@ async function checkFormat(studio, film, format, log, force) {
   /** @type {FormatCheck} */
   let result;
   if (passed?.hash === hash) {
-    result = { format, dir, ok: true, errors: [], warnings: passed.warnings };
+    result = { format, dir, ok: true, errors: [], warnings: passed.warnings, ...(passed.seam && { seam: passed.seam }) };
     log(`${format} unchanged ✓`);
   } else {
     log(`${format} checking`);
     assemble(studio, film, format);
     result = { format, dir, ...findings(await hyperframesAsync(["check", "--json"], { cwd: dir })) };
-    if (result.ok) writeFileSync(join(dir, PASSED), JSON.stringify({ hash, warnings: result.warnings }) + "\n");
+    if (isLoop(film.root)) {
+      const out = join(studio.dir, "build", film.name, `seam-${format}`);
+      result.seam = measureSeam(dir, Number(film.root["data-duration"]), out) ?? { ok: false, error: "the seam frames didn't render" };
+      result.ok &&= result.seam.ok;
+    }
+    if (result.ok) writeFileSync(join(dir, PASSED), JSON.stringify({ hash, warnings: result.warnings, seam: result.seam }) + "\n");
     log(`${format} ${result.ok ? "✓" : "✗"} ${((Date.now() - started) / 1000).toFixed(1)} s`);
   }
   for (const e of result.errors) log(`  ✗ ${e.code}: ${e.message}${e.selector ? ` (${e.selector})` : ""}`);
   for (const w of result.warnings) log(`  ⚠ ${w.code}: ${w.message}${w.selector ? ` (${w.selector})` : ""}`);
+  if (result.seam) log(seamLine(result.seam));
   return result;
 }
 
 /**
  * The format's last pass, while its build is still what passed.
  * @param {string} dir
- * @returns {{ hash: string, warnings: Finding[] } | null}
+ * @returns {{ hash: string, warnings: Finding[], seam?: SeamCheck } | null}
  */
 export function lastPass(dir) {
   try {

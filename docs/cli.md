@@ -12,7 +12,7 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 
 | Command | What it does |
 |---|---|
-| `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
+| `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `preview <film> [format]` | HyperFrames Studio on one format |
 | `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
@@ -30,12 +30,21 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
 `kit/motion.js` and `kit/theme/brand.js`: see `examples/studio/films/smoke`.
 
-**Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop.
-It hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version)
-and skips a format whose hash matches its last pass, in `build/<film>/<format>/.filmkit-hash`, printing
-`16x9 unchanged ✓` with the warnings it passed with. A failed format is always checked again. `render` keeps an MP4
+**Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop. It
+hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version) and
+skips a format whose hash matches its last pass, in `build/<film>/<format>/.filmkit-hash`, printing `16x9 unchanged ✓`
+with the warnings (and a loop's seam) it passed with. A failed format is always checked again. `render` keeps an MP4
 made from the same hash (`build/<film>/render-<format>.json`), so an interrupted render redoes only what's missing or
 stale. Renders run one at a time, as each already uses every core. `--force` redoes everything.
+
+**Loops.** A film whose root has `data-loop="true"` is a hook loop: it plays again from frame 0 as soon as it ends, so
+its last frame has to flow into its first. `check` runs the seam gate on it in each format. It snapshots the first 9 and
+the last 9 frames (30 fps) as PNGs into `build/<film>/seam-<format>/`, decodes them with ffmpeg at 480 px on the long
+side, and measures each step as the mean absolute RGB change between neighbours. The format fails when the step from
+the last frame back to frame 0 is over max(0.4, 1.5 × the median step at the ends): `seam` in the result gives the
+`step`, the `median` and the `limit`. A film that moves across its seam passes when it keeps its speed; one that holds
+still passes when nothing changes. The rules for making one are in
+`skills/filmkit/references/look-and-motion.md` § Hook loops, and `examples/studio/films/loop` is one.
 
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as
 `start-end text`, one per line, in seconds of the scene. `render` and `captions` write them, moved to the film's time,
