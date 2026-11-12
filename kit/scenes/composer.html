@@ -9,6 +9,8 @@
     #co-input { display: flex; align-items: center; justify-content: flex-end; white-space: pre; overflow: hidden; min-height: 1.3em; }
     #co-input > span { flex: none; }
     #co-input > i { flex: 1 0 0; }
+    /* The placeholder shrinks instead, so one too long for the box clips at its end. */
+    #co-input > #co-ph { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
     #co-ph { color: var(--muted-foreground); }
     #co-row { display: flex; align-items: center; justify-content: space-between; height: 68px; }
     #co-plus { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--fk-border); display: grid; place-items: center; color: var(--muted-foreground); }
