@@ -22,7 +22,8 @@
   function Have($cmd) { [bool](Get-Command $cmd -ErrorAction SilentlyContinue) }
   function NodeOk {
     if (-not (Have node)) { return $false }
-    return [int]((node -p "process.versions.node.split('.')[0]") 2>$null) -ge 20
+    # Windows PowerShell 5.1 turns a native command's stderr into a terminating error under Stop: a broken node is "missing".
+    try { return [int]((node -p "process.versions.node.split('.')[0]") 2>$null) -ge 20 } catch { return $false }
   }
   function Refresh-Path {
     $env:Path = [Environment]::GetEnvironmentVariable('Path', 'Machine') + ';' + [Environment]::GetEnvironmentVariable('Path', 'User')
