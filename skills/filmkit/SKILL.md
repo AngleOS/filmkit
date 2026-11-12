@@ -31,7 +31,8 @@ detail; read it when you reach that step.
 ## Rules that hold every time
 - **Every word on screen has a source in `CLAIMS.md`.** Product and capability lines are the product's own claims,
   word for word. Never show a feature the product doesn't have.
-- **One overclaim discredits every true number.** Say the honest limit out loud on screen.
+- **One overclaim discredits every true number.** When a film argues or compares, say the honest limit out loud on
+  screen. In a feature clip, show only what the product does today, at its real limits.
 - **No other company's logo, name or UI in the picture.** A competitor's UI is a generic grey UI. Sources may name
   companies in a small source line.
 - **Rebuild product UI from its tokens and its code's labels.** Never record the screen, and never invent UI.
@@ -59,5 +60,6 @@ prompt runs this same workflow.
 ## Background
 [research/](references/research/MOC-launch-video.md) holds measured notes on launch films: registers, beat timing,
 type, UI demos, motion, cuts, formats, sound and review (MIT, see [NOTICE](references/research/NOTICE.md)). Read
-[the map](references/research/MOC-launch-video.md) when you plan a film's register and beats. Where a note disagrees
-with this skill (it burns captions into feed cuts), follow this skill.
+[the map](references/research/MOC-launch-video.md) when you plan a film's register and beats. The notes are
+upstream's, unchanged: their `[[wikilinks]]` and repo paths point at notes that aren't shipped here, and where a note
+disagrees with this skill (it burns captions into feed cuts), follow this skill.

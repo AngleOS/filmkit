@@ -23,8 +23,8 @@ The capability lines are the product's claims file, word for word. No prices: th
 
 - **On screen:** the exact text, with `·` between pieces shown together. Include UI labels, chart labels and source
   lines.
-- **Kind:** `claim`, `number`, `chart`, `UI`, `example` (illustrative content), `brand`, `source line` or
-  `about other apps`.
+- **Kind:** `claim`, `number`, `chart`, `UI`, `example` (illustrative content), `brand`, `cta`, `source line` or
+  `about other apps`. A `cta`'s verb must be true of the offer ("Get it", not "Try it free" without a trial).
 - **Source:** a file and line in the product's code, a URL with its date, or "illustrative". Numbers keep their
   research tag ([research](research.md)). A derived number shows its working.
 
