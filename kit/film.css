@@ -6,3 +6,18 @@ body { font-family: var(--font-ui); color: var(--foreground); }
 .display { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); line-height: 1.02; }
 .word { display: inline-block; white-space: pre; }
 .accent { color: var(--accent); }
+
+/* Burned-in captions (the captions scene with `burn`): centred on a plate of the theme's ink, so they read over any
+   shot. */
+.caption { position: absolute; display: flex; justify-content: center; text-align: center; }
+.caption span { padding: 10px 22px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 82%, transparent); color: var(--foreground); font: 600 44px var(--font-ui); line-height: 1.3; }
+
+/* Infographics (kit/chart.js): marks in a tint of the text colour, the highlighted one in the accent; figures set
+   tabular so a rolling value doesn't jitter. */
+.chart-mark { background: color-mix(in srgb, var(--foreground) 28%, transparent); }
+.chart-mark.hi { background: var(--accent); }
+.chart-track { background: color-mix(in srgb, var(--foreground) 9%, transparent); }
+.chart-rule { border: 0 solid color-mix(in srgb, var(--foreground) 40%, transparent); }
+.chart-ref { border: 0 dashed var(--foreground); }
+.chart-num { font-family: var(--font-ui); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--foreground); }
+.chart-label { font-family: var(--font-ui); font-weight: 400; color: var(--muted-foreground); white-space: nowrap; line-height: 1.3; }

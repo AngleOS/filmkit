@@ -10,7 +10,8 @@ src/cli/       the `filmkit` CLI: init, new, check, snapshot, contact, preview, 
 src/mcp/       the MCP server: the CLI's operations as tools, plus guide resources and the make_film prompt
 src/build/     assembling a film into build/<film>/<format>/, sound, seam and captions
 kit/           what each build copies in: layout.js (AL), motion.js (KM), theme → CSS and KB, scenes/, sound/
-themes/        built-in themes (default, paper); a studio's own theme is in its filmkit.json
+themes/        built-in themes (angle, the reference; default, paper); a studio's own theme is in its filmkit.json
+brand/         Angle Filmkit's own films: the README hero, teaser and example GIFs (Angle trademarks, TRADEMARKS.md)
 templates/     starting films for `filmkit new --template`
 skills/filmkit SKILL.md and references: brief, research, claims, look and motion, review, posting
 examples/      a complete studio with films for a fictional brand: docs, demo and visual regression set
@@ -23,9 +24,9 @@ kb/            design, decisions, constraints (part of the hub vault)
 - Red, green, refactor. New behaviour comes with tests, and a bug fix starts with a test that reproduces it.
 - Node's built-in test runner (`node --test`). Tests are offline and deterministic. Fixtures are small HTML films and
   JSON cue sheets.
-- **A kit or scene change** is checked by `filmkit check` on the smoke film (it mounts every scene) and on
-  `examples/` in all four formats. Look at contact sheets of each before calling it done. Renders go to a temp
-  directory, never into git.
+- **A kit or scene change** is checked by `filmkit check` on the smoke films (`smoke` and `infographics` mount every
+  scene between them) and on `examples/` in all four formats. Look at contact sheets of each before calling it done.
+  Renders go to a temp directory, never into git.
 
 ## Code that reads well
 - Plain ESM JavaScript with JSDoc types, and `tsc --checkJs` in CI. No build step for the kit: it runs in the

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.6.7/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": ["**", "!pnpm-lock.yaml", "!**/*.md", "!public"]
+  },
+  "formatter": { "enabled": true, "indentStyle": "space", "lineWidth": 100 },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "preset": "recommended",
+      "suspicious": { "noExplicitAny": "error" }
+    }
+  },
+  "css": { "parser": { "tailwindDirectives": true } },
+  "assist": { "enabled": true, "actions": { "source": { "organizeImports": "on" } } }
+}

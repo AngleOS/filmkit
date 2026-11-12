@@ -1,0 +1,48 @@
+<template>
+  <!-- A vertical hook: the statement at the top, ten dots, seven lighting one by one as a counter ticks, a source line.
+       Example data. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--night); }
+    #hk-title { position: absolute; color: var(--foreground); text-wrap: balance; }
+    .hk-dot { position: absolute; border-radius: 50%; border: 6px solid #2a3d35; background: transparent; }
+    .hk-dot.on { border-color: var(--pear); background: var(--pear); }
+    #hk-count { position: absolute; text-align: center; font: 600 220px var(--ui); letter-spacing: -0.04em; color: var(--pear); }
+    #hk-of { position: absolute; text-align: center; font: 500 48px var(--ui); color: var(--muted-foreground); }
+    #hk-src { position: absolute; text-align: center; font: 400 30px var(--ui); color: var(--muted-foreground); }
+  </style>
+  <div id="root" data-composition-id="hook">
+    <div id="hk-title" class="display"></div>
+    <div id="hk-count">0</div>
+    <div id="hk-of"><span>in 10 watch with the sound off</span></div>
+    <div id="hk-src"><span>Example data · source line goes here</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const $ = (id) => document.getElementById(id);
+      const root = $("root"), { W, safe } = AL, inner = W - safe.left - safe.right;
+      gsap.set($("hk-title"), { left: safe.left, top: safe.top + 20, width: inner, fontSize: 120 });
+      $("hk-title").innerHTML = KM.wordSpans("Make it read\non *mute.*");
+      gsap.set($("hk-count"), { left: safe.left, width: inner, top: 620 });
+      gsap.set($("hk-of"), { left: safe.left, width: inner, top: 880 });
+      const d = 130, g = 46, cols = 5, gw = cols * d + (cols - 1) * g, gx = safe.left + (inner - gw) / 2, gy = 1010;
+      const dots = Array.from({ length: 10 }, (_, i) => {
+        const el = document.createElement("div"); el.className = "hk-dot"; root.appendChild(el);
+        gsap.set(el, { left: gx + (i % cols) * (d + g), top: gy + Math.floor(i / cols) * (d + g), width: d, height: d });
+        return el;
+      });
+      gsap.set($("hk-src"), { left: safe.left, width: inner, top: gy + 2 * d + g + 50 });
+      let t = 0.2;  // the title is on screen at frame 0: it's the thumbnail
+      KM.arrive(tl, dots, t + 0.1);
+      KM.arrive(tl, [$("hk-count"), $("hk-of")], t + 0.2);
+      for (let i = 0; i < 7; i++) {
+        const at = t + 0.7 + i * 0.22;
+        tl.set(dots[i], { className: "hk-dot on" }, at);
+        tl.fromTo(dots[i], { scale: 0.8 }, { scale: 1, duration: 0.35, ease: "expo.out" }, at);
+        tl.set($("hk-count"), { textContent: String(i + 1) }, at);
+      }
+      KM.arrive(tl, $("hk-src"), t + 2.4);
+      window.__timelines["hook"] = tl;
+    })();
+  </script>
+</template>

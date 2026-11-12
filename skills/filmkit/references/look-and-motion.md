@@ -30,6 +30,14 @@ piece. The brand comes from the studio's theme (`filmkit.json`); never hard-code
   visibly.
 - **Nothing decorative moves on UI.** No floating, no wobble.
 
+## Infographics
+- **Use the kit's scenes** (`bars`, `counter`, `stat`) under a title placed at the top (`"place": "top"`, `"ground":
+  "none"`, or `"over-paper"` over a paper chart). They sit in `AL.chart`, which stops above the caption block.
+- **Every chart has a `source`**: one short line, on the chart's floor. Keep it to one line in 9:16 (about 55
+  characters); `check` flags one that runs out of the frame.
+- **One highlight,** in the accent: the bar the title is about, the counter's number, the after bar and its delta.
+- **Values are drawn to scale** from zero; a reference line (a cap, a goal) is drawn before the bars rise to it.
+
 ## Motion
 - **Arrivals:** `expo.out` over 0.5–0.7 s. Exits mirror them, faster.
 - **Words blur in** from 6 px to 0, 0.07 s apart.
@@ -70,6 +78,10 @@ One master; each format is laid out for its own frame with `AL.pick({L, S, V})`.
   Text is fully on or fully off there.
 - **The returning state is its own layer.** A `fromTo` late in a timeline renders its from-state at frame 0 and blanks
   the poster.
+- **Or keep moving at one speed:** a cycle whose frame at the end would be frame 0 (a dot once round a ring) carries
+  on across the seam. The gate passes a seam step up to 1.5 × the median step at the ends.
+- **`check`'s `line_unread` on a loop's first and last lines counts one side of the seam only,** though the line is on
+  screen on both. Give the returning line 2 s anyway, and the warning stays quiet.
 
 See [formats](research/launch-video-formats.md) for the measured rules behind loops and vertical cuts.
 
