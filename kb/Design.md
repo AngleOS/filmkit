@@ -91,6 +91,7 @@ user's films.
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
+| `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 
@@ -168,14 +169,16 @@ prompt to their agent**.
      - **Claude Desktop:** `claude_desktop_config.json` `mcpServers`.
      - **Codex:** `~/.codex/config.toml` `[mcp_servers.filmkit]`, plus the skill.
      - **Cursor:** `~/.cursor/mcp.json`.
-     - **VS Code (Copilot agent mode):** user `mcp.json`, or `code --add-mcp`.
-     - **Windsurf:** `~/.codeium/windsurf/mcp_config.json`.
+     - **VS Code:** the profile's `mcp.json` (`servers`).
+     - **GitHub Copilot** (CLI and VS Code's Copilot agent): `~/.copilot/mcp-config.json`.
+     - **Windsurf:** `~/.codeium/windsurf/mcp_config.json`, which Devin Desktop, its successor, imports.
      - **Zed:** `context_servers`.
      - **Gemini CLI:** `~/.gemini/settings.json`.
      - **opencode:** its `mcp` config.
 
-     Each tool's config location is verified against its current docs when it is implemented. The list lives in one
-     table, so adding a tool is one row.
+     Tools that load Agent Skills get the skill in `~/.agents/skills/filmkit`. The step is `filmkit agents`, which
+     also runs on its own. Each tool's config location is verified against its current docs, and the list lives in
+     one table (`src/agents/tools.js`), so adding a tool is one row. `docs/agents/` has a page per tool.
   3. **Studio:** where it goes (`./<name>-films` by default), then `filmkit init`.
   4. **Brand:** `filmkit brand`. Give it a website URL and it pulls the brand from the site:
      - the logo (SVG first, from the site's icons, `og:image` and header);
