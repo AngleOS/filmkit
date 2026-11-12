@@ -1,0 +1,36 @@
+<template>
+  <!-- The film's caption track: one host spanning the film, on the captions track, one caption per line of `lines` as
+       "start-end text" in seconds of this scene. It draws nothing: `filmkit render` (and `filmkit captions`) writes the
+       lines to renders/<film>.srt and .vtt, uploaded as closed captions where they're posted. With `burn` it burns
+       them into the picture instead, in AL.captions, clear of each frame's feed overlays. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+  </style>
+  <div id="root" data-composition-id="captions" data-composition-variables='[
+    {"id":"lines","type":"string","label":"Captions (start-end text, one per line)","default":"0.2-2.4 A caption, shipped as a subtitle file."},
+    {"id":"burn","type":"boolean","label":"Burn the captions into the picture","default":false}
+  ]'>
+    <div id="cp-track"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const c = AL.captions;
+      const track = document.getElementById("cp-track");
+      const cues = !v.burn ? [] : v.lines.split("\n").map((l) => l.match(/^\s*([\d.]+)\s*-\s*([\d.]+)\s+(.+)$/)).filter(Boolean);
+      for (const [, start, end, text] of cues) {
+        const cap = document.createElement("div");
+        const span = document.createElement("span");
+        cap.className = "caption";
+        span.textContent = text;
+        cap.appendChild(span);
+        gsap.set(cap, { left: c.left, width: c.width, bottom: c.bottom, opacity: 0 });
+        gsap.set(span, { fontSize: c.fontSize });
+        track.appendChild(cap);
+        tl.set(cap, { opacity: 1 }, +start).set(cap, { opacity: 0 }, +end);
+      }
+      window.__timelines["captions"] = tl;
+    })();
+  </script>
+</template>
