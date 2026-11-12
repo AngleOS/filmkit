@@ -30,7 +30,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
   "formats": [
     { "format": "16x9", "ok": true,  "errors": [], "warnings": [{ "code": "line_unread", "message": "…", "selector": "#t-sub" }] },
     { "format": "9x16", "ok": false, "errors": [{ "code": "text_box_overflow", "message": "…", "selector": "#src" }], "warnings": [],
-      "seam": { "ok": true, "step": 0.21, "limit": 0.4 } }      // loops only
+      "seam": { "ok": true, "step": 0.21, "median": 0.12, "limit": 0.4 } }      // loops only; { ok: false, error } when its frames didn't render
   ],
   "sound": { "built": true, "lufs": -19.0 } }
 
