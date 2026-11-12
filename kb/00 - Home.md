@@ -16,6 +16,7 @@ made Angle's beta films. Repo: [AngleOS/filmkit](https://github.com/AngleOS/film
 - [[projects/filmkit/Experience]]: what makes it a joy to use (tone, errors with next steps, progress, speed, agents, accessibility); every command is held to it
 - [[projects/filmkit/Interfaces]]: the CLI's JSON and exit codes, and the MCP tools' inputs and outputs (stable contract)
 - [[projects/filmkit/Origins]]: how the Angle films were made, and the gotchas
+- [[projects/filmkit/Templates]]: what each `filmkit new --template` film contains
 - Briefs for the example studio (#12): [[projects/filmkit/briefs/Films are code]] · [[projects/filmkit/briefs/Brief in, film out]] · [[projects/filmkit/briefs/Hook - the four frames]]
 - [[projects/filmkit/01 - Now]] · [[projects/filmkit/02 - Decisions]] · [[projects/filmkit/03 - Constraints]] ·
   [[projects/filmkit/Tasks]]
