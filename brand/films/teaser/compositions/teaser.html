@@ -47,12 +47,8 @@
 
       // Lines draw; the mark's pieces meet at 1.0 s and the wordmark wipes in; FILMKIT, the promise word by word, the
       // line under it, then the four frames land one after another and hold.
-      tl.fromTo([...lines.diag, ...lines.horiz], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 1.1, ease: "power2.out", stagger: 0.04 }, 0.1);
-      // The pieces meet with the mark centred in the box, then it steps left by L.shift as the wordmark wipes in.
-      tl.from(parts.para, { x: -8, opacity: 0, duration: 0.45, ease: "power3.out" }, 1.0);
-      tl.from(parts.tri, { x: 8, opacity: 0, duration: 0.45, ease: "power3.out" }, 1.0);
-      tl.from($("hr-lockup"), { x: L.shift, duration: 0.6, ease: "power3.inOut" }, 1.45);
-      tl.to(parts.wipe, { attr: { width: 60 }, duration: 0.6, ease: "power3.inOut" }, 1.45);
+      KM.drawMotif(tl, lines, 0.1);
+      KM.assemble(tl, $("hr-lockup"), parts, L, 1.0);
       KM.arrive(tl, $("hr-kit"), 1.75);
       const t = KM.words(tl, $("hr-line").querySelectorAll(".word"), 2.0);
       KM.arrive(tl, $("hr-sub"), t + 0.25);

@@ -29,7 +29,7 @@ test("build/<film>/<format>/ holds the film sized for the format", () => {
 test("the kit, GSAP and the theme are copied in, never linked", () => {
   const { studio, film } = hook();
   const out = assemble(studio, film, "16x9");
-  for (const file of ["kit/layout.js", "kit/motion.js", "kit/film.css", "kit/scenes/title.html", "kit/vendor/gsap.min.js", "kit/theme/theme.css", "kit/theme/fonts/OFL.txt"]) {
+  for (const file of ["kit/layout.js", "kit/motion.js", "kit/film.css", "kit/scenes/title.html", "kit/vendor/gsap.min.js", "kit/theme/theme.css", "kit/theme/brand.js", "kit/theme/fonts/OFL.txt"]) {
     assert.ok(lstatSync(join(out, file)).isFile(), file);
   }
 });

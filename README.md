@@ -49,21 +49,38 @@ Short films made with the kit. Each one is a few dozen lines of HTML, and the da
 
 Their sources are in [`brand/films/`](brand/films). The header animation is a film too.
 
-## Quick start (target for v0.1)
-```sh
-npx filmkit init my-studio && cd my-studio      # your brand in filmkit.json, a smoke film, the agent skill
-npx filmkit new launch --template statement
-npx filmkit check launch                         # every format; non-zero on failure
-npx filmkit contact launch                       # contact sheets to review
-npx filmkit render launch                        # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
-```
-With an agent:
-```sh
-claude mcp add filmkit -- npx filmkit mcp          # Claude Code; any MCP client works
-```
-Then ask it: *"Make a 40-second launch film for my product. Here's the brief…"*
+## Install (one line)
+> Coming in v0.1: the installers are here, and `filmkit setup` and the CLI commands below are being built (#3, #19).
 
-Requirements: Node ≥ 20 and ffmpeg.
+```sh
+curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh     # macOS, Linux
+irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1 | iex           # Windows
+npx -y github:AngleOS/filmkit setup                                                      # anywhere with Node 20+
+```
+It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you through:
+- **connecting Filmkit to your agent tools:** it detects Claude Code, Claude Desktop, Codex, Cursor, VS Code (Copilot),
+  Windsurf, Zed, Gemini CLI and opencode, and registers the MCP server and skill in each;
+- **making a studio;**
+- **setting up your brand:** from your website, or by answering a few questions;
+- **making a first film.**
+
+`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it.
+
+> While the repo is private, collaborators run `install.sh` from a clone; the curl URLs work once it's public. Filmkit
+> isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
+
+### Or let your agent do it
+Paste [this prompt](docs/install-with-your-agent.md) into your agent (or run `npx -y github:AngleOS/filmkit prompt`). It installs and
+configures Filmkit, asks you only for your brand, and finishes with a first film.
+
+## Use it
+```sh
+npx -y github:AngleOS/filmkit new launch --template statement   # or ask your agent: "Make a 30-second launch film for …"
+npx -y github:AngleOS/filmkit check launch                       # every format; non-zero on failure
+npx -y github:AngleOS/filmkit contact launch                     # contact sheets to review
+npx -y github:AngleOS/filmkit render launch                      # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
+```
+Requirements: Node ≥ 20 and ffmpeg. The installer handles both.
 
 ## Licence
 The code is MIT. Third-party pieces keep their own licences (`THIRD_PARTY.md`). The Angle name and logo are trademarks
