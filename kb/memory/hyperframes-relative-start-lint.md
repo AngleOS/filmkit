@@ -1,14 +1,15 @@
 ---
 name: hyperframes-relative-start-lint
-description: HyperFrames 0.8.186 lint misreads id-relative data-start ("intro") as 0 and warns subcomposition_blanks_before_host
+description: HyperFrames 0.8.186 lint warns subcomposition_blanks_before_host on every host when id-relative data-starts chain
 metadata:
   type: project
 ---
 
-In HyperFrames 0.8.186, a host whose `data-start` names another clip (`data-start="intro"`) is linted as if it started
-at 0, so `check` warns `subcomposition_blanks_before_host` for every one of them, though the film plays right. Numeric
-starts lint clean, so kit examples and templates use numbers.
+In HyperFrames 0.8.186, chained id-relative starts (`data-start="b"` where `b` itself has `data-start="a"`) make
+`check` warn `subcomposition_blanks_before_host` on every host of the same scene file, numeric starts included, though
+the film plays right. A single relative start lints clean, and so do numeric starts (checked 2026-11-12 on the smoke
+film).
 
 **Why:** the warnings bury real ones in `check` output, and agents chase them.
-**How to apply:** write numeric `data-start` in examples, templates and the smoke film; treat this warning on a
-relative start as noise until the pin moves.
+**How to apply:** write numeric `data-start` in examples, templates and the smoke film; treat this warning as noise
+when the starts chain, until the pin moves.
