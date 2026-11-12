@@ -53,7 +53,7 @@
       "properties": {
         "extends": { "type": "string", "description": "the theme this one overrides: a built-in name or a folder" },
         "name": { "type": "string" },
-        "label": { "type": "string" },
+        "label": { "type": "string", "pattern": "^((?!\\*/)[^\\n])*$", "description": "the theme's name for people, on one line and without */ (it heads theme.css in a comment)" },
         "description": { "type": "string" },
         "grounds": {
           "type": "object",

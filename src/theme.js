@@ -134,7 +134,8 @@ export function themeCss({ label, grounds, accent, accentOn, text, code, codeOn,
   };
   /** @param {Record<string, string | number>} props */
   const block = (props) => Object.entries(props).map(([k, v]) => `  --${k}: ${v};\n`).join("");
-  return `/* The ${label ?? "studio's"} theme, compiled by filmkit from theme.json: change that, not this file. */\n${faces.join("")}\n:root {\n${block(root)}}\n\n.on-paper {\n${block(paper)}}\n`;
+  // The label is free text in a CSS comment: a "*/" in it would end the comment and turn the rest into rules.
+  return `/* The ${label?.replaceAll("*/", "* /") ?? "studio's"} theme, compiled by filmkit from theme.json: change that, not this file. */\n${faces.join("")}\n:root {\n${block(root)}}\n\n.on-paper {\n${block(paper)}}\n`;
 }
 
 /** The code scene's syntax colours, as --code-keyword… @param {Record<string, string>} [code] */

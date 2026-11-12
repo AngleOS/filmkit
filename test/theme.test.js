@@ -46,6 +46,11 @@ test("a theme folder in the studio extends a built-in: its values and font faces
   assert.match(css, /font-family: "Fraunces"; src: url\("type\/Fraunces\.woff2"\); font-weight: 600;/);
 });
 
+test("a label can't end theme.css's opening comment", () => {
+  const css = themeCss({ ...loadTheme(studio(), "angle").values, label: "Acme */ :root { --ink: red; } /*" });
+  assert.equal(css.indexOf("*/"), css.indexOf(" theme, compiled") + " theme, compiled by filmkit from theme.json: change that, not this file. ".length);
+});
+
 test("filmkit.json overrides single values of a theme, the default one when it names none", () => {
   const css = themeCss(loadTheme(studio(), { extends: "angle", accent: "#ff5a1f", text: { muted: "#999999" } }).values);
   assert.equal(prop(css, "accent"), "#ff5a1f");
@@ -64,6 +69,7 @@ test("a theme that can't be found, or that breaks the schema, says what's wrong"
   assert.throws(bad({ extends: "angle", grounds: { foreground: "#000" } }), /grounds\.foreground: should be a ground name/);
   assert.throws(bad({ extends: "angle", grounds: { "over-paper": "#000" } }), /grounds\.over-paper: should be a ground name/);
   assert.throws(bad({ extends: "angle", colour: "#000" }), /colour: unknown key/);
+  assert.throws(bad({ extends: "angle", label: "Acme */ :root { --ink: red; } /*" }), /label: .* should be the theme's name for people, on one line and without \*\//);
   assert.throws(bad({ extends: "angle", motif: "waves" }), /motif: "waves" should be one of lines, grid, dots, none/);
   assert.throws(bad({ extends: "angle", fonts: { display: { family: 'Inter"; }' } } }), /fonts\.display\.family: .* should be a font family name/);
   assert.throws(bad({ extends: "angle", fonts: { faces: [{ family: "Inter", weight: 400, file: "Inter.woff2" }] } }), /no fonts\/Inter\.woff2 in the theme's folders/);
