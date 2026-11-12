@@ -23,6 +23,7 @@ const MASTER = `<div id="root" data-composition-id="main" data-start="0" data-du
   <div id="cc" data-start="0" data-duration="10"></div>
   <div id="b" data-start="a" data-duration="0.4"></div>
   <div id="c" data-start="9" data-duration="1"></div>
+  <div id="d" data-start="9.9" data-duration="2"></div>
 </div>`;
 
 test("with no times, a contact sheet looks just after each scene starts, once per moment", () => {
@@ -66,11 +67,19 @@ test("the label canvas is a greyscale PGM of the sheet with each label inked ins
   assert.ok(layout.cells.every(inked));
 });
 
+test("a label too long for its cell keeps the time whole and drops the format", () => {
+  const layout = sheetLayout(48, 1080, 1920);
+  const only = (/** @type {string} */ label) => labelCanvas({ ...layout, cells: layout.cells.slice(0, 1) }, [label]);
+  assert.deepEqual(only("9x16 12.725s"), only("12.725s"));
+  assert.notDeepEqual(only("9x16 1s"), only("1s"));
+});
+
 test("contact rejects unreadable times before it snapshots anything", () => {
   for (const [args, message] of [
     [["contact", "hook", "--every", "2s", "--at", "1"], /--every or --at, not both/],
     [["contact", "hook", "--every", "soon"], /--every soon: say how often/],
     [["contact", "hook", "--at", "1,x"], /--at 1,x: list times in seconds/],
+    [["contact", "hook", "--at", "1,6"], /--at 6: past the end of hook \(6 s\)/],
     [["contact", "hook", "--every", "0.1"], /60 frames is too many for one sheet \(at most 48\)/],
   ]) {
     const { status, stderr } = filmkit(/** @type {string[]} */ (args));

@@ -15,6 +15,8 @@ export async function run({ args, options, json, log }) {
   const film = openFilm(studio, args[0]);
   const formats = resolveFormats(studio, film, args.slice(1));
   const times = contactTimes(film, when(/** @type {string | undefined} */ (options.every), /** @type {string | undefined} */ (options.at)));
+  const late = times.filter((t) => t >= +film.root["data-duration"]);
+  if (late.length) throw new FilmkitError(`--at ${late.join(",")}: past the end of ${film.name} (${film.root["data-duration"]} s)`);
   if (!times.length) throw new FilmkitError(`films/${film.name} has no scenes to look at: give times with --at t,t,…`);
   if (times.length > MAX_FRAMES) throw new FilmkitError(`${times.length} frames is too many for one sheet (at most ${MAX_FRAMES}): use a larger --every`);
   const failed = [];

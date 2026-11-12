@@ -54,7 +54,7 @@ export function contactTimes(film, { every, at }) {
   if (every) return Array.from({ length: Math.ceil(duration / every) }, (_, i) => round(i * every));
   const scenes = Object.values(sceneStarts(film.html)).filter((s) => s.start < duration);
   const times = scenes.map((s) => round(s.start + Math.min(SETTLED, (s.duration || duration - s.start) / 2)));
-  return [...new Set(times)].sort((a, b) => a - b);
+  return [...new Set(times)].filter((t) => t < duration).sort((a, b) => a - b);
 }
 
 /**
@@ -93,9 +93,10 @@ export function labelCanvas(layout, labels) {
   const pixels = Buffer.alloc(width * height, GROUND);
   labels.forEach((label, i) => {
     const { x, y } = layout.cells[i];
-    // Characters past the frame's width are dropped rather than drawn into the next cell.
+    // A narrow cell drops the format (the file names it), then cuts from the left: the time is what matters.
     const fits = Math.floor((layout.frame.w - PAD) / (6 * SCALE));
-    [...label.slice(0, fits)].forEach((c, n) => {
+    const text = label.length > fits ? label.split(" ").at(-1)?.slice(-fits) ?? "" : label;
+    [...text].forEach((c, n) => {
       GLYPHS[c].forEach((row, gy) => {
         [...row].forEach((bit, gx) => {
           if (bit !== "1") return;
