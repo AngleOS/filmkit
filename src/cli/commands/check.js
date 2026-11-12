@@ -1,11 +1,12 @@
 import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
 import { isLoop, measureSeam } from "../../build/seam.js";
+import { buildSound } from "../../build/sound.js";
 import { hyperframes } from "../../hyperframes.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "check <film> [formats…]";
-export const summary = "assemble each format and run `hyperframes check` on it, and a loop's seam gate; exits 1 when any format fails";
+export const summary = "build the sound, assemble each format and run `hyperframes check` on it, and a loop's seam gate; exits 1 when any fails";
 
 /**
  * @typedef {{ code: string, message: string, selector?: string }} Finding
@@ -21,13 +22,15 @@ export async function run({ args, options, log }) {
 }
 
 /**
- * Every format assembled and checked; the result says which passed, and why not.
+ * The film's sound built, then every format assembled and checked; the result says which passed, and why not.
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
  * @param {string[]} formats
  * @param {import("../index.js").Context["log"]} log
  */
 export function checkFilm(studio, film, formats, log) {
+  const sound = buildSound(studio, film);
+  if (sound) log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
   const loop = isLoop(film.root);
   const checked = formats.map((format) => {
     const dir = assemble(studio, film, format);
@@ -44,9 +47,9 @@ export function checkFilm(studio, film, formats, log) {
     }
     return result;
   });
-  const failed = checked.filter((c) => !c.ok).map((c) => c.format);
+  const failed = [...checked.filter((c) => !c.ok).map((c) => c.format), ...(sound && !sound.built ? ["sound"] : [])];
   log(failed.length ? `✗ ${film.name}: check failed in ${failed.join(", ")}` : `✓ ${film.name}: ${formats.join(", ")}`);
-  return { film: film.name, ok: !failed.length, formats: checked };
+  return { film: film.name, ok: !failed.length, formats: checked, sound };
 }
 
 /** @param {SeamCheck} seam */
