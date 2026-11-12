@@ -1,0 +1,42 @@
+<template>
+  <!-- An app window to rebuild a product's UI in: a title bar (with an address when `url` is set) over an empty body,
+       dark or light from the theme. The body is AL.app(place).body: mount the film's own composition on a later track
+       with the same box, and give it class "on-paper" when the window is light, so the fk- components match. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ui-win { position: absolute; background: var(--fk-background); border: 2px solid var(--fk-border); border-radius: 24px; overflow: hidden; box-shadow: 0 40px 120px color-mix(in srgb, var(--ink) 50%, transparent); }
+    #ui-bar { position: relative; display: flex; align-items: center; justify-content: center; background: var(--fk-card); border-bottom: 2px solid var(--fk-border); font: 500 28px var(--font-ui); color: var(--muted-foreground); }
+    #ui-dots { position: absolute; left: 24px; top: 0; bottom: 0; display: flex; align-items: center; gap: 12px; }
+    #ui-dots i { width: 18px; height: 18px; border-radius: 50%; background: var(--fk-border); }
+    #ui-label.url { padding: 4px 28px; border-radius: 999px; background: var(--fk-muted); }
+  </style>
+  <div id="root" data-composition-id="ui" data-composition-variables='[
+    {"id":"title","type":"string","label":"Window title (shown when there is no URL)","default":"Your app"},
+    {"id":"url","type":"string","label":"Address in the title bar (empty: the title)","default":""},
+    {"id":"variant","type":"enum","label":"Window","default":"dark","options":[{"value":"dark","label":"Dark"},{"value":"light","label":"Light"}]},
+    {"id":"place","type":"enum","label":"Place","default":"stage","options":[{"value":"stage","label":"Under a title at the top"},{"value":"center","label":"Filling the safe box"}]},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]}
+  ]'>
+    <div id="ui-win">
+      <div id="ui-bar"><div id="ui-dots"><i></i><i></i><i></i></div><span id="ui-label"></span></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+      // The window is all the scene draws, so its colours follow the variant, not the ground: a dark window on paper.
+      $("root").classList.toggle("on-paper", v.variant === "light");
+      const A = AL.app(v.place);
+      gsap.set($("ui-win"), { left: A.left, top: A.top, width: A.width, height: A.height });
+      gsap.set($("ui-bar"), { height: A.bar });
+      $("ui-label").textContent = v.url || v.title;
+      $("ui-label").classList.toggle("url", Boolean(v.url));
+
+      KM.arrive(tl, $("ui-win"), 0.05);
+      window.__timelines["ui"] = tl;
+    })();
+  </script>
+</template>

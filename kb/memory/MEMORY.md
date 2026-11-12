@@ -1,3 +1,4 @@
 - [hyperframes-relative-start-lint](hyperframes-relative-start-lint.md) — HyperFrames 0.8.186 lint warns subcomposition_blanks_before_host on every…
 - [Hyperframes without root](hyperframes-without-root.md) — Running HyperFrames check/snapshot on a Linux agent host without root — Chrome's missing libs via apt-get download, and its disk guard
 - [Composition variables quoting](composition-variables-quoting.md) — an apostrophe in a data-composition-variables label ends the single-quoted attribute and breaks the scene's JSON
+- [Ffmpeg without drawtext](ffmpeg-without-drawtext.md) — Homebrew's ffmpeg 8 has no drawtext filter, so filmkit draws text into images itself (contact sheet labels)

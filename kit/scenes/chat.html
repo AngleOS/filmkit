@@ -1,0 +1,35 @@
+<template>
+  <!-- A chat turn: the person's message lands in its bubble on the right, then the reply streams in under it at a
+       model's speed (~160 chars/s, no caret), as a chat app shows it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ch-user { position: absolute; padding: 24px 34px; border-radius: 30px; background: var(--fk-muted); color: var(--foreground); font: 400 34px var(--font-ui); line-height: 1.35; }
+    #ch-reply { position: absolute; color: var(--foreground); font: 400 34px var(--font-ui); line-height: 1.45; }
+  </style>
+  <div id="root" data-composition-id="chat" data-composition-variables='[
+    {"id":"prompt","type":"string","label":"Message","default":"Plan three days in Lisbon on a budget"},
+    {"id":"reply","type":"string","label":"Reply","default":"Here is a plan that keeps each day walkable and under €60."},
+    {"id":"cps","type":"number","label":"Reply speed (chars/s)","default":160},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]}
+  ]'>
+    <div id="ch-user"></div>
+    <div id="ch-reply"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, pick, safe, column } = AL;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+      const top = pick({ L: 220, V: safe.top + 40 });
+      gsap.set($("ch-user"), { right: W - column.left - column.width, top, maxWidth: pick({ L: 900, V: column.width - 120 }) });
+      gsap.set($("ch-reply"), { left: column.left, top: top + pick({ L: 150, S: 170, V: 210 }), width: column.width });
+      $("ch-user").textContent = v.prompt;
+
+      KM.arrive(tl, $("ch-user"), 0.1);
+      KM.type(tl, $("ch-reply"), v.reply, 0.7, v.cps);
+      window.__timelines["chat"] = tl;
+    })();
+  </script>
+</template>

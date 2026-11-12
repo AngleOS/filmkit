@@ -26,6 +26,7 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
+| `agents [tools…] [--remove] [--dry-run] [--mcp-command cmd]` | registers Filmkit's MCP server and skill in each agent tool it finds (Claude Code, Codex, Cursor, VS Code, …), with a backup of every file it edits: see [agents/](agents/README.md) |
 | `explain [code]` | why an error exists and how to fix it; with no code, every code |
 
 **Formats.** 16x9 (1920 × 1080), 9x16 (1080 × 1920), 1x1 (1080 × 1080) and 4x5 (1080 × 1350). With none named, a

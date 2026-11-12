@@ -40,7 +40,8 @@ test("init makes a studio that opens, with its smoke film, ledgers, agent pointe
   for (const file of ["AGENTS.md", "CLAIMS.md", "POSTING.md"]) assert.doesNotMatch(readFileSync(join(dir, file), "utf8"), /\{\{/, file);
   const opened = openStudio(dir);
   assert.equal(opened.name, "acme-films");
-  assert.equal(openFilm(opened, "smoke").root["data-duration"], "25.5");
+  const example = openFilm(openStudio(join(PACKAGE, "examples", "studio")), "smoke");
+  assert.equal(openFilm(opened, "smoke").root["data-duration"], example.root["data-duration"]);
 });
 
 test("init keeps what's already there and adds only the .gitignore lines it lacks", () => {
