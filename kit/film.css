@@ -6,3 +6,8 @@ body { font-family: var(--font-ui); color: var(--foreground); }
 .display { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); line-height: 1.02; }
 .word { display: inline-block; white-space: pre; }
 .accent { color: var(--accent); }
+
+/* Burned-in captions (the captions scene with `burn`): centred on a plate of the theme's ink, so they read over any
+   shot. */
+.caption { position: absolute; display: flex; justify-content: center; text-align: center; }
+.caption span { padding: 10px 22px; border-radius: 14px; background: color-mix(in srgb, var(--ink) 82%, transparent); color: var(--foreground); font: 600 44px var(--font-ui); line-height: 1.3; }
