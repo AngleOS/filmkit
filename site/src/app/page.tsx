@@ -1,10 +1,10 @@
 import { ArrowDown, ArrowRight } from "lucide-react";
 import { Beat } from "@/components/beat";
 import { CopyCommand } from "@/components/copy-command";
+import { FilmStill } from "@/components/film-still";
 import { FormatSwitcher } from "@/components/format-switcher";
 import { InstallTabs } from "@/components/install-tabs";
 import { Lockup } from "@/components/lockup";
-import { LoopVideo } from "@/components/loop-video";
 import { Viewfinder } from "@/components/viewfinder";
 import {
   agentApps,
@@ -108,11 +108,10 @@ export default function Home() {
           }
         >
           <Viewfinder label="Teaser · 16:9 · 7 s" className="mb-14 sm:mb-16">
-            <LoopVideo
-              src={asset("/media/teaser.mp4")}
-              poster={asset("/media/teaser.webp")}
+            <FilmStill
+              src={asset("/media/teaser.webp")}
               ratio="16 / 9"
-              label="Angle Filmkit's teaser: the brand lines draw in, the Angle mark assembles, 'Your agent makes the film.' arrives word by word, and four format frames land."
+              label="Still from Angle Filmkit's teaser: the Angle Filmkit lockup, 'Your agent makes the film.', and four format frames, 16:9, 1:1, 4:5 and 9:16, over the brand lines."
             />
           </Viewfinder>
           <div className="examples-grid">
@@ -330,12 +329,7 @@ function ExampleFilm({
   return (
     <figure className="flex flex-col gap-4">
       <Viewfinder>
-        <LoopVideo
-          src={asset(`/media/${id}.mp4`)}
-          poster={asset(`/media/${id}.webp`)}
-          ratio={ratio}
-          label={label}
-        />
+        <FilmStill src={asset(`/media/${id}.webp`)} ratio={ratio} label={label} />
       </Viewfinder>
       <figcaption className="text-[15px] leading-relaxed">
         <span className="font-semibold text-ink">{title}</span>

@@ -28,29 +28,19 @@ describe("the one page", () => {
     }
   });
 
-  it("gives every film a poster, a description and a pause control", () => {
-    const { container } = render(<Home />);
-    const videos = container.querySelectorAll("video");
-    expect(videos).toHaveLength(examples.length + 1);
-    for (const v of videos) {
-      expect(v.getAttribute("poster")).toMatch(/\.webp$/);
-      expect(v.getAttribute("aria-label")).toBeTruthy();
-      expect(v.muted).toBe(true);
-      expect(v.getAttribute("preload")).toBe("none");
-    }
-    expect(screen.getAllByRole("button", { name: /^(Play|Pause): / })).toHaveLength(videos.length);
-  });
-
-  // jsdom never fetches preload="none" media and Lighthouse never plays it, so a missing film only shows up here.
-  it("ships every film and poster it references", () => {
-    const { container } = render(<Home />);
+  it("shows every film as a described poster, and ships each one", () => {
+    render(<Home />);
     const base = process.env.SITE_BASE_PATH ?? "";
-    for (const v of container.querySelectorAll("video")) {
-      for (const src of [v.getAttribute("src"), v.getAttribute("poster")]) {
-        expect(src).toBeTruthy();
-        const file = join(process.cwd(), "public", (src ?? "").slice(base.length));
-        expect(existsSync(file), file).toBe(true);
-      }
+    const stills = screen
+      .getAllByRole("img")
+      .filter((i) => i.getAttribute("src")?.includes("/media/"));
+    expect(stills).toHaveLength(examples.length + 1);
+    for (const still of stills) {
+      expect(still.getAttribute("alt")).toBeTruthy();
+      const src = still.getAttribute("src") ?? "";
+      expect(src).toMatch(/\.webp$/);
+      const file = join(process.cwd(), "public", src.slice(base.length));
+      expect(existsSync(file), file).toBe(true);
     }
   });
 
