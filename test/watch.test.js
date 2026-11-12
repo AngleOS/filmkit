@@ -92,7 +92,11 @@ test("watching copies each save into the build, and show() resizes the master", 
   t.after(() => live.close());
   const card = join("compositions", "card.html");
   const saved = new Promise((resolve) => (changed = (path) => path === card && resolve(path)));
-  writeFileSync(join(film.dir, card), "<template>saved</template>");
+  // macOS starts listening a moment after watch() returns, so the save is repeated until it's seen.
+  const save = () => writeFileSync(join(film.dir, card), "<template>saved</template>");
+  save();
+  const resave = setInterval(save, 200);
+  t.after(() => clearInterval(resave));
   assert.equal(await saved, card);
   assert.equal(readFileSync(join(out, card), "utf8"), "<template>saved</template>");
   live.show("1x1");

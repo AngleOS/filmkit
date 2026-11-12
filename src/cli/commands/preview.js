@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
 import { watchSources } from "../../build/watch.js";
@@ -21,6 +22,8 @@ export async function run({ args, options, json, log }) {
   // One directory for every format: switching resizes the master in place, so Studio's server and tab stay.
   const dir = join(studio.dir, "build", film.name, "preview");
   assemble(studio, film, first, dir);
+  // Not one format's id: the directory shows each in turn.
+  writeFileSync(join(dir, "meta.json"), JSON.stringify({ id: `${film.name}-preview`, name: `${film.name} preview` }) + "\n");
   const open = !options["no-open"] && (options.open ?? Boolean(process.stdout.isTTY));
 
   let shown = 0;
@@ -87,6 +90,7 @@ export async function run({ args, options, json, log }) {
   } finally {
     live.close();
     process.stdin.off("data", keys);
+    process.off("SIGINT", quit).off("SIGTERM", quit);
     if (process.stdin.isTTY) process.stdin.setRawMode(false);
     process.stdin.pause();
   }
