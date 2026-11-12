@@ -70,7 +70,8 @@
         return el;
       };
       const bars = [];
-      let rule, ref;
+      const refs = [];
+      let rule;
       if (vertical) {
         // Values over the bars and labels under them, each sized to fit its slot.
         const slot = plot.width / n;
@@ -92,12 +93,13 @@
         rule = make("chart-rule");
         gsap.set(rule, { left: 0, width: plot.width, top: floor, borderTopWidth: 3, transformOrigin: "0 50%" });
         if (hasRef) {
-          ref = make("chart-ref");
-          gsap.set(ref, { left: -12, width: plot.width + 24, top: refY - 1, borderTopWidth: 3, transformOrigin: "0 50%" });
+          refs.push(make("chart-ref"));
+          gsap.set(refs, { left: -12, width: plot.width + 24, top: refY - 1, borderTopWidth: 3, transformOrigin: "0 50%" });
         }
       } else {
-        // A row a bar: its label and value on a line, the bar under them across the plot's width.
-        const slot = plot.height / n, size = pick({ L: 34, S: 32, V: 36 });
+        // A row a bar: its label and value on a line, the bar under them across the plot's width. Many rows set their
+        // type smaller, down to 28 px, so a row's line and a 16 px bar still fit its slot.
+        const slot = plot.height / n, size = Math.max(28, Math.min(pick({ L: 34, S: 32, V: 36 }), Math.floor((slot - 36) / 1.3)));
         const lineH = R(size * 1.3) + 12, track = Math.max(16, Math.min(pick({ L: 52, S: 44, V: 52 }), R(slot * 0.82) - lineH));
         const rowH = lineH + track, gap = slot - rowH;
         const widths = KC.lengths(values, plot.width, scale);
@@ -112,17 +114,18 @@
           const bar = make("ba-bar chart-mark" + (d.label === v.highlight ? " hi" : ""));
           gsap.set(bar, { left: 0, width: widths[i], top: top + lineH, height: track, transformOrigin: "0 50%" });
           bars.push({ bar, value, grow: { scaleX: 0 } });
+          // The reference crosses each bar only, never a row's words.
+          if (hasRef) {
+            refs.push(make("chart-ref"));
+            gsap.set(refs.at(-1), { left: R((v.ref / KC.top(values, scale)) * plot.width) - 1, top: top + lineH - 6, height: track + 12, borderLeftWidth: 3, transformOrigin: "50% 0" });
+          }
         });
-        if (hasRef) {
-          ref = make("chart-ref");
-          gsap.set(ref, { left: R((v.ref / KC.top(values, scale)) * plot.width) - 1, top: R(gap / 2) - 8, height: R(plot.height - gap) + 16, borderLeftWidth: 3, transformOrigin: "50% 0" });
-        }
       }
 
       // The frame and the reference first, then each bar grows as its value rolls up, 0.25 s apart.
       tl.fromTo($("ba-head"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 0.1);
       if (rule) tl.fromTo(rule, { scaleX: 0 }, { scaleX: 1, duration: 0.6, ease: "expo.out" }, 0.1);
-      if (ref) tl.fromTo(ref, vertical ? { scaleX: 0 } : { scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" }, 0.3);
+      if (refs.length) tl.fromTo(refs, vertical ? { scaleX: 0 } : { scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" }, 0.3);
       bars.forEach((b, i) => {
         const t = 0.5 + 0.25 * i;
         tl.fromTo(b.bar, b.grow, { scaleX: 1, scaleY: 1, duration: 0.6, ease: "expo.out" }, t);

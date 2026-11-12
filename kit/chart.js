@@ -6,22 +6,25 @@
 
   // A number as the films print it. format: "grouped" (12,345.6), "plain" (2026: years and codes) or "compact"
   // (12.3K, 4.5M, 1.2B, keeping `decimals` after the point).
-  const COMPACT = [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"]];
+  // A compact number takes its unit after rounding, so 999,950 reads 1.0M, not 1,000.0K.
+  const COMPACT = [[1e12, "T"], [1e9, "B"], [1e6, "M"], [1e3, "K"], [1, ""]];
   const format = (x, { prefix = "", suffix = "", decimals = 0, format: style = "grouped" } = {}) => {
-    const sign = x < 0 ? "−" : "";
-    let n = Math.abs(x), unit = "";
-    if (style === "compact") [n, unit] = ((c) => (c ? [n / c[0], c[1]] : [n, ""]))(COMPACT.find(([m]) => n >= m));
-    const fixed = n.toFixed(decimals);
+    let i = style === "compact" ? COMPACT.findIndex(([m]) => Math.abs(x) >= m) : COMPACT.length - 1;
+    if (i < 0) i = COMPACT.length - 1;
+    if (i > 0 && style === "compact" && +Math.abs(x / COMPACT[i][0]).toFixed(decimals) >= 1000) i--;
+    const [scale, unit] = COMPACT[i];
+    const fixed = Math.abs(x / scale).toFixed(decimals);
     const [int, frac] = fixed.split(".");
     const body = style === "plain" ? int : int.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    return sign + prefix + body + (frac ? "." + frac : "") + unit + suffix;
+    return (x < 0 && +fixed ? "−" : "") + prefix + body + (frac ? "." + frac : "") + unit + suffix;
   };
 
-  // A chart's rows: one "label: value" a line; the label is everything before the last colon.
+  // A chart's rows: one "label: value" a line; the label is everything before the last colon, and the value may carry
+  // separators and a currency sign ("$1,200"). A line with no colon is no row.
   const rows = (text) =>
-    text.split("\n").map((line) => line.trim()).filter(Boolean).map((line) => {
+    text.split("\n").filter((line) => line.includes(":")).map((line) => {
       const at = line.lastIndexOf(":");
-      return { label: line.slice(0, at).trim(), value: +line.slice(at + 1) };
+      return { label: line.slice(0, at).trim(), value: +line.slice(at + 1).replace(/−/g, "-").replace(/[^\d.-]/g, "") };
     });
 
   // Values drawn to scale along `length` px: the top of the scale is `max`, else the largest value or reference line.
@@ -51,11 +54,11 @@
   const clear = (top, h, y) => (y > top && y < top + h ? y - h : top);
 
   // How `after` differs from `before`: "difference" in the values' own units (percentages differ in points), "percent"
-  // (relative change) or "times".
+  // (relative change) or "times". From zero, a ratio means nothing, so it falls back to the difference.
   const delta = (before, after, kind, fmt = {}) => {
     const d = after - before, sign = d > 0 ? "+" : d < 0 ? "−" : "";
-    if (kind === "percent") return sign + format(Math.abs(before ? (d / before) * 100 : 0)) + "%";
-    if (kind === "times") return format(before ? after / before : 0, { decimals: 1 }) + "×";
+    if (kind === "percent" && before) return sign + format(Math.abs((d / before) * 100)) + "%";
+    if (kind === "times" && before) return format(after / before, { decimals: 1 }) + "×";
     if (fmt.suffix === "%") return sign + format(Math.abs(d), { ...fmt, suffix: "" }) + " points";
     return sign + format(Math.abs(d), fmt);
   };

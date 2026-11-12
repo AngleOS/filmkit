@@ -63,8 +63,19 @@ test("numbers print grouped, plain or compact, with a prefix, suffix and roundin
   assert.equal(KC.format(-3.5, { suffix: "%", decimals: 1 }), "−3.5%");
 });
 
+test("a compact number takes the next unit when rounding reaches it, and zero has no sign", () => {
+  assert.equal(KC.format(999_950, { format: "compact", decimals: 1 }), "1.0M");
+  assert.equal(KC.format(999.6, { format: "compact" }), "1K");
+  assert.equal(KC.format(500, { format: "compact" }), "500");
+  assert.equal(KC.format(-0.4), "0");
+});
+
 test("a chart's rows are 'label: value' lines, split at the last colon", () => {
   assert.deepEqual(plain(KC.rows("2024/25: 28.92\n Ratio 3:1 : 4 \n\n")), [{ label: "2024/25", value: 28.92 }, { label: "Ratio 3:1", value: 4 }]);
+});
+
+test("values may carry separators and a currency sign, and a line with no colon is no row", () => {
+  assert.deepEqual(plain(KC.rows("Revenue: $1,200\nJan 12\nCost: −300")), [{ label: "Revenue", value: 1200 }, { label: "Cost", value: -300 }]);
 });
 
 test("the delta reads as a difference (percentages in points), a relative change or a multiple", () => {
@@ -73,6 +84,8 @@ test("the delta reads as a difference (percentages in points), a relative change
   assert.equal(KC.delta(1200, 3700, "percent"), "+208%");
   assert.equal(KC.delta(1200, 3700, "times"), "3.1×");
   assert.equal(KC.delta(5, 5, "difference"), "0");
+  assert.equal(KC.delta(0, 40, "percent"), "+40", "from zero, a change is the difference");
+  assert.equal(KC.delta(0, 40, "times", { suffix: "%" }), "+40 points");
 });
 
 test("type fits the longest label in its width, but never under 28 px", () => {
