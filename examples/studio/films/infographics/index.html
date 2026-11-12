@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- The infographic scenes' smoke film: each one with realistic data under a title placed at the top, so `filmkit
+         check infographics` checks them in all four frames. Captions are burned in, to show every chart and source
+         line clearing them. Not for posting: the studio's figures are made up, and their source lines say so. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="20" data-width="1920" data-height="1080">
+      <div id="growth" data-composition-id="growth" data-composition-src="kit/scenes/bars.html" data-start="0" data-duration="5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"data":"Jan: 12\nFeb: 19\nMar: 26\nApr: 37","highlight":"Apr","axis":"Films shipped a month","ref":30,"refLabel":"the goal","source":"Example data · a studio’s render log, 2026"}'></div>
+      <div id="growth-title" data-composition-id="growth-title" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"A film a day, by *April.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="minutes" data-composition-id="minutes" data-composition-src="kit/scenes/bars.html" data-start="5" data-duration="5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"data":"Writing the brief: 18\nBuilding the scenes: 42\nChecking four formats: 9\nRendering: 6","direction":"horizontal","highlight":"Building the scenes","suffix":" min","ref":30,"refLabel":"half an hour","ground":"paper","source":"Example data · one 30-second film, start to finish"}'></div>
+      <div id="minutes-title" data-composition-id="minutes-title" data-composition-src="kit/scenes/title.html" data-start="5" data-duration="5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Where the *minutes* go.","place":"top","ground":"over-paper","entrance":"rise"}'></div>
+      <div id="frames" data-composition-id="frames" data-composition-src="kit/scenes/counter.html" data-start="10" data-duration="4.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"value":12480,"lead":"Frames checked before a render","sub":"four formats of a 104-second film","source":"4 formats × 104 s × 30 frames a second"}'></div>
+      <div id="frames-title" data-composition-id="frames-title" data-composition-src="kit/scenes/title.html" data-start="10" data-duration="4.5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Every frame, *checked.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="refusals" data-composition-id="refusals" data-composition-src="kit/scenes/stat.html" data-start="14.5" data-duration="5.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"before":28.7,"after":50,"beforeLabel":"Refused, a plain request","afterLabel":"Refused, after “I’m authorized”","ground":"accent-dark","source":"2,390 cyber-defense prompts · arXiv 2603.01246 (2026)"}'></div>
+      <div id="refusals-title" data-composition-id="refusals-title" data-composition-src="kit/scenes/title.html" data-start="14.5" data-duration="5.5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Asking nicely made it *worse.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="20" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.5-4.8 Films shipped each month passed the goal in April.\n5.5-9.8 Most of a film’s time goes into building its scenes.\n10.5-14.3 Every frame of every format is checked before a render.\n15-19.8 Saying “I’m authorized” raised refusals from 28.7% to 50%.","burn":true}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/chart.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
