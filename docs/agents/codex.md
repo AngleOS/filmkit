@@ -12,7 +12,9 @@ startup_timeout_sec = 60
 ```
 The start-up timeout is raised from Codex's 10 seconds because npx downloads Filmkit the first time. Filmkit replaces
 the `[mcp_servers.filmkit]` table (and any `[mcp_servers.filmkit.*]` subtable) where it stands, and leaves every other
-line alone.
+line alone. An
+entry written another way (`filmkit = { … }` under `[mcp_servers]`, or dotted keys) is left as it is, and the tool
+fails with a message to delete it first, since a second definition would make the file invalid.
 
 **Skill:** `~/.agents/skills/filmkit`, the folder Codex reads personal skills from.
 

@@ -8,17 +8,19 @@ filmkit agents                    # every tool it finds
 filmkit agents cursor zed         # only these
 filmkit agents --dry-run          # say what would change, change nothing
 filmkit agents --remove           # take Filmkit out again, leaving the rest of each config alone
-filmkit agents --mcp-command "npx -y github:AngleOS/filmkit mcp"
+filmkit agents --mcp-command "node '/path with spaces/filmkit/src/cli/index.js' mcp"
 ```
 
 - **It edits only Filmkit's entry.** Every other key, server and comment in the file stays as it was. Running it
   again updates the entry; it never adds a second one.
-- **It backs up every file before it writes:** `<file>.filmkit-backup-<date>-<time>`, beside the file.
+- **It backs up every file before it writes:** `<file>.filmkit-backup-<date>-<time>`, beside the file, and never over
+  an earlier backup (a second one in the same second gets `-2`). A run with nothing to change writes nothing.
 - **The server command** follows how you ran Filmkit: `npx -y github:AngleOS/filmkit mcp` when npx fetched it from
   GitHub (while the repo is private), `npx -y filmkit mcp` from npm, and `node <checkout>/src/cli/index.js mcp` from
   a clone. `--mcp-command` sets it. On Windows, npx is started through `cmd /c`.
 - **The skill** is copied to `~/.claude/skills/filmkit` for Claude Code and to `~/.agents/skills/filmkit`, the folder
-  Codex, Cursor, Copilot, Devin, Zed, Gemini CLI and opencode read.
+  Codex, Cursor, Copilot, Devin, Zed, Gemini CLI and opencode read. `--remove` for some tools leaves that shared copy
+  while another tool still has Filmkit.
 - **`--json`** prints `{ ok, dryRun, command, tools: [{ id, name, status, changes, backups, detail? }] }`, where
   `status` is `configured`, `removed`, `skipped` (not installed, or nothing to remove) or `failed` (with `detail`
   saying why). It exits 1 when a tool failed.

@@ -2,7 +2,7 @@
 // (Design §8). The tools are rows in tools.js; this applies one to a config file or a tool's own CLI. It is
 // idempotent, edits only Filmkit's entry, keeps comments in JSONC files and backs up every file before it writes.
 import { spawnSync } from "node:child_process";
-import { copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { constants, copyFileSync, cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join, sep } from "node:path";
 import { applyEdits, findNodeAtLocation, getNodeValue, modify, parseTree } from "jsonc-parser";
@@ -46,9 +46,12 @@ function githubSpec(lockfile) {
   }
 }
 
-/** `--mcp-command "npx -y filmkit mcp"` as a command and its arguments. @param {string} line @returns {McpCommand} */
+/**
+ * `--mcp-command "npx -y filmkit mcp"` as a command and its arguments; quotes keep a path with spaces together.
+ * @param {string} line @returns {McpCommand}
+ */
 export function parseCommand(line) {
-  const [command, ...args] = line.trim().split(/\s+/);
+  const [command, ...args] = [...line.matchAll(/"([^"]*)"|'([^']*)'|(\S+)/g)].map((m) => m[1] ?? m[2] ?? m[3]);
   return { command, args };
 }
 
@@ -59,6 +62,10 @@ export function parseCommand(line) {
  */
 export function registerAgents({ remove = false, dryRun = false, only, command = mcpCommand(), host = thisHost(), stamp = timestamp() } = {}) {
   const run = { remove, dryRun, stamp, host, command: windowsShell(command, host.platform), skillDirs: new Set() };
+  // A skills folder several tools share stays while a tool left out of a partial --remove still has Filmkit.
+  if (remove && only) {
+    for (const t of TOOLS) if (!only.includes(t.id) && installed(t, host) && registered(t, host)) run.skillDirs.add(t.skills?.(host));
+  }
   return TOOLS.filter((t) => !only || only.includes(t.id)).map((tool) => {
     const base = { id: tool.id, name: tool.name, changes: [], backups: [] };
     if (!installed(tool, host)) return { ...base, status: "skipped", detail: "not installed" };
@@ -83,6 +90,21 @@ function installed(tool, host) {
   return (tool.bin && onPath(tool.bin, host)) || (tool.dirs?.(host) ?? []).some((d) => existsSync(d));
 }
 
+/**
+ * Whether the tool's config has Filmkit's entry; when that can't be told (a CLI tool, an unreadable file), yes.
+ * @param {import("./tools.js").Tool} tool @param {Host} host
+ */
+function registered(tool, host) {
+  if (!tool.config) return true;
+  const file = tool.config.path(host);
+  if (!existsSync(file)) return false;
+  try {
+    return (tool.config.toml ? tomlEdit : jsonEdit)(file, tool.config.key, undefined)(readFileSync(file, "utf8")) !== undefined;
+  } catch {
+    return true;
+  }
+}
+
 /** @param {string} bin @param {Host} host */
 function onPath(bin, host) {
   const win = host.platform === "win32";
@@ -91,7 +113,8 @@ function onPath(bin, host) {
 }
 
 /**
- * @typedef {{ remove: boolean, dryRun: boolean, stamp: string, host: Host, command: McpCommand, skillDirs: Set<string> }} Run
+ * @typedef {{ remove: boolean, dryRun: boolean, stamp: string, host: Host, command: McpCommand,
+ *   skillDirs: Set<string | undefined> }} Run  `skillDirs`: skills folders already handled, or to leave alone
  * @param {import("./tools.js").Tool} tool
  * @param {Run} run
  * @returns {Pick<ToolResult, "status" | "changes" | "backups" | "detail">}
@@ -119,26 +142,37 @@ function applyTool(tool, run) {
 }
 
 /**
- * A tool with its own CLI for MCP servers: remove Filmkit's entry, then add it, so a re-run replaces it.
+ * A tool with its own CLI for MCP servers: when its entry isn't already this command, remove it, then add it.
  * @param {string} bin
  * @param {NonNullable<import("./tools.js").Tool["cli"]>} cli
  * @param {Run} run
  * @returns {string[]} the commands run
  */
-function cliTool(bin, { add, remove: removeArgs }, run) {
+function cliTool(bin, { add, remove: removeArgs, get, current }, run) {
   const addArgs = add(run.command);
   const show = (/** @type {string[]} */ args) => [bin, ...args].join(" ");
-  if (run.dryRun) return [show(run.remove ? removeArgs : addArgs)];
-  const removed = exec(bin, removeArgs, run.host).status === 0;
-  if (run.remove) return removed ? [show(removeArgs)] : [];
+  const found = exec(bin, get, run.host);
+  if (run.remove) {
+    if (found.status !== 0) return [];
+    if (!run.dryRun) exec(bin, removeArgs, run.host);
+    return [show(removeArgs)];
+  }
+  if (found.status === 0 && current(found.stdout, run.command)) return [];
+  if (run.dryRun) return [show(addArgs)];
+  exec(bin, removeArgs, run.host);
   const added = exec(bin, addArgs, run.host);
   if (added.status !== 0) throw new Error(`${show(addArgs)} failed: ${(added.stderr || added.stdout).trim()}`);
   return [show(addArgs)];
 }
 
-/** @param {string} bin @param {string[]} args @param {Host} host */
+/**
+ * On Windows the tool's CLI is often a .cmd script, which only a shell runs, so arguments are quoted for cmd.
+ * @param {string} bin @param {string[]} args @param {Host} host
+ */
 function exec(bin, args, host) {
-  return spawnSync(bin, args, { encoding: "utf8", env: host.vars, shell: host.platform === "win32" });
+  const shell = host.platform === "win32";
+  const quoted = shell ? args.map((a) => (/[\s"&|<>^]/.test(a) ? `"${a.replaceAll('"', '""')}"` : a)) : args;
+  return spawnSync(bin, quoted, { encoding: "utf8", env: host.vars, shell });
 }
 
 /**
@@ -155,11 +189,26 @@ function editFile(file, edit, run) {
   const next = edit(text);
   if (next === undefined || next === text) return undefined;
   if (run.dryRun) return "";
-  const backup = exists ? `${file}.filmkit-backup-${run.stamp}` : "";
-  if (backup) copyFileSync(file, backup);
+  const backup = exists ? backUp(file, run.stamp) : "";
   mkdirSync(dirname(file), { recursive: true });
   writeFileSync(file, next);
   return backup;
+}
+
+/**
+ * Copies the file beside itself, never over an earlier backup (two runs in one second): `-2`, `-3`, … then.
+ * @param {string} file @param {string} stamp @returns {string} the backup's path
+ */
+function backUp(file, stamp) {
+  for (let n = 1; ; n++) {
+    const backup = `${file}.filmkit-backup-${stamp}${n > 1 ? `-${n}` : ""}`;
+    try {
+      copyFileSync(file, backup, constants.COPYFILE_EXCL);
+      return backup;
+    } catch (e) {
+      if (/** @type {NodeJS.ErrnoException} */ (e).code !== "EEXIST") throw e;
+    }
+  }
 }
 
 /**
@@ -210,15 +259,18 @@ function indentOf(text) {
 }
 
 /**
- * Codex's TOML: Filmkit's table (and its subtables, such as `.env`) is replaced where it stands, or appended.
- * @param {string} _file @param {string[]} key @param {Record<string, unknown> | undefined} value
+ * Codex's TOML: Filmkit's table (and its subtables, such as `.env`) is replaced where it stands, or appended. An
+ * entry written another way (`filmkit = { … }` under `[mcp_servers]`, or dotted keys) fails the tool rather than
+ * become a second definition, which would make the file invalid.
+ * @param {string} file @param {string[]} key @param {Record<string, unknown> | undefined} value
  */
-function tomlEdit(_file, key, value) {
+function tomlEdit(file, key, value) {
   const block = value ? [`[${key.join(".")}]`, ...Object.entries(value).map(([k, v]) => `${k} = ${toml(v)}`)].join("\n") : "";
   const ours = new RegExp(`^\\s*\\[\\s*${key.map((k) => `(?:${k}|"${k}")`).join("\\s*\\.\\s*")}\\s*(?:\\.[^\\]]*)?\\]`);
   return (/** @type {string} */ text) => {
     const eol = text.includes("\r\n") ? "\r\n" : "\n";
     const lines = text.split(/\r?\n/);
+    if (otherForm(lines, key)) throw new Error(`${file} defines ${key.join(".")} other than as a [${key.join(".")}] table: delete it, then run this again`);
     const start = lines.findIndex((l) => ours.test(l));
     if (start < 0) return block ? `${text.trimEnd()}${text.trim() ? eol + eol : ""}${block.replaceAll("\n", eol)}${eol}` : undefined;
     let end = lines.findIndex((l, i) => i > start && /^\s*\[/.test(l) && !ours.test(l));
@@ -230,6 +282,18 @@ function tomlEdit(_file, key, value) {
   };
 }
 
+/** Whether `key` is set by an inline table or dotted keys, at the root or in its parent's table. @param {string[]} lines @param {string[]} key */
+function otherForm(lines, key) {
+  const name = (/** @type {string} */ k) => `(?:${k}|"${k}")`;
+  const dotted = (/** @type {string[]} */ ks) => new RegExp(`^\\s*${ks.map(name).join("\\s*\\.\\s*")}\\s*[.=]`);
+  const parent = new RegExp(`^\\s*\\[\\s*${key.slice(0, -1).map(name).join("\\s*\\.\\s*")}\\s*\\]`);
+  let table = "root";
+  return lines.some((l) => {
+    if (/^\s*\[/.test(l)) table = parent.test(l) ? "parent" : "other";
+    return (table === "root" && dotted(key).test(l)) || (table === "parent" && dotted(key.slice(-1)).test(l));
+  });
+}
+
 /** A TOML value: strings, numbers and arrays of them are all an MCP entry has. @param {unknown} value @returns {string} */
 const toml = (value) => (Array.isArray(value) ? `[${value.map(toml).join(", ")}]` : JSON.stringify(value));
 
@@ -239,13 +303,22 @@ const toml = (value) => (Array.isArray(value) ? `[${value.map(toml).join(", ")}]
  * @returns {boolean} whether anything changes
  */
 function skill(dest, run) {
+  const source = join(PACKAGE, "skills", "filmkit");
   const ours = existsSync(join(dest, "SKILL.md")) && /^name:\s*filmkit\s*$/m.test(readFileSync(join(dest, "SKILL.md"), "utf8"));
   if (existsSync(dest) && !ours) throw new Error(`${dest} isn't Filmkit's skill: move it, then run this again`);
-  if (run.remove && !ours) return false;
+  if (run.remove ? !ours : ours && sameFiles(source, dest)) return false;
   if (run.dryRun) return true;
   rmSync(dest, { recursive: true, force: true });
-  if (!run.remove) cpSync(join(PACKAGE, "skills", "filmkit"), dest, { recursive: true });
+  if (!run.remove) cpSync(source, dest, { recursive: true });
   return true;
+}
+
+/** Whether two folders hold the same files with the same contents. @param {string} a @param {string} b */
+function sameFiles(a, b) {
+  const list = (/** @type {string} */ dir) => readdirSync(dir, { recursive: true, withFileTypes: true }).filter((e) => e.isFile())
+    .map((e) => join(e.parentPath, e.name).slice(dir.length)).sort();
+  const files = list(a);
+  return isDeepStrictEqual(files, list(b)) && files.every((f) => readFileSync(join(a, f)).equals(readFileSync(join(b, f))));
 }
 
 /** 20261112-153600, for backup names. */

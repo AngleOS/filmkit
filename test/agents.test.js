@@ -100,10 +100,8 @@ for (const platform of /** @type {const} */ (["darwin", "linux", "win32"])) {
     assert.deepEqual(added.filter((t) => t.changes.includes(dirname(skill))).map((t) => t.id), ["codex"], "one copy, listed once");
 
     const again = registerAgents({ host, command: NPX, stamp: "2" });
-    for (const t of again.filter((t) => t.status === "configured")) {
-      assert.deepEqual(t.changes.filter((c) => !c.endsWith(join("skills", "filmkit"))), [], `${t.id} is already set up`);
-      assert.deepEqual(t.backups, []);
-    }
+    for (const t of again.filter((t) => t.status === "configured")) assert.deepEqual([t.changes, t.backups], [[], []], `${t.id} is already set up`);
+    assert.ok(registerAgents({ host, command: NPX, dryRun: true }).every((t) => t.changes.length === 0), "a dry run has nothing to do");
     const after = Object.fromEntries(Object.entries(files).map(([id, f]) => [id, read(f)]));
 
     const removed = registerAgents({ host, command: NPX, remove: true, stamp: "3" });
@@ -169,23 +167,71 @@ test("a skills folder named filmkit that isn't Filmkit's is left alone", () => {
   assert.match(codex.detail ?? "", /isn't Filmkit's skill: move it/);
 });
 
-test("Claude Code goes through its CLI: remove, then add at user scope, with the skill in ~/.claude/skills", { skip: process.platform === "win32" }, () => {
+test("Claude Code goes through its CLI at user scope, only when its entry differs, with the skill in ~/.claude/skills", { skip: process.platform === "win32" }, () => {
   const home = mkdtempSync(join(tmpdir(), "filmkit-agents-claude-"));
   const log = join(home, "claude.log");
-  write(join(home, "bin", "claude"), `#!/bin/sh\necho "$*" >> "${log}"\n[ "$2" != add ] || [ ! -e "${home}/fail" ]\n`);
+  const state = join(home, "entry");
+  // A stand-in claude: `get` prints the entry the way Claude Code does, and exits 1 when there's none.
+  write(join(home, "bin", "claude"), `#!/bin/sh
+echo "$*" >> "${log}"
+case "$2" in
+  get) [ -e "${state}" ] && /bin/cat "${state}" ;;
+  remove) [ -e "${state}" ] && /bin/rm "${state}" ;;
+  add) [ ! -e "${home}/fail" ] && shift 6 && c=$1 && shift &&
+    printf 'filmkit:\\n  Scope: User config (available in all your projects)\\n  Command: %s\\n  Args: %s\\n' "$c" "$*" > "${state}" ;;
+esac
+`);
   chmodSync(join(home, "bin", "claude"), 0o755);
   const host = { home, platform: process.platform, vars: { PATH: join(home, "bin") } };
-  const [added] = registerAgents({ host, command: NPX, only: ["claude-code"] });
-  assert.equal(added.status, "configured");
-  assert.equal(read(log), "mcp remove -s user filmkit\nmcp add -s user filmkit -- npx -y filmkit mcp\n");
+  const claude = (/** @type {import("../src/agents/register.js").Options} */ options = {}) => registerAgents({ host, command: NPX, only: ["claude-code"], ...options })[0];
+  assert.equal(claude().status, "configured");
+  assert.equal(read(log), "mcp get filmkit\nmcp remove -s user filmkit\nmcp add -s user filmkit -- npx -y filmkit mcp\n");
   assert.ok(existsSync(join(home, ".claude", "skills", "filmkit", "SKILL.md")));
-  const [removed] = registerAgents({ host, command: NPX, only: ["claude-code"], remove: true });
-  assert.equal(removed.status, "removed");
-  assert.ok(!existsSync(join(home, ".claude", "skills", "filmkit")));
+  assert.deepEqual(claude().changes, [], "already set up");
+  assert.deepEqual(claude({ dryRun: true }).changes, []);
+  assert.deepEqual(claude({ command: { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] }, dryRun: true }).changes, ["claude mcp add -s user filmkit -- npx -y github:AngleOS/filmkit mcp"]);
+  const removed = claude({ remove: true });
+  assert.deepEqual([removed.status, removed.changes], ["removed", ["claude mcp remove -s user filmkit", join(home, ".claude", "skills", "filmkit")]]);
+  assert.equal(claude({ remove: true }).status, "skipped");
   write(join(home, "fail"), "");
-  const [failed] = registerAgents({ host, command: NPX, only: ["claude-code"] });
+  const failed = claude();
   assert.equal(failed.status, "failed");
   assert.match(failed.detail ?? "", /^claude mcp add -s user filmkit -- npx -y filmkit mcp failed/);
+});
+
+test("removing one tool keeps the shared skills folder while another tool still has Filmkit", () => {
+  const { home, host } = fixtureHome("linux");
+  registerAgents({ host, command: NPX, only: ["codex", "cursor"] });
+  const skill = join(home, ".agents", "skills", "filmkit");
+  const [codex] = registerAgents({ host, command: NPX, only: ["codex"], remove: true });
+  assert.deepEqual(codex.changes, [`${join(home, ".codex", "config.toml")} mcp_servers.filmkit`]);
+  assert.ok(existsSync(skill));
+  registerAgents({ host, command: NPX, only: ["cursor"], remove: true });
+  assert.ok(!existsSync(skill));
+});
+
+test("Codex: an entry written as an inline table or dotted keys fails the tool instead of becoming a second one", () => {
+  const { host, files } = fixtureHome("linux");
+  for (const text of [`[mcp_servers]\nfilmkit = { command = "old" }\n`, `mcp_servers.filmkit.command = "old"\n`, `[mcp_servers]\n"filmkit".command = "old"\n`]) {
+    write(files.codex, text);
+    for (const remove of [false, true]) {
+      const [codex] = registerAgents({ host, command: NPX, only: ["codex"], remove });
+      assert.equal(codex.status, "failed", text);
+      assert.match(codex.detail ?? "", /defines mcp_servers\.filmkit other than as a \[mcp_servers\.filmkit\] table: delete it/);
+      assert.equal(read(files.codex), text);
+    }
+  }
+  write(files.codex, `[mcp_servers]\nother = { command = "x" }\n\n[other]\nfilmkit = 1\n`);
+  assert.equal(registerAgents({ host, command: NPX, only: ["codex"] })[0].status, "configured");
+});
+
+test("a backup never replaces an earlier one, even within the same second", () => {
+  const { host, files } = fixtureHome("linux");
+  const before = read(files.cursor);
+  registerAgents({ host, command: NPX, only: ["cursor"], stamp: "1" });
+  registerAgents({ host, command: NPX, only: ["cursor"], stamp: "1", remove: true });
+  assert.equal(read(`${files.cursor}.filmkit-backup-1`), before);
+  assert.match(read(`${files.cursor}.filmkit-backup-1-2`), /"filmkit"/);
 });
 
 test("the server command follows how filmkit was run", () => {
@@ -198,6 +244,8 @@ test("the server command follows how filmkit was run", () => {
   lock("https://registry.npmjs.org/filmkit/-/filmkit-0.1.0.tgz");
   assert.deepEqual(mcpCommand(join(npxCache, "node_modules", "filmkit")), { command: "npx", args: ["-y", "filmkit", "mcp"] });
   assert.deepEqual(parseCommand(" npx -y github:AngleOS/filmkit mcp "), { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] });
+  assert.deepEqual(parseCommand(`node "/Users/x/My Projects/filmkit/src/cli/index.js" mcp`), { command: "node", args: ["/Users/x/My Projects/filmkit/src/cli/index.js", "mcp"] });
+  assert.deepEqual(parseCommand(`'C:\\Program Files\\nodejs\\node.exe' cli.js mcp`), { command: "C:\\Program Files\\nodejs\\node.exe", args: ["cli.js", "mcp"] });
 });
 
 test("filmkit agents: --json, --mcp-command and --dry-run, and an unknown tool is a usage error", () => {
