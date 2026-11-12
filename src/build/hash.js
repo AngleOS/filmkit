@@ -2,7 +2,7 @@
 // filmkit's version. `check` skips a format whose hash still matches its last pass, and `render` keeps an MP4 made
 // from the same hash. Contents count, not mtimes, so a fresh checkout or a copied studio still matches.
 import { createHash } from "node:crypto";
-import { lstatSync, readFileSync, readdirSync, readlinkSync, realpathSync } from "node:fs";
+import { lstatSync, readFileSync, readdirSync, readlinkSync, realpathSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { HYPERFRAMES } from "../hyperframes.js";
 import { PACKAGE } from "../studio.js";
@@ -24,14 +24,15 @@ export function formatHash(studio, film, format) {
 
 /**
  * Adds a file, or a folder's files in a stable order, each under its path so a rename counts as a change. A symlink
- * counts by where it points, so a broken one doesn't stop the check and one to a parent folder doesn't recurse.
+ * to a file counts by its contents, as a shared asset can change. One to a folder or to nothing counts by where it
+ * points, so a link to a parent folder doesn't recurse and a broken one doesn't stop the check.
  * @param {import("node:crypto").Hash} hash
  * @param {string} name
  * @param {string} path
  */
 function add(hash, name, path) {
   const stat = lstatSync(path);
-  if (stat.isSymbolicLink()) {
+  if (stat.isSymbolicLink() && !target(path)?.isFile()) {
     hash.update(`${name}\0->${readlinkSync(path)}\0`);
     return;
   }
@@ -41,4 +42,13 @@ function add(hash, name, path) {
     return;
   }
   for (const entry of readdirSync(path).sort()) add(hash, `${name}/${entry}`, join(path, entry));
+}
+
+/** What a symlink points to, or null when it's broken or loops. @param {string} path */
+function target(path) {
+  try {
+    return statSync(path);
+  } catch {
+    return null;
+  }
 }

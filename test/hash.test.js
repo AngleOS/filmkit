@@ -48,14 +48,25 @@ test("a changed, added or renamed film file invalidates, sound.json included", (
   assert.equal(hashes.size, 4);
 });
 
-test("a symlink counts by where it points: a broken one hashes, and one to a parent folder doesn't recurse", () => {
+test("a symlink to a folder or to nothing counts by where it points: one to a parent doesn't recurse", () => {
   const { studio, film } = hook();
   symlinkSync("..", join(film.dir, "up"));
   symlinkSync("missing.mp4", join(film.dir, "broll.mp4"));
+  symlinkSync("loop.mp4", join(film.dir, "loop.mp4"));
   const before = formatHash(studio, film, "16x9");
   assert.equal(formatHash(studio, film, "16x9"), before);
   renameSync(join(film.dir, "broll.mp4"), join(film.dir, "old.mp4"));
   symlinkSync("other.mp4", join(film.dir, "broll.mp4"));
+  assert.notEqual(formatHash(studio, film, "16x9"), before);
+});
+
+test("a symlink to a file counts by its contents, so an edited shared asset invalidates", () => {
+  const { studio, film } = hook();
+  const shared = join(mkdtempSync(join(tmpdir(), "filmkit-shared-")), "broll.mp4");
+  writeFileSync(shared, "take 1");
+  symlinkSync(shared, join(film.dir, "broll.mp4"));
+  const before = formatHash(studio, film, "16x9");
+  writeFileSync(shared, "take 2");
   assert.notEqual(formatHash(studio, film, "16x9"), before);
 });
 
