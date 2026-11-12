@@ -14,8 +14,9 @@ function hook() {
   return { studio, film: openFilm(studio, "hook") };
 }
 
-test("build/<film>/<format>/ holds the film sized for the format", () => {
+test("build/<film>/<format>/ holds the film sized for the format, and leaves sound.json out", () => {
   const { studio, film } = hook();
+  writeFileSync(join(film.dir, "sound.json"), '{ "cues": [] }');
   const out = assemble(studio, film, "9x16");
   assert.equal(out, join(studio.dir, "build", "hook", "9x16"));
   const root = rootTag(readFileSync(join(out, "index.html"), "utf8")).attrs;

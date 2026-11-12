@@ -4,11 +4,13 @@
 import { cpSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PACKAGE, SIZES } from "../studio.js";
 import { mountAudio, setRootSize } from "./html.js";
 import { soundPath } from "./sound.js";
 
 const GSAP = createRequire(import.meta.url).resolve("gsap/dist/gsap.min.js");
+const PROJECT = fileURLToPath(new URL("hyperframes.json", import.meta.url));
 /** What stays in the film's folder: the master is written sized, and sound is built from sound.json, not copied. */
 const OWN = new Set(["index.html", "sound.json"]);
 
@@ -37,8 +39,19 @@ export function assemble(studio, film, format) {
   }
   writeFileSync(join(out, "index.html"), html);
   writeFileSync(join(out, "meta.json"), JSON.stringify({ id: `${film.name}-${format}`, name: `${film.name} ${format}` }) + "\n");
-  cpSync(new URL("hyperframes.json", import.meta.url), join(out, "hyperframes.json"));
+  cpSync(PROJECT, join(out, "hyperframes.json"));
   return out;
+}
+
+/**
+ * What a format is assembled from, by name: a change in any of them changes the format. The film's sound counts once
+ * it's built, so build it first.
+ * @param {import("../studio.js").Studio} studio
+ * @param {import("../studio.js").Film} film
+ */
+export function sources(studio, film) {
+  const sound = soundPath(studio, film);
+  return { kit: join(PACKAGE, "kit"), gsap: GSAP, theme: studio.themeDir, film: film.dir, project: PROJECT, ...(existsSync(sound) && { sound }) };
 }
 
 /**

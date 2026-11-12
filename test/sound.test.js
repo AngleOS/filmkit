@@ -99,6 +99,7 @@ test("a film without sound.json has no sound, and loses the last one", () => {
 
 test("a sound.json that places nothing fails the sound, and a bed that isn't a number is a usage error", () => {
   const { dir, studio, film } = studioCopy("fixtures/studio", "hook");
+  writeFileSync(join(dir, "films/hook/sound.json"), '{ "cues": [] }');
   assert.deepEqual(buildSound(studio, film), { built: false, error: "sound.json places no cues or chords, so there's nothing to hear" });
   writeFileSync(join(dir, "films/hook/sound.json"), '{ "bed": "-12" }');
   assert.throws(() => buildSound(studio, film), (e) => e instanceof FilmkitError && /films\/hook\/sound\.json: "bed"/.test(e.message));
