@@ -26,6 +26,12 @@
   --brand-mark: #e3ef26;
   --brand-word: #ffffff;
   --brand-line: #e3ef26;
+  /* Code: the syntax colours of the code scene. */
+  --code-keyword: #ffc9c2;
+  --code-string: #cfe6ff;
+  --code-title: #e6d0ff;
+  --code-number: #bcdcff;
+  --code-attr: #ffd4a8;
 }
 
 /* Text on paper: Pear doesn't read on white, so the accent is Castleton. */
@@ -36,4 +42,9 @@
   --brand-mark: #145237;
   --brand-word: #07120f;
   --brand-line: #145237;
+  --code-keyword: #9a0d22;
+  --code-string: #0a3069;
+  --code-title: #5a2fa8;
+  --code-number: #034090;
+  --code-attr: #7a2e00;
 }

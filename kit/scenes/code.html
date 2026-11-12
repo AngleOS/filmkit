@@ -1,0 +1,75 @@
+<template>
+  <!-- A code block in the theme's syntax colours (--code-*): its lines reveal top to bottom, then `mark` (a piece of
+       one line, such as a base URL or a model id) lights up in the accent. The highlighter knows Python, TypeScript
+       and shell well enough for a film; run every snippet you show before you post it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #cd-box { position: absolute; background: var(--fk-muted); border-radius: 22px; color: var(--foreground); font-family: var(--font-mono); line-height: 1.55; overflow: hidden; }
+    #cd-title { padding: 14px 30px; border-bottom: 2px solid var(--fk-border); font: 500 28px var(--font-ui); color: var(--muted-foreground); }
+    #cd-pre { position: relative; z-index: 0; margin: 0; padding: 26px 30px; white-space: pre; font: inherit; }
+    .cd-mark { position: relative; }
+    .cd-mark i { position: absolute; inset: -2px -8px; background: var(--accent); border-radius: 8px; transform-origin: 0 50%; z-index: -1; }
+    .tk-k { color: var(--code-keyword, var(--accent)); }
+    .tk-s { color: var(--code-string, var(--foreground)); }
+    .tk-t { color: var(--code-title, var(--foreground)); }
+    .tk-n { color: var(--code-number, var(--foreground)); }
+    .tk-a { color: var(--code-attr, var(--foreground)); }
+    .tk-c { color: var(--muted-foreground); }
+  </style>
+  <div id="root" data-composition-id="code" data-composition-variables='[
+    {"id":"title","type":"string","label":"File name","default":"client.py"},
+    {"id":"lang","type":"enum","label":"Language","default":"python","options":[{"value":"python","label":"Python"},{"value":"ts","label":"TypeScript"},{"value":"shell","label":"Shell"}]},
+    {"id":"code","type":"string","label":"Code","default":"import os\n\nfrom example import Client\n\nclient = Client(\n    base_url=\"https://api.example.com/v1\",\n    api_key=os.environ[\"EXAMPLE_API_KEY\"],\n)"},
+    {"id":"mark","type":"string","label":"Light up (a piece of one line; empty for none)","default":"base_url"},
+    {"id":"markAt","type":"number","label":"Lights up at (s)","default":1.6},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]}
+  ]'>
+    <div id="cd-box"><div id="cd-title"></div><pre id="cd-pre"></pre></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, safe, column } = AL;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const keywords = {
+        python: "from import def return class if else elif for in while with as await async lambda None True False",
+        ts: "const let var function return import from export await async new class if else for of in type interface",
+        shell: "",
+      }[v.lang].split(" ").filter(Boolean);
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      const comment = v.lang === "ts" ? "\\/\\/.*$" : "#.*$";
+      const kw = keywords.length ? `\\b(?:${keywords.join("|")})\\b` : "(?!)";
+      const flag = v.lang === "shell" ? "(?:^|\\s)--?[A-Za-z][\\w-]*" : "(?!)";
+      const token = new RegExp(`(${comment})|("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*')|(\\$\\w+)|(${flag})|\\b(\\d+(?:\\.\\d+)?)\\b|(${kw})|([A-Za-z_]\\w*)(?=\\()`, "g");
+      const kinds = ["tk-c", "tk-s", "tk-t", "tk-a", "tk-n", "tk-k", "tk-t"];
+      const paint = (s) => esc(s).replace(token, (m, ...groups) => `<span class="${kinds[groups.slice(0, 7).findIndex(Boolean)]}">${m}</span>`);
+      // Only the first occurrence lights up.
+      let marked = false;
+      const line = (s) => {
+        const i = v.mark && !marked ? s.indexOf(v.mark) : -1;
+        if (i < 0) return paint(s);
+        marked = true;
+        return `${paint(s.slice(0, i))}<span class="cd-mark"><i></i>${paint(v.mark)}</span>${paint(s.slice(i + v.mark.length))}`;
+      };
+      $("cd-title").textContent = v.title;
+      $("cd-pre").innerHTML = v.code.split("\n").map((s) => `<div class="cd-line">${line(s) || " "}</div>`).join("");
+
+      const width = pick({ L: 1500, V: column.width });
+      gsap.set($("cd-box"), { left: Math.round((W - width) / 2), width, top: pick({ L: 300, S: Math.round(H * 0.3), V: safe.top + 420 }), fontSize: pick({ L: 34, V: 28 }) });
+
+      KM.arrive(tl, $("cd-box"), 0.05);
+      tl.fromTo(document.querySelectorAll(".cd-line"), { opacity: 0, filter: "blur(4px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.15, stagger: 0.06, ease: "none" }, 0.3);
+      const mark = document.querySelector(".cd-mark");
+      if (mark) {
+        tl.fromTo(mark.querySelector("i"), { scaleX: 0 }, { scaleX: 1, duration: 0.35, ease: "power3.out" }, v.markAt);
+        // GSAP can't tween to a var(), so the colour that reads on the accent is read from the theme here.
+        const onAccent = getComputedStyle(mark).getPropertyValue("--fk-on-accent").trim();
+        tl.to([mark, ...mark.querySelectorAll("span")], { color: onAccent, duration: 0.1, ease: "none" }, v.markAt + 0.1);
+      }
+      window.__timelines["code"] = tl;
+    })();
+  </script>
+</template>

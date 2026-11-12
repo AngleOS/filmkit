@@ -40,7 +40,8 @@ user's films.
 ### 2. The kit, shipped inside the package and copied into every build
 - **layout.js (`AL`)**: one master and four frames:
   - L = 16:9, S = 1:1 and 4:5, V = 9:16;
-  - safe boxes per frame (clear of the feeds' buttons), the caption box, a content column and a stage;
+  - safe boxes per frame (clear of the feeds' buttons), the caption box, a content column, a stage, the composer's
+    box and the app window's (`app(place)`, whose body a film's own composition fills);
   - `pick({L,S,V})` for per-frame values;
   - the chart box: the stage stopped above two caption lines (three in 9:16), with the source line on its floor;
   - `vars()` for scene variables. It merges the declared defaults back in, working around a HyperFrames quirk.
@@ -58,9 +59,12 @@ user's films.
   - one accent colour: one word per title, the motif, the primary button;
   - text colours, display, UI and mono fonts, title tracking;
   - logo SVGs: mark and wordmark;
-  - a motif: lines, grid, dots or none.
+  - a motif: lines, grid, dots or none;
+  - optionally, syntax colours for code (`--code-*`).
 
   It compiles to CSS custom properties and a `KB` helper that draws the motif and the logo lockup.
+- **film.css**: the shared look, and shadcn-style `fk-` pieces (button, input, badge, card, dialog, tabs, the cursor
+  and a caret) whose surfaces are worked out from the theme, so a film's own compositions can rebuild a product's UI.
 - **Scenes**, each driven by declared variables and documented from its own declaration:
   - **titles and brand:** `title`, `motif`, `mark` (logo reveal), `endcard`, `lower-third`;
   - **product:** `chat`, `code`, `terminal`, `composer`, `ui` (a generic app frame for rebuilt product UI);
