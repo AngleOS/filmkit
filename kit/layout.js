@@ -2,13 +2,17 @@
 // format is laid out for its own frame, never cropped from the master. The size is the root composition's
 // data-width / data-height, which filmkit sets per format. Scenes apply layout with gsap.set at build time: their
 // CSS is scoped by the runtime, so mode-dependent rules live here.
-(function () {
-  const root = document.querySelector('[data-composition-id="main"]');
-  const W = +root.dataset.width, H = +root.dataset.height, r = W / H;
+// A top-level `var` is the window's AL, as `window.AL =` would be, and gives `tsc --checkJs` its type.
+var AL = (function () {
+  const root = /** @type {HTMLElement} */ (document.querySelector('[data-composition-id="main"]'));
+  const W = Number(root.dataset.width), H = Number(root.dataset.height), r = W / H;
   const mode = r > 1.2 ? "L" : r > 0.7 ? "S" : "V";
   document.documentElement.dataset.mode = mode;
-  // pick({L: a, S: b, V: c}) → the value for this frame; S falls back to V when absent
-  const pick = (o) => (mode in o ? o[mode] : mode === "S" ? o.V : o.L);
+  /**
+   * pick({L: a, S: b, V: c}) → the value for this frame; S falls back to V when absent
+   * @template T @param {{ L: T, S?: T, V: T }} o @returns {T}
+   */
+  const pick = (o) => o[mode] ?? (mode === "S" ? o.V : o.L);
   const R = Math.round;
 
   // Where words and the key action stay. 9:16 keeps clear of the feeds' header, action rail and caption block; 4:5
@@ -43,6 +47,7 @@
 
   // A scene's ground: one of the theme's fills (ink, accent-dark, paper), or none for an overlay. Paper is light, so
   // the theme's .on-paper turns the text dark over it.
+  /** @param {HTMLElement} el @param {string} name */
   const ground = (el, name) => {
     el.classList.toggle("on-paper", name === "paper");
     el.style.background = name === "none" ? "transparent" : `var(--${name})`;
@@ -50,10 +55,12 @@
 
   // A scene's variables: its declared defaults under the host's values. HyperFrames 0.8.186 drops a scene file's
   // defaults when a film mounts it more than once, so read them from the scene root's own declaration.
+  /** @param {Element} root @param {{ getVariables(): Record<string, unknown> }} hf @returns {Record<string, any>} */
   const vars = (root, hf) => {
+    /** @type {{ id: string, default: unknown }[]} */
     const declared = JSON.parse(root.getAttribute("data-composition-variables") || "[]");
     return { ...Object.fromEntries(declared.map((d) => [d.id, d.default])), ...hf.getVariables() };
   };
 
-  window.AL = { W, H, mode, pick, safe, captions, column, stage, ground, vars };
+  return { W, H, mode, pick, safe, captions, column, stage, ground, vars };
 })();

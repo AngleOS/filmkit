@@ -27,7 +27,7 @@ export function assemble(studio, film, format) {
   for (const entry of readdirSync(film.dir)) {
     if (!OWN.has(entry)) cpSync(join(film.dir, entry), join(out, entry), { recursive: true });
   }
-  const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
+  const [width, height] = SIZES[/** @type {keyof typeof SIZES} */ (format)];
   writeFileSync(join(out, "index.html"), setRootSize(film.html, width, height));
   writeFileSync(join(out, "meta.json"), JSON.stringify({ id: `${film.name}-${format}`, name: `${film.name} ${format}` }) + "\n");
   cpSync(new URL("hyperframes.json", import.meta.url), join(out, "hyperframes.json"));

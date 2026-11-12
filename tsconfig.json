@@ -1,0 +1,21 @@
+// `npm run typecheck`: JSDoc types over the CLI (src/, Node ≥ 20) and the kit (kit/, the browser). No emit: both run
+// as written.
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "target": "es2023",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    // The kit's files are classic scripts, not modules (no import or export), so their top-level AL and KM are
+    // globals the scenes and motion.js read.
+    "moduleDetection": "legacy",
+    "lib": ["es2023", "dom", "dom.iterable"],
+    "types": ["node", "gsap"],
+    // gsap's own declarations don't pass a check (file names that differ only in case)
+    "skipLibCheck": true
+  },
+  "include": ["src", "kit"]
+}
