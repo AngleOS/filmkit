@@ -1,0 +1,54 @@
+<template>
+  <!-- A chat composer: a prompt typed at reading speed (15 chars/s), then the cursor comes in and presses Send and the
+       box clears. Its box is AL.composer, so a film's own composition (a menu, a reply) can line up with it. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #co-box { position: absolute; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 26px 20px 38px; background: var(--fk-background); border: 2px solid var(--fk-border); border-radius: 40px; color: var(--foreground); font: 400 34px var(--font-ui); }
+    #co-input { white-space: nowrap; overflow: hidden; min-height: 1.3em; }
+    #co-ph { color: var(--muted-foreground); }
+    #co-row { display: flex; align-items: center; justify-content: space-between; height: 68px; }
+    #co-plus { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--fk-border); display: grid; place-items: center; color: var(--muted-foreground); }
+    #co-send { width: 68px; height: 68px; border-radius: 50%; background: var(--accent); display: grid; place-items: center; color: var(--fk-on-accent); }
+    #co-box svg { fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  </style>
+  <div id="root" data-composition-id="composer" data-composition-variables='[
+    {"id":"prompt","type":"string","label":"Prompt","default":"Plan three days in Lisbon on a budget"},
+    {"id":"placeholder","type":"string","label":"Placeholder","default":"Ask anything"},
+    {"id":"cursor","type":"boolean","label":"Cursor presses Send","default":true},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]}
+  ]'>
+    <div id="co-box">
+      <div id="co-input"><span id="co-ph"></span><span id="co-typed"></span><span id="co-caret" class="fk-caret"></span></div>
+      <div id="co-row">
+        <div id="co-plus"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
+        <div id="co-send"><svg width="36" height="36" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
+      </div>
+    </div>
+    <img id="co-cursor" class="fk-cursor" src="kit/assets/cursor.svg" alt="" />
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const C = AL.composer;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+      gsap.set($("co-box"), { left: C.left, top: C.top, width: C.width, height: C.height });
+      $("co-ph").textContent = v.placeholder;
+      gsap.set($("co-cursor"), { x: C.send[0] + 170, y: AL.H + 100 });
+
+      // a person types it, then sends it
+      tl.set($("co-ph"), { display: "none" }, 0.4);
+      const typed = KM.type(tl, $("co-typed"), v.prompt, 0.4, 15);
+      let sent = typed + 0.25;
+      if (v.cursor) {
+        KM.cursorIn(tl, $("co-cursor"), C.send[0] - 6, C.send[1] - 6, typed + 0.55);
+        sent = typed + 0.65;
+      }
+      KM.press(tl, $("co-send"), v.cursor ? $("co-cursor") : null, sent - 0.1);
+      tl.set($("co-typed"), { textContent: "" }, sent).set($("co-ph"), { display: "inline" }, sent).set($("co-caret"), { opacity: 0 }, sent);
+      if (v.cursor) KM.cursorOut(tl, $("co-cursor"), sent + 0.35);
+      window.__timelines["composer"] = tl;
+    })();
+  </script>
+</template>
