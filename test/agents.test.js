@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
@@ -176,7 +176,7 @@ test("Claude Code goes through its CLI at user scope, only when its entry differ
 echo "$*" >> "${log}"
 case "$2" in
   get) [ -e "${state}" ] && /bin/cat "${state}" ;;
-  remove) [ -e "${state}" ] && /bin/rm "${state}" ;;
+  remove) [ ! -e "${home}/fail-remove" ] && [ -e "${state}" ] && /bin/rm "${state}" ;;
   add) [ ! -e "${home}/fail" ] && shift 6 && c=$1 && shift &&
     printf 'filmkit:\\n  Scope: User config (available in all your projects)\\n  Command: %s\\n  Args: %s\\n' "$c" "$*" > "${state}" ;;
 esac
@@ -193,6 +193,13 @@ esac
   const removed = claude({ remove: true });
   assert.deepEqual([removed.status, removed.changes], ["removed", ["claude mcp remove -s user filmkit", join(home, ".claude", "skills", "filmkit")]]);
   assert.equal(claude({ remove: true }).status, "skipped");
+  write(state, "filmkit:\n  Scope: Project config (shared via .mcp.json)\n  Command: npx\n  Args: -y filmkit mcp\n");
+  assert.equal(claude({ remove: true }).status, "skipped", "a project-scope entry isn't Filmkit's to remove");
+  write(state, "filmkit:\n  Scope: User config (available in all your projects)\n  Command: npx\n  Args: -y filmkit mcp\n");
+  write(join(home, "fail-remove"), "");
+  assert.match(claude({ remove: true }).detail ?? "", /^claude mcp remove -s user filmkit failed/);
+  rmSync(join(home, "fail-remove"));
+  rmSync(state);
   write(join(home, "fail"), "");
   const failed = claude();
   assert.equal(failed.status, "failed");

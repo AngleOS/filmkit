@@ -148,16 +148,17 @@ function applyTool(tool, run) {
  * @param {Run} run
  * @returns {string[]} the commands run
  */
-function cliTool(bin, { add, remove: removeArgs, get, current }, run) {
+function cliTool(bin, { add, remove: removeArgs, get, ours, current }, run) {
   const addArgs = add(run.command);
   const show = (/** @type {string[]} */ args) => [bin, ...args].join(" ");
   const found = exec(bin, get, run.host);
   if (run.remove) {
-    if (found.status !== 0) return [];
-    if (!run.dryRun) exec(bin, removeArgs, run.host);
+    if (found.status !== 0 || !ours(found.stdout)) return [];
+    const removed = run.dryRun || exec(bin, removeArgs, run.host);
+    if (removed !== true && removed.status !== 0) throw new Error(`${show(removeArgs)} failed: ${(removed.stderr || removed.stdout).trim()}`);
     return [show(removeArgs)];
   }
-  if (found.status === 0 && current(found.stdout, run.command)) return [];
+  if (found.status === 0 && ours(found.stdout) && current(found.stdout, run.command)) return [];
   if (run.dryRun) return [show(addArgs)];
   exec(bin, removeArgs, run.host);
   const added = exec(bin, addArgs, run.host);
@@ -316,7 +317,8 @@ function skill(dest, run) {
 /** Whether two folders hold the same files with the same contents. @param {string} a @param {string} b */
 function sameFiles(a, b) {
   const list = (/** @type {string} */ dir) => readdirSync(dir, { recursive: true, withFileTypes: true }).filter((e) => e.isFile())
-    .map((e) => join(e.parentPath, e.name).slice(dir.length)).sort();
+    // Dirent.parentPath is Node 20.12+; `path` is its older name.
+    .map((e) => join(e.parentPath ?? e.path, e.name).slice(dir.length)).sort();
   const files = list(a);
   return isDeepStrictEqual(files, list(b)) && files.every((f) => readFileSync(join(a, f)).equals(readFileSync(join(b, f))));
 }

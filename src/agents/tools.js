@@ -10,11 +10,12 @@ import { join } from "node:path";
  * @typedef {{ path: (h: Host) => string, key: string[], entry: (c: McpCommand) => Record<string, unknown>,
  *   toml?: boolean }} Config  Filmkit's `entry` at `key` in a JSON file (comments allowed) or a TOML one
  * @typedef {{ id: string, name: string, bin?: string, dirs?: (h: Host) => string[], config?: Config,
- *   cli?: { add: (c: McpCommand) => string[], remove: string[], get: string[], current: (out: string, c: McpCommand) => boolean },
+ *   cli?: { add: (c: McpCommand) => string[], remove: string[], get: string[], ours: (out: string) => boolean,
+ *     current: (out: string, c: McpCommand) => boolean },
  *   skills?: (h: Host) => string }} Tool
  *   Installed when `bin` is on the PATH or one of `dirs` exists. A tool with its own `cli` for MCP servers is
- *   registered with it (`bin` and the arguments): `get` exits 0 when Filmkit is there, and `current` says from its
- *   output whether the entry already runs this command. `skills` is the folder it loads Agent Skills from.
+ *   registered with it (`bin` and the arguments): `get` exits 0 when Filmkit is there, `ours` says from its output
+ *   whether that's the entry setup made, and `current` whether it already runs this command. `skills` is the folder it loads Agent Skills from.
  */
 
 /** @param {Host} h */
@@ -42,7 +43,9 @@ export const TOOLS = [
       add: (c) => ["mcp", "add", "-s", "user", "filmkit", "--", c.command, ...c.args],
       remove: ["mcp", "remove", "-s", "user", "filmkit"],
       get: ["mcp", "get", "filmkit"],
-      current: (out, c) => /Scope: User/.test(out) && out.includes(`Command: ${c.command}\n`) && out.includes(`Args: ${c.args.join(" ")}\n`),
+      // `get` finds an entry at any scope; Filmkit's is the user-scope one.
+      ours: (out) => /Scope: User/.test(out),
+      current: (out, c) => out.includes(`Command: ${c.command}\n`) && out.includes(`Args: ${c.args.join(" ")}\n`),
     },
     skills: (h) => join(h.vars.CLAUDE_CONFIG_DIR ?? join(h.home, ".claude"), "skills"),
   },
