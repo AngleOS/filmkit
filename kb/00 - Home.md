@@ -14,6 +14,7 @@ made Angle's beta films. Repo: [AngleOS/filmkit](https://github.com/AngleOS/film
 ## Pages
 - [[projects/filmkit/Design]]: what it is, the studio, kit, CLI, MCP server, skill, roadmap
 - [[projects/filmkit/Origins]]: how the Angle films were made, and the gotchas
+- Briefs for the example studio (#12): [[projects/filmkit/briefs/Films are code]] · [[projects/filmkit/briefs/Brief in, film out]] · [[projects/filmkit/briefs/Hook - the four frames]]
 - [[projects/filmkit/01 - Now]] · [[projects/filmkit/02 - Decisions]] · [[projects/filmkit/03 - Constraints]] ·
   [[projects/filmkit/Tasks]]
 
