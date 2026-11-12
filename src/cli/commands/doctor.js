@@ -25,7 +25,7 @@ function node() {
 function ffmpegVersion() {
   const { status, stdout } = spawnSync("ffmpeg", ["-version"], { encoding: "utf8" });
   if (status !== 0) return { name: "ffmpeg", ok: false, detail: "not on the PATH", hint: "install it: https://ffmpeg.org/download.html" };
-  return { name: "ffmpeg", ok: true, detail: stdout.split("\n")[0].replace(/ Copyright.*/, "") };
+  return { name: "ffmpeg", ok: true, detail: stdout.split("\n")[0].replace(/ Copyright.*/, "").trim() };
 }
 
 /**
