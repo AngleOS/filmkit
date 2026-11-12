@@ -6,13 +6,11 @@ import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 
 const kit = (file) => readFileSync(new URL(`../kit/${file}`, import.meta.url), "utf8");
-/** Runs a kit script with `window` as its global, as in the browser: its top-level `var` is a window property. */
-const run = (/** @type {string} */ source, /** @type {any} */ window) => runInNewContext(source, Object.assign(window, { window }));
 
 /** kit/chart.js's KC, with a linear ease for its rolls. */
 function chart() {
   const window = /** @type {any} */ ({ gsap: { parseEase: () => (/** @type {number} */ t) => t } });
-  run(kit("chart.js"), window);
+  runInNewContext(kit("chart.js"), { window, ...window });
   return window.KC;
 }
 
@@ -25,7 +23,7 @@ function layout(width, height) {
     document: { querySelector: () => root, documentElement: { dataset: {} } },
     gsap: { set: (/** @type {any} */ el, /** @type {any} */ props) => sets.set(el, props) },
   });
-  run(kit("layout.js"), window);
+  runInNewContext(kit("layout.js"), { window, ...window });
   return { AL: window.AL, sets };
 }
 

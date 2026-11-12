@@ -1,7 +1,7 @@
 // The infographic scenes' maths: values to lengths, bands and labels, numbers to strings, and a value rolling to its
 // target. Pure functions of their inputs (roll only adds to a timeline), so every frame is a function of time and the
 // geometry is tested in Node.
-// The window's KC, a top-level `var` like layout.js's AL.
+// KC is a top-level `var` and a window property, like layout.js's AL.
 var KC = (function () {
   /** @typedef {{ prefix?: string, suffix?: string, decimals?: number, format?: string }} NumberFormat */
   const R = Math.round;
@@ -94,3 +94,4 @@ var KC = (function () {
 
   return { format, rows, top, lengths, bands, textWidth, fit, clear, delta, steps, roll };
 })();
+window.KC = KC;

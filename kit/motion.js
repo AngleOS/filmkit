@@ -4,7 +4,7 @@
 // Each helper adds tweens to the scene's paused timeline `tl` at time `t` and returns the time it ends. Pass elements
 // (the scene's own document.querySelectorAll), never selector strings: these helpers run outside the scene's scope,
 // so a string would also match the same scene mounted elsewhere in the film.
-// The window's KM, a top-level `var` like layout.js's AL.
+// KM is a top-level `var` and a window property, like layout.js's AL.
 var KM = (function () {
   /** @typedef {(tl: gsap.core.Timeline, els: gsap.TweenTarget, t: number) => number} Entrance */
 
@@ -105,3 +105,4 @@ var KM = (function () {
 
   return { words, rise, ink, out, arrive, type, press, cursorIn, cursorTo, cursorOut, drawMotif, assemble, wordSpans };
 })();
+window.KM = KM;
