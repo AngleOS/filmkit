@@ -1,0 +1,86 @@
+/* The Angle app's colour tokens (dark, and .paper for its light theme), as synced from AngleOS/angle-ai apps/web on 2026-11-12. */
+
+:root {
+  color-scheme: dark;
+  --background: #07120f;
+  --foreground: #eef3ec;
+  --card: #0c1d18;
+  --card-foreground: #eef3ec;
+  --popover: #0c1d18;
+  --popover-foreground: #eef3ec;
+  --primary: #e3ef26;
+  --primary-foreground: #07120f;
+  --secondary: #12291f;
+  --secondary-foreground: #eef3ec;
+  --muted: #12291f;
+  --muted-foreground: #a9bdb2;
+  --accent: #12291f;
+  --accent-foreground: #eef3ec;
+  --destructive: #ff6467;
+  --caution: #ffc35c;
+  --border: #1c3a2d;
+  --input: #1c3a2d;
+  --ring: #e3ef26;
+  --sidebar: #0a1814;
+  --sidebar-foreground: #eef3ec;
+  --sidebar-primary: #e3ef26;
+  --sidebar-primary-foreground: #07120f;
+  --sidebar-accent: #12291f;
+  --sidebar-accent-foreground: #eef3ec;
+  --sidebar-border: #1c3a2d;
+  --sidebar-ring: #e3ef26;
+  --brand-mark: #e3ef26;
+  --brand-word: #ffffff;
+  --brand-line: #e3ef26;
+  --selection: #e3ef26;
+  --selection-foreground: #07120f;
+  --code-keyword: #ffc9c2;
+  --code-string: #cfe6ff;
+  --code-title: #e6d0ff;
+  --code-number: #bcdcff;
+  --code-attr: #ffd4a8;
+  --code-green: #c4f5cc;
+}
+
+.paper {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #07120f;
+  --card: #ffffff;
+  --card-foreground: #07120f;
+  --popover: #ffffff;
+  --popover-foreground: #07120f;
+  --primary: #145237;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f4f0;
+  --secondary-foreground: #07120f;
+  --muted: #f1f4f0;
+  --muted-foreground: #56665e;
+  --accent: #f1f4f0;
+  --accent-foreground: #07120f;
+  --destructive: #c5000a;
+  --caution: #8a4b00;
+  --border: #e1e6df;
+  --input: #e1e6df;
+  --ring: #145237;
+  --sidebar: #f6f8f5;
+  --sidebar-foreground: #07120f;
+  --sidebar-primary: #145237;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eaefe8;
+  --sidebar-accent-foreground: #07120f;
+  --sidebar-border: #e1e6df;
+  --sidebar-ring: #145237;
+  --brand-mark: #145237;
+  --brand-word: #07120f;
+  --brand-line: #145237;
+  --selection: #14523740;
+  --selection-foreground: var(--foreground);
+  --code-keyword: #9a0d22;
+  --code-string: #0a3069;
+  --code-title: #5a2fa8;
+  --code-number: #034090;
+  --code-attr: #7a2e00;
+  --code-green: #0b5a26;
+}
+

@@ -1,12 +1,17 @@
-# filmkit
+<p align="center"><img src="docs/assets/hero.png" alt="Angle Filmkit: your agent makes the film. A brief in; 16:9, 1:1, 4:5 and 9:16 out." width="100%"></p>
+
+# Angle Filmkit
 
 **Your AI agent makes the film.** Write a brief. The agent researches it, builds the film from filmkit's scenes,
 checks every format, looks at its own frames and renders. You get **16:9, 1:1, 4:5 and 9:16** videos with sound made
 from the motion and SRT/VTT captions.
 
-> **Status: pre-alpha, being built in the open.** The kit behind it already made a launch film, eight feature clips and
-> three hook loops for [Angle](https://github.com/AngleOS). This repo turns it into a tool anyone can use. Follow the
-> v0.1 epic in the issues.
+> **Status: pre-alpha.** The kit behind it already made Angle's launch film, eight feature clips and three hook loops.
+> Angle Filmkit turns it into a tool anyone with an agent can use. Follow the v0.1 epic in the issues.
+
+Made by [Angle](https://github.com/AngleOS), the private AI that runs open models on GPUs that already exist. Out of
+the box, films get Angle's look: a Night ground, a Pear accent, Geist and the brand lines. They carry your logo, and
+you can retheme them completely.
 
 ## How it works
 - **Films are HTML.** Scenes are HTML with GSAP timelines, rendered to video by
@@ -45,4 +50,5 @@ Then ask it: *"Make a 40-second launch film for my product. Here's the brief…"
 Requirements: Node ≥ 20 and ffmpeg.
 
 ## Licence
-MIT. Third-party pieces keep their own licences: see `THIRD_PARTY.md`.
+The code is MIT. Third-party pieces keep their own licences (`THIRD_PARTY.md`). The Angle name and logo are trademarks
+and aren't covered by the MIT licence (`TRADEMARKS.md`).
