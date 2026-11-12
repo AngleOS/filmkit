@@ -5,7 +5,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 ## In Review
 
 - [sound: cues from the picture, the pad and the mix in Node (port cues.py, pad.mjs, mix.sh, sound-sheet)](https://github.com/AngleOS/filmkit/issues/4) `filmkit#4` · High
-- [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
 - [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
 - [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
@@ -14,6 +13,7 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Progress
 
+- [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
 - [speed: parallel formats, skip unchanged formats, resumable renders, one live progress line](https://github.com/AngleOS/filmkit/issues/23) `filmkit#23` · High
 
 ## Todo
