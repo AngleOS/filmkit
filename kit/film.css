@@ -1,0 +1,8 @@
+/* The films' shared look, drawn from the theme's custom properties (kit/theme/theme.css): the ground, title type and
+   the one accent word. Scene CSS is scoped by the runtime, so anything a scene shares lives here. */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; overflow: hidden; background: var(--ink); }
+body { font-family: var(--font-ui); color: var(--foreground); }
+.display { font-family: var(--font-display); font-weight: var(--title-weight); letter-spacing: var(--title-tracking); line-height: 1.02; }
+.word { display: inline-block; white-space: pre; }
+.accent { color: var(--accent); }
