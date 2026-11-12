@@ -1,0 +1,34 @@
+# The filmkit CLI
+
+`filmkit` works on the studio in the current directory:
+
+```
+filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
+films/<name>/       index.html (the master), compositions/ (the film's own scenes), assets
+build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
+renders/            git-ignored: <film>-<format>.mp4
+```
+
+| Command | What it does |
+|---|---|
+| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it; exits non-zero when any format fails |
+| `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snapshots/<format>/` |
+| `preview <film> [format]` | HyperFrames Studio on one format |
+| `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality |
+
+**Formats.** 16x9 (1920 × 1080), 9x16 (1080 × 1920), 1x1 (1080 × 1080) and 4x5 (1080 × 1350). With none named, a
+command works on the film's own (its root's `data-formats`, such as a vertical hook's `"9x16"`), else the studio's.
+`snapshot` and `preview` take the first.
+
+**Assembly.** Each format is a HyperFrames project in `build/<film>/<format>/`: the film, a copy of the kit
+(`kit/layout.js`, `kit/motion.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
+`kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
+`kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js` and
+`kit/motion.js`: see `examples/studio/films/smoke`.
+
+**Output.** Every command prints what it wrote. With `--json` it prints one JSON result on stdout (`"ok"` and what it
+made), and HyperFrames' own output goes to stderr. A failure exits non-zero, with `{"ok": false, "error": …}` under
+`--json`. Nothing prompts.
+
+HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
+`HYPERFRAMES_SKIP_SKILLS` set.
