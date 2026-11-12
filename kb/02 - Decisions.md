@@ -144,9 +144,6 @@ performance checks, a11y."
   - No "early access" wording (owner).
   - Mobile first, checked at 360, 390, 768 and 1440 px under real device emulation.
 
-## Related
-- [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
-
 ## D-009 · 2026-11-12 · The site lives at filmkit.anglehq.net, on GitHub Pages
 
 **Decision:** the marketing one-pager (`site/`, Next.js static export) deploys from `.github/workflows/site.yml` to GitHub
@@ -158,3 +155,6 @@ overrides the proxied `*.anglehq.net` wildcard that sends everything else to the
 ca-server reboots), and GitHub-only deploys. Pages serves the site publicly while the repo stays private.
 **Consequences:** the build needs no base path (`SITE_BASE_PATH` stays for a build served under a path). Canonical,
 OG and sitemap URLs come from `SITE_URL` in `site/src/lib/content.ts`.
+
+## Related
+- [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
