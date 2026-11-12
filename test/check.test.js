@@ -23,5 +23,7 @@ test("a clean report passes", () => {
 });
 
 test("no report is a failure", () => {
-  assert.equal(findings({ ok: false, stdout: "Error: Chrome crashed" }).errors[0].code, "hyperframes");
+  assert.deepEqual(findings({ ok: false, stdout: "Error: Chrome crashed" }).errors, [
+    { code: "no_report", message: "HyperFrames gave no report. See what's missing with: filmkit doctor" },
+  ]);
 });

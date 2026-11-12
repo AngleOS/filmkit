@@ -1,4 +1,5 @@
 import { assemble } from "../../build/assemble.js";
+import { describe } from "../../errors.js";
 import { hyperframes } from "../../hyperframes.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
@@ -49,7 +50,7 @@ export function findings({ ok, stdout }) {
   try {
     report = JSON.parse(stdout);
   } catch {
-    return { ok: false, errors: [{ code: "hyperframes", message: "hyperframes check gave no report" }], warnings: [] };
+    return { ok: false, errors: [{ code: "no_report", message: describe("no_report").message }], warnings: [] };
   }
   /** @type {{ severity: string, code: string, message: string, selector?: string }[]} */
   const all = Object.values(report).flatMap((pass) => (Array.isArray(pass?.findings) ? pass.findings : []));
