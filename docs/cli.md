@@ -10,7 +10,7 @@ films/<name>/       brief.md, index.html (the master), compositions/ (the film's
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
 POSTING.md          where each render goes, with its copy per platform
 AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/
-build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
+build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
@@ -18,11 +18,11 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 |---|---|
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
-| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings, and a loop's seam gate |
+| `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
 | `preview <film> [format]` | HyperFrames Studio on one format |
-| `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions |
+| `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
@@ -38,6 +38,13 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
 `kit/motion.js`, `kit/chart.js` (for the infographic scenes) and `kit/theme/brand.js`: see
 `examples/studio/films/infographics`.
+
+**Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop. It
+hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version) and
+skips a format whose hash matches its last pass, in `build/<film>/<format>/.filmkit-hash`, printing `16x9 unchanged ✓`
+with the warnings (and a loop's seam) it passed with. A failed format is always checked again. `render` keeps an MP4
+made from the same hash (`build/<film>/render-<format>.json`), so an interrupted render redoes only what's missing or
+stale. Renders run one at a time, as each already uses every core. `--force` redoes everything.
 
 **Loops.** A film whose root has `data-loop="true"` is a hook loop: it plays again from frame 0 as soon as it ends, so
 its last frame has to flow into its first. `check` runs the seam gate on it in each format. It snapshots the first 9 and
