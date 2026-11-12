@@ -1,7 +1,7 @@
 // The studio is the user's own repo, and the CLI works on the one in the current directory: filmkit.json, films/<name>/
 // (index.html is the master every format is laid out from), build/ (assembled formats) and renders/ (the output).
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { rootTag } from "./build/html.js";
 
@@ -18,7 +18,8 @@ export class FilmkitError extends Error {}
 export class RequirementError extends Error {}
 
 /**
- * @typedef {{ dir: string, formats: string[], theme: string, themeDir: string }} Studio
+ * @typedef {{ dir: string, name: string, formats: string[], theme: string, themeDir: string }} Studio
+ *   `name` is the brand or product the films are for, which templates fill in
  * @typedef {{ name: string, dir: string, html: string, root: Record<string, string> }} Film
  */
 
@@ -42,7 +43,7 @@ export function openStudio(dir) {
   if (!existsSync(join(themeDir, "theme.css"))) {
     throw new FilmkitError(`filmkit.json: no theme "${theme}" (${readdirSync(join(PACKAGE, "themes")).join(", ")})`);
   }
-  return { dir: root, formats: checkFormats(config.formats ?? FORMATS, "filmkit.json formats"), theme, themeDir };
+  return { dir: root, name: config.name ?? basename(root), formats: checkFormats(config.formats ?? FORMATS, "filmkit.json formats"), theme, themeDir };
 }
 
 /** @param {string} from @returns {string} the directory, or "" when there's none */
