@@ -41,7 +41,7 @@
     return { left: safe.left, top, width: W - safe.left - safe.right, height: H - safe.bottom - top };
   })();
 
-  // The composer (its height is fixed in film.css) low in the safe box, as in a chat, leaving room above for a title
+  // The composer, 180 px tall, low in the safe box, as in a chat, leaving room above for a title
   // and below for two lines of captions; `send` is the point the cursor aims for.
   const composer = (() => {
     const { left, width } = column, height = 180, top = H - safe.bottom - height - pick({ L: 140, S: 150, V: 200 });

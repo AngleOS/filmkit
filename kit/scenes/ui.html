@@ -27,8 +27,9 @@
       const v = AL.vars(document.getElementById("root"), window.__hyperframes);
       const $ = (id) => document.getElementById(id);
       AL.ground($("root"), v.ground);
+      // The window is all the scene draws, so its colours follow the variant, not the ground: a dark window on paper.
+      $("root").classList.toggle("on-paper", v.variant === "light");
       const A = AL.app(v.place);
-      $("ui-win").classList.toggle("on-paper", v.variant === "light");
       gsap.set($("ui-win"), { left: A.left, top: A.top, width: A.width, height: A.height });
       gsap.set($("ui-bar"), { height: A.bar });
       $("ui-label").textContent = v.url || v.title;

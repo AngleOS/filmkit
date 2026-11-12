@@ -46,9 +46,12 @@
       const token = new RegExp(`(${comment})|("(?:[^"\\\\]|\\\\.)*"|'(?:[^'\\\\]|\\\\.)*')|(\\$\\w+)|(${flag})|\\b(\\d+(?:\\.\\d+)?)\\b|(${kw})|([A-Za-z_]\\w*)(?=\\()`, "g");
       const kinds = ["tk-c", "tk-s", "tk-t", "tk-a", "tk-n", "tk-k", "tk-t"];
       const paint = (s) => esc(s).replace(token, (m, ...groups) => `<span class="${kinds[groups.slice(0, 7).findIndex(Boolean)]}">${m}</span>`);
+      // Only the first occurrence lights up.
+      let marked = false;
       const line = (s) => {
-        const i = v.mark ? s.indexOf(v.mark) : -1;
+        const i = v.mark && !marked ? s.indexOf(v.mark) : -1;
         if (i < 0) return paint(s);
+        marked = true;
         return `${paint(s.slice(0, i))}<span class="cd-mark"><i></i>${paint(v.mark)}</span>${paint(s.slice(i + v.mark.length))}`;
       };
       $("cd-title").textContent = v.title;

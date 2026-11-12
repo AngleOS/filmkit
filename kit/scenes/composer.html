@@ -4,7 +4,11 @@
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; }
     #co-box { position: absolute; display: flex; flex-direction: column; justify-content: space-between; padding: 26px 26px 20px 38px; background: var(--fk-background); border: 2px solid var(--fk-border); border-radius: 40px; color: var(--foreground); font: 400 34px var(--font-ui); }
-    #co-input { white-space: nowrap; overflow: hidden; min-height: 1.3em; }
+    /* A prompt too long for the box scrolls like a text field, keeping its end and the caret in view: the filler
+       after it takes the slack while it fits and shrinks to nothing once it doesn't, so the start is what clips. */
+    #co-input { display: flex; align-items: center; justify-content: flex-end; white-space: pre; overflow: hidden; min-height: 1.3em; }
+    #co-input > span { flex: none; }
+    #co-input > i { flex: 1 0 0; }
     #co-ph { color: var(--muted-foreground); }
     #co-row { display: flex; align-items: center; justify-content: space-between; height: 68px; }
     #co-plus { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--fk-border); display: grid; place-items: center; color: var(--muted-foreground); }
@@ -18,7 +22,7 @@
     {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]}
   ]'>
     <div id="co-box">
-      <div id="co-input"><span id="co-ph"></span><span id="co-typed"></span><span id="co-caret" class="fk-caret"></span></div>
+      <div id="co-input"><span id="co-ph"></span><span id="co-typed"></span><span id="co-caret" class="fk-caret"></span><i></i></div>
       <div id="co-row">
         <div id="co-plus"><svg width="32" height="32" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></svg></div>
         <div id="co-send"><svg width="36" height="36" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></svg></div>
