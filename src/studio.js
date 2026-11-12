@@ -1,7 +1,7 @@
 // The studio is the user's own repo, and the CLI works on the one in the current directory: filmkit.json, films/<name>/
 // (index.html is the master every format is laid out from), build/ (assembled formats) and renders/ (the output).
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startTags } from "./build/html.js";
 import { fail } from "./errors.js";
@@ -16,7 +16,8 @@ export const SIZES = /** @type {const} */ ({ "16x9": [1920, 1080], "9x16": [1080
 export const FORMATS = Object.keys(SIZES);
 
 /**
- * @typedef {{ dir: string, formats: string[], theme: string, themeDir: string }} Studio
+ * @typedef {{ dir: string, name: string, formats: string[], theme: string, themeDir: string }} Studio
+ *   `name` is the brand or product the films are for, which templates fill in
  * @typedef {{ name: string, dir: string, html: string, root: Record<string, string> }} Film
  */
 
@@ -38,7 +39,9 @@ export function openStudio(dir) {
   if (!Array.isArray(formats) || !formats.length) {
     throw fail("config_key", { key: "formats", want: "a list of formats", example: `"formats": ${JSON.stringify(FORMATS)}` });
   }
-  return { dir: root, formats: checkFormats(formats, 'filmkit.json "formats"'), theme, themeDir: join(PACKAGE, "themes", theme) };
+  const name = config.name ?? basename(root);
+  if (typeof name !== "string") throw fail("config_key", { key: "name", want: "the brand's name, as a string", example: '"name": "Acme"' });
+  return { dir: root, name, formats: checkFormats(formats, 'filmkit.json "formats"'), theme, themeDir: join(PACKAGE, "themes", theme) };
 }
 
 /**

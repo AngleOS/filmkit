@@ -104,6 +104,38 @@ export const CATALOGUE = {
     why: "A film is a folder in the studio's films/, with index.html as its master. `filmkit new <film>` makes one " +
       "from a template that already checks.",
   },
+  studio_exists: {
+    exit: 2,
+    message: ({ dir }) => `${dir} is already a studio.`,
+    fix: () => ["Make a film in it with", "filmkit new <film>"],
+    why: "init makes a studio, and a folder holds one: its filmkit.json says so. In a studio, `filmkit new <film>` " +
+      "adds films.",
+  },
+  new_unnamed: {
+    exit: 2,
+    message: () => "Name the new film.",
+    fix: () => ["For example", "filmkit new launch --template statement"],
+    why: "A film's name is its folder in films/ and the start of its renders' names, so new needs one.",
+  },
+  bad_film_name: {
+    exit: 2,
+    message: ({ film }) => `"${film}" can't be a film's name: it takes lowercase letters, digits and dashes.`,
+    fix: ({ film }) => ["For example", `filmkit new ${String(film).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "launch"}`],
+    why: "A film's name goes into file names (renders/<film>-<format>.mp4) and commands, so it stays plain: " +
+      "lowercase letters, digits and dashes, like launch-teaser.",
+  },
+  unknown_template: {
+    exit: 2,
+    message: ({ template, templates }) => `There's no template called "${template}". Templates: ${list(templates)}.`,
+    fix: ({ film, templates }) => ["Use one, as in", `filmkit new ${film} --template ${templates[0]}`],
+    why: "new copies a starting film from one of Filmkit's templates; each one checks as it's made.",
+  },
+  film_exists: {
+    exit: 2,
+    message: ({ film }) => `films/${film} already exists.`,
+    fix: ({ film }) => ["Pick another name, or carry on in", `films/${film}/brief.md`],
+    why: "new never overwrites a film. Give the new one another name, or carry on with the one that's there.",
+  },
   no_root: {
     exit: 2,
     message: ({ film }) => `films/${film}/index.html has no root composition.`,

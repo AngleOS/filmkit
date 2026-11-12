@@ -32,6 +32,19 @@ const CASES = {
     'No film called "launch" in this studio. Films: hello, smoke. Make it with: filmkit new launch',
     "filmkit new launch",
   ],
+  studio_exists: [{ dir: "/home/a/films" }, "/home/a/films is already a studio. Make a film in it with: filmkit new <film>", "filmkit new <film>"],
+  new_unnamed: [{}, "Name the new film. For example: filmkit new launch --template statement", "filmkit new launch --template statement"],
+  bad_film_name: [
+    { film: "Launch Film" },
+    "\"Launch Film\" can't be a film's name: it takes lowercase letters, digits and dashes. For example: filmkit new launch-film",
+    "filmkit new launch-film",
+  ],
+  unknown_template: [
+    { film: "x", template: "documentary", templates: ["poster", "statement"] },
+    'There\'s no template called "documentary". Templates: poster, statement. Use one, as in: filmkit new x --template poster',
+    "filmkit new x --template poster",
+  ],
+  film_exists: [{ film: "launch" }, "films/launch already exists. Pick another name, or carry on in: films/launch/brief.md", "films/launch/brief.md"],
   no_root: [
     { film: "launch" },
     'films/launch/index.html has no root composition. Wrap the film in: <div id="main" data-composition-id="main" data-duration="10">',
