@@ -3,7 +3,7 @@ type: design
 status: active
 tags: [filmkit, design]
 updated: 2026-11-12
-issues: []
+issues: [AngleOS/filmkit#2]
 ---
 # filmkit design
 
@@ -140,6 +140,9 @@ with an Angle theme (filmkit epic, last step).
 - **v0.2:** the infographic scene set complete; `contact`; templates; docs site; npm release.
 - **Later:** a data-binding helper (CSV or JSON into `bars`/`counter`); voice-over (a TTS track timed to beats);
   more themes; a gallery of community templates.
+
+## Issues
+- Epic: [filmkit v0.1](https://github.com/AngleOS/filmkit/issues/2): seed #3, sound #4, seam #5, product scenes #6, infographics #7, studio and themes #8, contact sheets #9, MCP #10, skill #11, examples #12, CI #13, docs #14, owner publish #15.
 
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/02 - Decisions]] · [[projects/filmkit/Origins]]
