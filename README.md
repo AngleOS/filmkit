@@ -1,4 +1,4 @@
-<p align="center"><img src="docs/assets/teaser.gif" alt="Angle Filmkit: the brand lines draw in, the ANGLE mark assembles, 'Your agent makes the film.' blurs in word by word, and the four frames (16:9, 1:1, 4:5, 9:16) land one after another. Made with the kit itself." width="100%"></p>
+<p align="center"><a href="docs/assets/teaser.gif"><img src="docs/assets/hero.png" alt="Angle Filmkit: the ANGLE lockup with FILMKIT, 'Your agent makes the film.', and the four frames one master becomes: 16:9, 1:1, 4:5 and 9:16. Made with the kit itself; click for the teaser." width="100%"></a></p>
 
 # Angle Filmkit
 

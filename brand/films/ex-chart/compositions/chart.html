@@ -21,7 +21,7 @@
     (function () {
       const tl = gsap.timeline({ paused: true });
       const $ = (id) => document.getElementById(id);
-      const root = $("root"), { W, H, safe } = AL;
+      const root = $("root"), { W, safe } = AL;
       const data = [["Jan", 1200], ["Feb", 1900], ["Mar", 2600], ["Apr", 3700]];
       const max = 4000, base = 900, top = 360, maxH = base - top, bw = 210, gap = 90;
       const left = W - safe.right - 40 - data.length * bw - (data.length - 1) * gap;
@@ -29,7 +29,7 @@
       $("ch-title").innerHTML = KM.wordSpans("Signups *tripled*\nthis quarter.");
       gsap.set($("ch-axis"), { left: left - 30, top: base, width: data.length * bw + (data.length - 1) * gap + 60 });
       gsap.set($("ch-src"), { left: left - 30, top: base + 90 });
-      let t = 0.2;  // the title is on screen at frame 0: it's the thumbnail
+      // The title is on screen at frame 0: it's the thumbnail.
       data.forEach(([label, value], i) => {
         const x = left + i * (bw + gap), h = Math.round((value / max) * maxH), at = 0.9 + i * 0.28;
         const bar = document.createElement("div"); bar.className = "ch-bar" + (i === data.length - 1 ? " hi" : "");

@@ -28,8 +28,8 @@
       const tl = gsap.timeline({ paused: true });
       const $ = (id) => document.getElementById(id);
       const { safe } = AL;
-      KB.lines($("hr-lines"));
-      const L = AL.lockup(420, 190);
+      KB.motif($("hr-lines"));
+      const L = KB.lockupBox(420, 190);
       const left = safe.left + 40;
       gsap.set($("hr-lockup"), { left, top: L.top, width: L.w, height: L.h });
       gsap.set(KB.lockup($("hr-lockup")).wipe, { attr: { width: 60 } });
