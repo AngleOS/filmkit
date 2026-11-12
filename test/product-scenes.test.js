@@ -14,9 +14,11 @@ test("the kit has the product scenes", () => {
   for (const name of ["chat", "code", "terminal", "composer", "ui"]) assert.ok(existsSync(new URL(`scenes/${name}.html`, kit)), name);
 });
 
-test("the smoke film mounts every kit scene", () => {
-  const smoke = readFileSync(new URL("../examples/studio/films/smoke/index.html", import.meta.url), "utf8");
-  const mounted = new Set(startTags(smoke).map((t) => t.attrs["data-composition-src"]).filter(Boolean));
+test("an example film mounts every kit scene, so checking the examples checks them all", () => {
+  const films = new URL("../examples/studio/films/", import.meta.url);
+  const mounted = new Set(
+    readdirSync(films).flatMap((film) => startTags(readFileSync(new URL(`${film}/index.html`, films), "utf8")).map((t) => t.attrs["data-composition-src"])),
+  );
   for (const file of readdirSync(new URL("scenes/", kit)).filter((f) => f.endsWith(".html"))) {
     assert.ok(mounted.has(`kit/scenes/${file}`), file);
   }

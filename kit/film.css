@@ -45,3 +45,13 @@ body { font-family: var(--font-ui); color: var(--foreground); }
 .fk-tabs { display: inline-flex; align-items: center; height: 64px; padding: 5px; border-radius: 16px; background: var(--fk-muted); color: var(--muted-foreground); font: 500 28px var(--font-ui); }
 .fk-tabs span { display: flex; align-items: center; height: 100%; padding: 0 22px; border: 2px solid transparent; border-radius: 12px; white-space: nowrap; }
 .fk-tabs .on { border-color: var(--fk-border); background: var(--fk-background); color: var(--foreground); }
+
+/* Infographics (kit/chart.js): marks in a tint of the text colour, the highlighted one in the accent; figures set
+   tabular so a rolling value doesn't jitter. */
+.chart-mark { background: color-mix(in srgb, var(--foreground) 28%, transparent); }
+.chart-mark.hi { background: var(--accent); }
+.chart-track { background: color-mix(in srgb, var(--foreground) 9%, transparent); }
+.chart-rule { border: 0 solid color-mix(in srgb, var(--foreground) 40%, transparent); }
+.chart-ref { border: 0 dashed var(--foreground); }
+.chart-num { font-family: var(--font-ui); font-weight: 600; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--foreground); }
+.chart-label { font-family: var(--font-ui); font-weight: 400; color: var(--muted-foreground); white-space: nowrap; line-height: 1.3; }

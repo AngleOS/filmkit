@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- A 9:16 hook loop: it plays again from frame 0 as soon as it ends, so `filmkit check loop` runs the seam gate.
+         Frame 0 is the poster, its line already on screen. The line clears for a second, then comes back on its own
+         layer and holds still across the seam, while the dot goes once round the ring and carries on through it.
+         Silent: feeds play hooks muted, and a sound would restart on every pass. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1080" data-height="1920" data-formats="9x16" data-loop="true">
+      <div id="orbit" data-composition-id="orbit" data-composition-src="compositions/orbit.html" data-start="0" data-duration="8" data-track-index="1" data-track-kind="graphics" data-variable-values='{"period":8}'></div>
+      <div id="t-hook" data-composition-id="t-hook" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="3.2" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"A loop has\nno *end.*","entrance":"none","place":"head","ground":"none","out":2.95}'></div>
+      <div id="t-turn" data-composition-id="t-turn" data-composition-src="kit/scenes/title.html" data-start="3.2" data-duration="2.3" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Its last frame flows\ninto the *first.*","place":"head","ground":"none","out":2.05}'></div>
+      <div id="t-again" data-composition-id="t-again" data-composition-src="kit/scenes/title.html" data-start="5.5" data-duration="2.5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"A loop has\nno *end.*","place":"head","ground":"none"}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
