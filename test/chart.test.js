@@ -113,6 +113,47 @@ test("a value rolls a frame at a time and lands exactly on its target", () => {
   assert.deepEqual(sets.map((s) => s[1]), ["0", "50", "100"]);
 });
 
+test("a scene's fields are '|'-separated lines, trimmed, and blank lines are none", () => {
+  assert.deepEqual(plain(KC.fields("lock | Organizations only. | Not for individuals\n\n check|Kept ")), [["lock", "Organizations only.", "Not for individuals"], ["check", "Kept"]]);
+});
+
+test("a grid's cells take the largest square that fits, fewer rows on a tie, filled a column at a time", () => {
+  const ten = KC.grid(10, 1200, 300, { most: 120 });
+  assert.deepEqual([ten.cols, ten.rows, ten.size, ten.gap, ten.width, ten.height], [5, 2, 120, 30, 720, 270]);
+  const hundred = KC.grid(100, 900, 900);
+  assert.deepEqual([hundred.cols, hundred.rows, hundred.size], [10, 10, 73]);
+  assert.ok(hundred.width <= 900 && hundred.height <= 900);
+  const row = KC.grid(10, 1200, 300, { rows: 1 });
+  assert.deepEqual([row.cols, row.rows, row.size], [10, 1, 97]);
+  const five = KC.grid(5, 1000, 1000, { rows: 2, most: 100 });
+  assert.deepEqual(plain(five.cells), [{ x: 0, y: 0 }, { x: 0, y: 125 }, { x: 125, y: 0 }, { x: 125, y: 125 }, { x: 250, y: 0 }]);
+});
+
+test("a bracket spans the columns its first n cells fill", () => {
+  const g = KC.grid(10, 1200, 300, { most: 120 });
+  assert.equal(KC.span(g, 7), 4 * 150 - 30);
+  assert.equal(KC.span(g, 2), 120);
+  assert.equal(KC.span(KC.grid(10, 1200, 300, { rows: 1 }), 7), 7 * 97 + 6 * 24);
+});
+
+test("ticks sit evenly, or to scale with room for the end labels", () => {
+  assert.deepEqual(plain(KC.ticks([30, 730, 1095], 900, "even")), [150, 450, 750]);
+  assert.deepEqual(plain(KC.ticks([2019, 2022, 2026], 900, "scale")), [150, 407, 750]);
+  assert.deepEqual(plain(KC.ticks([5, 5], 400, "scale")), [100, 300], "one value to scale falls back to even");
+});
+
+test("labels spread apart to their width, and stay between the ends", () => {
+  assert.deepEqual(plain(KC.spread([100, 110, 400], 60, 0, 1000)), [100, 160, 400]);
+  assert.deepEqual(plain(KC.spread([950, 960, 990], 100, 0, 1000)), [800, 900, 1000]);
+  assert.deepEqual(plain(KC.spread([10, 20], 100, 50, 1000)), [50, 150]);
+});
+
+test("a line wraps a word at a time to the lines it sets in", () => {
+  assert.equal(KC.lines("Data retention is required.", 400, 40), 2);
+  assert.equal(KC.lines("Kept.", 400, 40), 1);
+  assert.equal(KC.lines("", 400, 40), 0);
+});
+
 const FRAMES = { "16x9": [1920, 1080, 2], "1x1": [1080, 1080, 2], "4x5": [1080, 1350, 2], "9x16": [1080, 1920, 3] };
 
 test("the chart box and its source line stop above the caption block in every frame (two lines, three in 9:16)", () => {
@@ -133,4 +174,15 @@ test("the chart box and its source line stop above the caption block in every fr
 test("no source line takes no room", () => {
   const { AL } = layout(1080, 1920);
   assert.equal(AL.source({}, ""), 0);
+});
+
+test("KI draws every icon the cards default and the smoke film name, and nothing for one it lacks", () => {
+  const window = /** @type {any} */ ({});
+  runInNewContext(kit("icons.js"), { window });
+  const film = readFileSync(new URL("../examples/studio/films/infographics/index.html", import.meta.url), "utf8");
+  // A card's icon starts a value or a line in one: `"cards":"search | …\nshield | …"`.
+  const named = [kit("scenes/cards.html"), film].flatMap((html) => [...html.matchAll(/(?:\\n|":")([a-z-]+) \|/g)].map((m) => m[1]));
+  assert.ok(named.length >= 6, named.join());
+  for (const name of named) assert.match(window.KI.svg(name), /<(path|circle|rect)/, name);
+  assert.doesNotMatch(window.KI.svg("no-such-icon"), /<(path|circle|rect)/);
 });
