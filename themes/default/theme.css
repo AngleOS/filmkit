@@ -1,0 +1,33 @@
+/* filmkit's default theme: the brand as custom properties. The kit reads only these names, so a theme is this file,
+   its fonts and its logo. Geist and Geist Mono are © 2023 Vercel, SIL Open Font License 1.1 (fonts/OFL.txt). */
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Regular.woff2"); font-weight: 400; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Medium.woff2"); font-weight: 500; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-SemiBold.woff2"); font-weight: 600; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Bold.woff2"); font-weight: 700; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Regular.woff2"); font-weight: 400; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Medium.woff2"); font-weight: 500; }
+
+:root {
+  /* Grounds: the fills a scene stands on (a scene's "ground" variable). */
+  --ink: #101114;
+  --accent-dark: #1b2550;
+  --paper: #f3f1ea;
+  /* The accent: one word per title, the motif, the primary button. */
+  --accent: #ff7a45;
+  /* Text on the dark grounds. */
+  --foreground: #f3f1ea;
+  --muted-foreground: #a7a8b0;
+  /* Type: display for titles, UI for everything else, mono for code. */
+  --font-display: "Geist", sans-serif;
+  --font-ui: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  --title-weight: 600;
+  --title-tracking: -0.035em;
+}
+
+/* Text on paper. */
+.on-paper {
+  --foreground: #16171c;
+  --muted-foreground: #5b5d66;
+  --accent: #c2410c;
+}
