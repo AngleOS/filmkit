@@ -44,6 +44,15 @@ the MCP server share one implementation: MCP tools call the same functions the C
 
 // scenes
 { "scenes": [{ "name": "bars", "description": "…", "variables": [{ "id": "values", "type": "string", "label": "…", "default": "…" }] }] }
+
+// agents  (`filmkit agents [tools…] [--remove] [--dry-run] --json`); exits 1 when a tool failed
+{ "ok": true, "dryRun": false, "command": { "command": "npx", "args": ["-y", "filmkit", "mcp"] },
+  "tools": [
+    { "id": "cursor", "name": "Cursor", "status": "configured",            // configured | removed | skipped | failed
+      "changes": ["/abs/.cursor/mcp.json mcpServers.filmkit"],          // empty: already set up
+      "backups": ["/abs/.cursor/mcp.json.filmkit-backup-20261112-153600"] },
+    { "id": "zed", "name": "Zed", "status": "skipped", "changes": [], "backups": [], "detail": "not installed" }
+  ] }
 ```
 
 ## MCP tools (`filmkit mcp`, server name `filmkit`, title "Angle Filmkit")
