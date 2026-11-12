@@ -1,4 +1,5 @@
 import { assemble } from "../../build/assemble.js";
+import { buildSound } from "../../build/sound.js";
 import { hyperframes } from "../../hyperframes.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
@@ -10,6 +11,7 @@ export async function run({ args, options, json }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   const [format] = resolveFormats(studio, film, args.slice(1, 2));
+  buildSound(studio, film);
   const dir = assemble(studio, film, format);
   const { ok } = hyperframes(["preview"], { cwd: dir, toStderr: json });
   return { film: film.name, format, ok, dir, ...(!ok && { exit: 4 }) };
