@@ -22,6 +22,10 @@
   --font-mono: "Geist Mono", monospace;
   --title-weight: 600;
   --title-tracking: -0.035em;
+  /* The lockup and the lines motif (brand.js). */
+  --brand-mark: #e3ef26;
+  --brand-word: #ffffff;
+  --brand-line: #e3ef26;
 }
 
 /* Text on paper: Pear doesn't read on white, so the accent is Castleton. */
@@ -29,4 +33,7 @@
   --foreground: #07120f;
   --muted-foreground: #56665e;
   --accent: #145237;
+  --brand-mark: #145237;
+  --brand-word: #07120f;
+  --brand-line: #145237;
 }

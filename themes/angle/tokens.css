@@ -42,7 +42,9 @@
   --code-green: #c4f5cc;
 }
 
-.paper {
+/* .paper is the app's light theme; a film gets the light values from the kit's .on-paper ground. */
+.paper,
+.on-paper {
   color-scheme: light;
   --background: #ffffff;
   --foreground: #07120f;
