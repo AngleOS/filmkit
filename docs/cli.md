@@ -40,7 +40,7 @@ still passes when nothing changes. The rules for making one are in
 `skills/filmkit/references/look-and-motion.md` § Hook loops, and `examples/studio/films/loop` is one.
 
 **Sound.** A film with a `sound.json` gets `build/<film>/sound.m4a`, built by `check` (so `render` and `stills` too) and
-`preview`, mastered to −19 LUFS and −1 dBTP and mounted in every format. `check` prints its loudness and fails when it
+`preview`, mastered to −19 LUFS under −1 dBTP and mounted in every format. `check` prints its loudness and fails when it
 can't be built. How to write `sound.json`: [sound.md](sound.md).
 
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as

@@ -117,14 +117,13 @@ test("the foley stays dry: sound-sheet never sees the pad's bed, so it is silent
   assert.ok(beforeHit.every((byte) => byte === 0));
 });
 
-test("the smoke film's sound is mastered to −19 LUFS ±0.5 and −1 dBTP, and kept while its score holds", { skip: !hasFfmpeg && "no ffmpeg" }, () => {
+test("the smoke film's sound is mastered to −19 LUFS ±0.5 with its hits held near −3 dBTP, and kept while its score holds", { skip: !hasFfmpeg && "no ffmpeg" }, () => {
   const { dir, studio, film } = studioCopy("../examples/studio", "smoke");
   const sound = buildSound(studio, film);
   assert.ok(sound?.built, JSON.stringify(sound));
   const measured = /** @type {{ lufs: number, truePeak: number }} */ (loudness(sound.path));
   assert.ok(Math.abs(measured.lufs + 19) <= 0.5, `${measured.lufs} LUFS`);
-  // AAC may overshoot the master's peak a little
-  assert.ok(measured.truePeak <= -0.5, `${measured.truePeak} dBTP`);
+  assert.ok(measured.truePeak <= -2.5, `${measured.truePeak} dBTP`);
 
   const built = statSync(sound.path).mtimeMs;
   assert.deepEqual(buildSound(studio, film), sound);

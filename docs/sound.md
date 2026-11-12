@@ -1,7 +1,7 @@
 # Sound
 
 A film's sound is made from its picture, with no licensed music. It is dry foley on what moves, over a tonal chord
-pad, mastered to −19 LUFS integrated and −1 dBTP true peak. You write `films/<film>/sound.json`, which places every
+pad, mastered to −19 LUFS integrated, under −1 dBTP true peak. You write `films/<film>/sound.json`, which places every
 sound in its scenes' own time:
 
 ```json
@@ -49,8 +49,10 @@ sound in its scenes' own time:
 ## How it's built
 `check`, `render` and `preview` resolve `sound.json` against the master into `build/<film>/sound/score.json`. Then
 they render the foley and the pad as WAVs, mix the pad `bed` dB under the foley (the foley itself stays dry: `bed`
-never reaches sound-sheet, which would read it as a drone of its own), and master the mix with ffmpeg's
-two-pass `loudnorm`. The result is `build/<film>/sound.m4a` (AAC, 48 kHz). Every format mounts it as
+never reaches sound-sheet, which would read it as a drone of its own), and master the mix with ffmpeg: a gain
+to −19 LUFS, and a limiter that holds the hits to −3 dBTP. AAC overshoots a sharp hit by over a dB, and HyperFrames
+turns the whole track down when its own AAC lands above −1 dBTP; the limiter leaves the rest of the mix as it is. The
+result is `build/<film>/sound.m4a` (AAC, 48 kHz). Every format mounts it as
 `<audio id="sound" src="sound.m4a">` spanning the film, unless the master already has an element with that `src`.
 
 Both renderers are deterministic: the same score gives byte-identical WAVs. The sound is kept until the score changes,

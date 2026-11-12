@@ -1,6 +1,6 @@
 // A film's sound, made from its picture: films/<film>/sound.json places cues, chords, blooms and pockets in its scenes'
 // own time, so a retimed film keeps its sound on the picture. The foley (the vendored sound-sheet renderer) and the
-// pad (kit/sound/pad.js) are mixed with the pad `bed` dB under the foley, mastered to −19 LUFS and −1 dBTP, and
+// pad (kit/sound/pad.js) are mixed with the pad `bed` dB under the foley, mastered to −19 LUFS under −1 dBTP, and
 // written as build/<film>/sound.m4a, which every format mounts.
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
@@ -14,9 +14,13 @@ import { rootTag } from "./html.js";
 const SHEET = join(PACKAGE, "kit", "sound", "vendor", "sound-sheet.mjs");
 const VERSION = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8")).version;
 const PLACED = /** @type {const} */ (["cues", "chords", "blooms", "pockets"]);
-/** Integrated loudness, true peak and loudness range: where loudnorm masters to. */
-export const TARGET = { lufs: -19, truePeak: -1, range: 14 };
-const LOUDNORM = `loudnorm=I=${TARGET.lufs}:TP=${TARGET.truePeak}:LRA=${TARGET.range}`;
+/** Integrated loudness and true peak of the delivered sound. */
+export const TARGET = { lufs: -19, truePeak: -1 };
+/**
+ * Where the limiter holds the hits, in dB. AAC overshoots a sharp hit by over a dB, and HyperFrames turns the whole
+ * track down when its own AAC lands above −1 dBTP, so the master keeps two dB under that.
+ */
+const CEILING = -3;
 
 /**
  * @typedef {Record<string, unknown> & { t?: number, at?: number, end?: number, until?: number, scene?: string }} Row
@@ -119,8 +123,10 @@ function readScore(film, source) {
 }
 
 /**
- * Mixes the foley with the bed `gain` dB under it, then masters it in two loudnorm passes: the first measures, the
- * second applies the measurement linearly, so the mix keeps its dynamics. Returns whether it succeeded.
+ * Mixes the foley with the bed `gain` dB under it, then masters it: a gain to the target loudness, and a limiter on the
+ * hits. Dry hits peak far over the rest, too far for a linear loudnorm, whose fallback squashes the whole mix; the
+ * limiter touches only the hits. It runs 4× oversampled, so it holds true peaks rather than samples. What it takes off
+ * the hits lowers the loudness a little, so the gain is measured again until it lands. Returns whether it succeeded.
  * @param {string} foley
  * @param {string | null} bed
  * @param {number} gain
@@ -131,12 +137,17 @@ function master(foley, bed, gain, out) {
   const mixed = bed
     ? ffmpeg(["-i", foley, "-i", bed, "-filter_complex", `[1:a]volume=${gain}dB[b];[0:a][b]amix=inputs=2:normalize=0:duration=first[m]`, "-map", "[m]", "-c:a", "pcm_s24le", premix])
     : ffmpeg(["-i", foley, "-c:a", "pcm_s24le", premix]);
-  const log = mixed && ffmpegLog(["-i", premix, "-af", `${LOUDNORM}:print_format=json`, "-f", "null", "-"]);
-  const json = log && log.match(/\{[^{}]*"input_i"[^{}]*\}/)?.[0];
-  if (!json) return false;
-  const m = JSON.parse(json);
-  const measured = `measured_I=${m.input_i}:measured_TP=${m.input_tp}:measured_LRA=${m.input_lra}:measured_thresh=${m.input_thresh}:offset=${m.target_offset}`;
-  return ffmpeg(["-i", premix, "-af", `${LOUDNORM}:${measured}:linear=true`, "-ar", "48000", "-c:a", "pcm_s24le", out]);
+  const level = mixed ? loudness(premix)?.lufs : undefined;
+  if (level === undefined) return false;
+  let boost = TARGET.lufs - level;
+  for (let pass = 0; pass < 4; pass++) {
+    const limited = `volume=${boost.toFixed(2)}dB,aresample=192000,alimiter=limit=${10 ** (CEILING / 20)}:level=false:latency=true:attack=1:release=60,aresample=48000`;
+    const lufs = ffmpeg(["-i", premix, "-af", limited, "-c:a", "pcm_s24le", out]) ? loudness(out)?.lufs : undefined;
+    if (lufs === undefined) return false;
+    if (Math.abs(lufs - TARGET.lufs) <= 0.1) return true;
+    boost += TARGET.lufs - lufs;
+  }
+  return false;
 }
 
 /**

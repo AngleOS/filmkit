@@ -70,8 +70,8 @@ user's films.
     against the master's scene starts, so a retimed scene keeps its sound;
   - a tonal chord pad (`kit/sound/pad.js`) on the chords, blooms and pockets;
   - a foley stem from the vendored sound-sheet renderer (MIT);
-  - mixed with the pad `bed` dB under the foley and mastered to −19 LUFS and −1 dBTP with ffmpeg (two-pass
-    `loudnorm`), as `build/<film>/sound.m4a`, which every format mounts as an `<audio>`.
+  - mixed with the pad `bed` dB under the foley and mastered with ffmpeg to −19 LUFS, its hits limited to −3 dBTP so the
+    rendered AAC stays under −1, as `build/<film>/sound.m4a`, which every format mounts as an `<audio>`.
 
   Both renderers are deterministic, so the sound is rebuilt only when its score changes. There is no licensed music.
 - **seam**: the loop gate for hooks. It fails when the last frame doesn't flow into frame 0.
