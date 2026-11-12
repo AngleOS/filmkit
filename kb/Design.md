@@ -40,7 +40,8 @@ user's films.
 ### 2. The kit, shipped inside the package and copied into every build
 - **layout.js (`AL`)**: one master and four frames:
   - L = 16:9, S = 1:1 and 4:5, V = 9:16;
-  - safe boxes per frame (clear of the feeds' buttons), the caption box, a content column and a stage;
+  - safe boxes per frame (clear of the feeds' buttons), the caption box, a content column, a stage, the composer's
+    box and the app window's (`app(place)`, whose body a film's own composition fills);
   - `pick({L,S,V})` for per-frame values;
   - the chart box: the stage stopped above two caption lines (three in 9:16), with the source line on its floor;
   - `vars()` for scene variables. It merges the declared defaults back in, working around a HyperFrames quirk.
@@ -58,9 +59,12 @@ user's films.
   - one accent colour: one word per title, the motif, the primary button;
   - text colours, display, UI and mono fonts, title tracking;
   - logo SVGs: mark and wordmark;
-  - a motif: lines, grid, dots or none.
+  - a motif: lines, grid, dots or none;
+  - optionally, syntax colours for code (`--code-*`).
 
   It compiles to CSS custom properties and a `KB` helper that draws the motif and the logo lockup.
+- **film.css**: the shared look, and shadcn-style `fk-` pieces (button, input, badge, card, dialog, tabs, the cursor
+  and a caret) whose surfaces are worked out from the theme, so a film's own compositions can rebuild a product's UI.
 - **Scenes**, each driven by declared variables and documented from its own declaration:
   - **titles and brand:** `title`, `motif`, `mark` (logo reveal), `endcard`, `lower-third`;
   - **product:** `chat`, `code`, `terminal`, `composer`, `ui` (a generic app frame for rebuilt product UI);
@@ -83,14 +87,15 @@ user's films.
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
-| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format, and the seam gate for loops; non-zero exit on failure |
+| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
 | `preview <film> [format]` | HyperFrames Studio, live: reloads on save of the film, kit or theme; `f` switches format |
-| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt` |
+| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt`; keeps MP4s still current (`--force` redoes all) |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
+| `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 
@@ -168,14 +173,16 @@ prompt to their agent**.
      - **Claude Desktop:** `claude_desktop_config.json` `mcpServers`.
      - **Codex:** `~/.codex/config.toml` `[mcp_servers.filmkit]`, plus the skill.
      - **Cursor:** `~/.cursor/mcp.json`.
-     - **VS Code (Copilot agent mode):** user `mcp.json`, or `code --add-mcp`.
-     - **Windsurf:** `~/.codeium/windsurf/mcp_config.json`.
+     - **VS Code:** the profile's `mcp.json` (`servers`).
+     - **GitHub Copilot** (CLI and VS Code's Copilot agent): `~/.copilot/mcp-config.json`.
+     - **Windsurf:** `~/.codeium/windsurf/mcp_config.json`, which Devin Desktop, its successor, imports.
      - **Zed:** `context_servers`.
      - **Gemini CLI:** `~/.gemini/settings.json`.
      - **opencode:** its `mcp` config.
 
-     Each tool's config location is verified against its current docs when it is implemented. The list lives in one
-     table, so adding a tool is one row.
+     Tools that load Agent Skills get the skill in `~/.agents/skills/filmkit`. The step is `filmkit agents`, which
+     also runs on its own. Each tool's config location is verified against its current docs, and the list lives in
+     one table (`src/agents/tools.js`), so adding a tool is one row. `docs/agents/` has a page per tool.
   3. **Studio:** where it goes (`./<name>-films` by default), then `filmkit init`.
   4. **Brand:** `filmkit brand`. Give it a website URL and it pulls the brand from the site:
      - the logo (SVG first, from the site's icons, `og:image` and header);

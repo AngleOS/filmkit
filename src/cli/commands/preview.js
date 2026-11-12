@@ -2,8 +2,8 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
 import { watchSources } from "../../build/watch.js";
-import { startHyperframes } from "../../hyperframes.js";
-import { RequirementError, openFilm, openStudio, resolveFormats } from "../../studio.js";
+import { npxError, startHyperframes } from "../../hyperframes.js";
+import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "preview <film> [format] [--no-open]";
 export const summary = "HyperFrames Studio on the film, reloading as you save films/, the theme or the kit; f switches format";
@@ -81,8 +81,7 @@ export async function run({ args, options, json, log }) {
 
   try {
     const code = await new Promise((resolve, reject) => {
-      server.child.on("error", (e) =>
-        reject(/** @type {NodeJS.ErrnoException} */ (e).code === "ENOENT" ? new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)") : e));
+      server.child.on("error", (e) => reject(npxError(e)));
       server.child.on("exit", resolve);
     });
     const ok = quitting || code === 0;

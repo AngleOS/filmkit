@@ -21,11 +21,33 @@ export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   });
-  if (/** @type {NodeJS.ErrnoException | undefined} */ (error)?.code === "ENOENT") {
-    throw new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)");
-  }
-  if (error) throw error;
+  if (error) throw npxError(error);
   return { ok: status === 0, stdout: stdout ?? "" };
+}
+
+/**
+ * Runs the pinned HyperFrames CLI in `cwd` alongside others, with its stdout and stderr captured rather than mixed
+ * into the terminal.
+ * @param {string[]} args
+ * @param {{ cwd: string }} options
+ * @returns {Promise<{ ok: boolean, stdout: string, stderr: string }>}
+ */
+export function hyperframesAsync(args, { cwd }) {
+  return new Promise((resolve, reject) => {
+    const child = spawn("npx", ["--yes", HYPERFRAMES, ...args], { cwd, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+    child.stdout.setEncoding("utf8").on("data", (chunk) => (stdout += chunk));
+    child.stderr.setEncoding("utf8").on("data", (chunk) => (stderr += chunk));
+    child.on("error", (error) => reject(npxError(error)));
+    child.on("close", (status) => resolve({ ok: status === 0, stdout, stderr }));
+  });
+}
+
+/** @param {Error} error */
+export function npxError(error) {
+  const missing = /** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT";
+  return missing ? new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)") : error;
 }
 
 /**

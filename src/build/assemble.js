@@ -4,10 +4,12 @@
 import { cpSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { PACKAGE, SIZES } from "../studio.js";
 import { setRootSize } from "./html.js";
 
 const GSAP = createRequire(import.meta.url).resolve("gsap/dist/gsap.min.js");
+const PROJECT = fileURLToPath(new URL("hyperframes.json", import.meta.url));
 /** What stays in the film's folder: the master is written sized, and sound is built from sound.json, not copied. */
 export const OWN = new Set(["index.html", "sound.json"]);
 
@@ -28,7 +30,7 @@ export function assemble(studio, film, format, out = buildDir(studio, film, form
   }
   writeMaster(out, film.html, format);
   writeFileSync(join(out, "meta.json"), JSON.stringify({ id: `${film.name}-${format}`, name: `${film.name} ${format}` }) + "\n");
-  cpSync(new URL("hyperframes.json", import.meta.url), join(out, "hyperframes.json"));
+  cpSync(PROJECT, join(out, "hyperframes.json"));
   return out;
 }
 
@@ -42,6 +44,13 @@ export function writeMaster(out, html, format) {
   const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
   writeFileSync(join(out, "index.html"), setRootSize(html, width, height));
 }
+
+/**
+ * What a format is assembled from, by name: a change in any of them changes the format.
+ * @param {import("../studio.js").Studio} studio
+ * @param {import("../studio.js").Film} film
+ */
+export const sources = (studio, film) => ({ kit: join(PACKAGE, "kit"), gsap: GSAP, theme: studio.themeDir, film: film.dir, project: PROJECT });
 
 /**
  * @param {import("../studio.js").Studio} studio
