@@ -6,7 +6,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [seed: the filmkit package, CLI core and kit core, ported from angle-ai's video kit](https://github.com/AngleOS/filmkit/issues/3) `filmkit#3` · High
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
-- [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
 - [brand: Angle Filmkit — the angle theme, the README hero, trademarks](https://github.com/AngleOS/filmkit/pull/16) `filmkit#16`
 
 ## Todo
@@ -33,3 +32,4 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 ## Done
 
 - [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
+- [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
