@@ -91,7 +91,8 @@ user's films.
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 
-Every command prints what it wrote, and `--json` prints it machine-readably.
+Every command prints what it wrote, and `--json` prints it machine-readably. How it feels to use (copy, errors,
+progress, speed) is set by [[projects/filmkit/Experience]].
 
 ### 4. The MCP server (`filmkit mcp`)
 **Tools:**
