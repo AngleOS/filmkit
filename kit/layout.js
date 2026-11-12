@@ -27,11 +27,11 @@
     V: { left: safe.left, width: W - safe.left - safe.right, bottom: safe.bottom + 24, fontSize: 52 },
   });
 
-  // The content column: where a product's messages, code and forms sit.
+  // The content column: where a product's messages, code and forms sit, clear of 9:16's action rail.
   const column = pick({
     L: { left: 310, width: 1300 },
-    S: { left: 64, width: W - 128 },
-    V: { left: 64, width: W - 128 },
+    S: { left: safe.left, width: W - safe.left - safe.right },
+    V: { left: safe.left, width: W - safe.left - safe.right },
   });
 
   // Where a product shot sits under a title placed at the top ("place": "top"): the rest of the safe box, below room
@@ -40,6 +40,21 @@
     const top = pick({ L: 250, S: safe.top + 250, V: safe.top + 330 });
     return { left: safe.left, top, width: W - safe.left - safe.right, height: H - safe.bottom - top };
   })();
+
+  // The composer (its height is fixed in film.css) low in the safe box, as in a chat, leaving room above for a title
+  // and below for two lines of captions; `send` is the point the cursor aims for.
+  const composer = (() => {
+    const { left, width } = column, height = 180, top = H - safe.bottom - height - pick({ L: 140, S: 150, V: 200 });
+    return { left, top, width, height, send: [left + width - 62, top + height - 56] };
+  })();
+
+  // The app window (the ui scene): on the stage under a top title, or filling the safe box. `body` is the part below
+  // its title bar, where a film's own composition rebuilds the product's UI.
+  const app = (place) => {
+    const box = place === "stage" ? stage : { left: safe.left, top: safe.top, width: W - safe.left - safe.right, height: H - safe.top - safe.bottom };
+    const bar = pick({ L: 64, S: 60, V: 60 });
+    return { ...box, bar, body: { left: box.left, top: box.top + bar, width: box.width, height: box.height - bar } };
+  };
 
   // A scene's ground: one of the theme's fills (ink, accent-dark, paper), or none for an overlay. Paper is light, so
   // the theme's .on-paper turns the text dark over it.
@@ -55,5 +70,5 @@
     return { ...Object.fromEntries(declared.map((d) => [d.id, d.default])), ...hf.getVariables() };
   };
 
-  window.AL = { W, H, mode, pick, safe, captions, column, stage, ground, vars };
+  window.AL = { W, H, mode, pick, safe, captions, column, composer, stage, app, ground, vars };
 })();
