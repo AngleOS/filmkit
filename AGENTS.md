@@ -25,9 +25,9 @@ kb/            design, decisions, constraints (part of the hub vault)
 - Node's built-in test runner (`node --test`). Tests are offline and deterministic. Fixtures are small HTML films and
   JSON cue sheets. The one test that renders (the smoke film's sound, measured in its MP4) needs HyperFrames' Chrome,
   so it runs only with `FILMKIT_RENDER=1`; run it after a change to the sound.
-- **A kit or scene change** is checked by `filmkit check` on the smoke film (it mounts every scene) and on
-  `examples/` in all four formats. Look at contact sheets of each before calling it done. Renders go to a temp
-  directory, never into git.
+- **A kit or scene change** is checked by `filmkit check` on the smoke films (`smoke` and `infographics` mount every
+  scene between them) and on `examples/` in all four formats. Look at contact sheets of each before calling it done.
+  Renders go to a temp directory, never into git.
 
 ## Code that reads well
 - Plain ESM JavaScript with JSDoc types, and `tsc --checkJs` in CI. No build step for the kit: it runs in the
