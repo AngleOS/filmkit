@@ -6,10 +6,16 @@ updated: 2026-11-12
 ---
 # Filmkit
 
-What it is, who it's for, where things live (AngleOS/filmkit).
+**AI agents make brand films in HTML.** A brief goes in. The agent researches, builds from the kit's scenes, checks
+every format and looks at its own frames. Out come 16:9, 1:1, 4:5 and 9:16 videos with generated sound and SRT/VTT
+captions. It ships as an npm CLI, an MCP server and an agent skill. It is MIT-licensed, extracted from the kit that
+made Angle's beta films. Repo: [AngleOS/filmkit](https://github.com/AngleOS/filmkit).
 
 ## Pages
-- [[projects/filmkit/01 - Now]] · [[projects/filmkit/02 - Decisions]] · [[projects/filmkit/Tasks]]
+- [[projects/filmkit/Design]]: what it is, the studio, kit, CLI, MCP server, skill, roadmap
+- [[projects/filmkit/Origins]]: how the Angle films were made, and the gotchas
+- [[projects/filmkit/01 - Now]] · [[projects/filmkit/02 - Decisions]] · [[projects/filmkit/03 - Constraints]] ·
+  [[projects/filmkit/Tasks]]
 
 ## Related
-- [[Home]]
+- [[Home]] · [[projects/angle-ai/00 - Home]] (the source kit: `marketing/video/`)

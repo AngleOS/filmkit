@@ -1,0 +1,8 @@
+node_modules/
+build/
+renders/
+*.mp4
+*.mov
+*.wav
+*.m4a
+.claude/skills/
