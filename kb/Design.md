@@ -88,6 +88,7 @@ user's films.
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
+| `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`) |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 

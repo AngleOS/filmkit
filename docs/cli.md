@@ -19,6 +19,7 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
+| `explain [code]` | why an error exists and how to fix it; with no code, every code |
 
 **Formats.** 16x9 (1920 × 1080), 9x16 (1080 × 1920), 1x1 (1080 × 1080) and 4x5 (1080 × 1350). With none named, a
 command works on the film's own (its root's `data-formats`, such as a vertical hook's `"9x16"`), else the studio's.
@@ -37,12 +38,16 @@ scene gets no files. With `burn` the scene also draws them into the picture, in 
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
 `kb/Interfaces.md` (`captions` and `stills` as the MCP tools of the same name, `doctor` as
-`{ ok, checks: [{ name, ok, detail, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
+`{ ok, checks: [{ name, ok, detail, code?, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
 
 **Exit codes.** `0` ok, `1` the film failed a check, `2` a usage error (no studio, an unknown film, format or option),
 `3` a missing requirement (`doctor` says which), `4` a render, snapshot or still failed. A failure prints
-`{"ok": false, "error": …}` under `--json` when there's no result to give.
+`{"ok": false, "error": …, "code": …, "fix": …}` under `--json` when there's no result to give.
+
+**Errors.** Every error names the thing, says what's wrong and ends with the fix, as a command where there is one:
+`No film called "launch" in this studio. Films: hello, smoke. Make it with: filmkit new launch`. They come from one
+catalogue, `src/errors.js`, each with a code; `filmkit explain <code>` says why it exists and how to fix it.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.
