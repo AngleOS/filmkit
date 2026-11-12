@@ -23,6 +23,7 @@ const BUILT_IN = /^[a-z0-9-]+$/;
  * @typedef {{ name: string, dirs: string[], values: ThemeValues }} Theme
  *   `dirs` are the theme's folders, base first; `values` its theme.json merged down the chain, with every layer's font
  *   faces and each face's file from the folder
+ * @typedef {{ dir: string, values: Partial<ThemeValues> }} Layer one theme.json, or filmkit.json's values (no dir)
  */
 
 /**
@@ -34,12 +35,13 @@ const BUILT_IN = /^[a-z0-9-]+$/;
 export function loadTheme(studio, ref = "default") {
   const own = typeof ref === "string" ? undefined : ref;
   const name = typeof ref === "string" ? ref : String(ref.extends ?? "default");
+  /** @type {Layer[]} */
   const layers = [...chain(name, studio, studio, []), ...(own ? [{ dir: "", values: own }] : [])];
   const values = /** @type {ThemeValues} */ (layers.reduce((merged, layer) => merge(merged, layer.values), {}));
   delete values.extends;
   // Each layer's faces add to its base's, so a brand folder can add its display face and keep the base's UI and mono.
   // Their files are found through their own layer's fonts.dir.
-  const faces = layers.flatMap(({ values: v }) => /** @type {ThemeValues} */ (v).fonts?.faces?.map((f) => ({ ...f, file: `${/** @type {ThemeValues} */ (v).fonts.dir ?? "fonts"}/${f.file}` })) ?? []);
+  const faces = layers.flatMap(({ values: { fonts } }) => fonts?.faces?.map((f) => ({ ...f, file: `${fonts.dir ?? "fonts"}/${f.file}` })) ?? []);
   if (values.fonts) values.fonts = { ...values.fonts, faces };
   const dirs = layers.map((l) => l.dir).filter(Boolean);
   const problems = [...validate(values, "complete"), ...missingFaces(values, dirs)];
@@ -53,7 +55,7 @@ export function loadTheme(studio, ref = "default") {
  * @param {string} from
  * @param {string} studio
  * @param {string[]} seen
- * @returns {{ dir: string, values: Record<string, unknown> }[]}
+ * @returns {Layer[]}
  */
 function chain(ref, from, studio, seen) {
   const builtIn = BUILT_IN.test(ref);
