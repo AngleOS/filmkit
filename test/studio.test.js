@@ -7,7 +7,7 @@ import { FORMATS, openFilm, openStudio, resolveFormats } from "../src/studio.js"
 
 const FIXTURE = new URL("fixtures/studio", import.meta.url);
 
-/** A copy of the fixture studio with its filmkit.json replaced. @param {object} config */
+/** A copy of the fixture studio with its filmkit.json replaced. @param {object | null} config */
 function studioWith(config) {
   const dir = mkdtempSync(join(tmpdir(), "filmkit-studio-"));
   cpSync(FIXTURE, dir, { recursive: true });
@@ -19,17 +19,21 @@ test("a studio needs filmkit.json", () => {
   assert.throws(() => openStudio(tmpdir()), { code: "no_studio", message: /^No filmkit\.json in .*, so there's no studio here\. Make one with: filmkit init$/ });
 });
 
-test("the studio's formats and theme default to all four and the default theme", () => {
-  const studio = openStudio(studioWith({}));
+test("the studio's formats, theme and renders default to all four, the default theme and renders/", () => {
+  const dir = studioWith({});
+  const studio = openStudio(dir);
   assert.deepEqual(studio.formats, FORMATS);
-  assert.equal(studio.theme, "default");
+  assert.equal(studio.theme.name, "default");
+  assert.equal(studio.renders, join(dir, "renders"));
+  assert.equal(openStudio(studioWith({ renders: "out/films" })).renders.split("/").slice(-2).join("/"), "out/films");
 });
 
-test("an unknown theme or format in filmkit.json is an error", () => {
-  assert.throws(() => openStudio(studioWith({ theme: "nope" })), { code: "unknown_theme", message: /no theme called "nope"\. Themes: angle, default\./ });
-  assert.throws(() => openStudio(studioWith({ theme: 3 })), { code: "config_key", message: /^filmkit\.json "theme" should be a theme's name/ });
-  assert.throws(() => openStudio(studioWith({ formats: ["16x9", "21x9"] })), { code: "unknown_format", message: /^filmkit\.json "formats": there's no format called "21x9"/ });
-  assert.throws(() => openStudio(studioWith({ formats: [] })), { code: "config_key", fix: '"formats": ["16x9","9x16","1x1","4x5"]' });
+test("filmkit.json breaking the schema names the key, and an unknown theme lists the themes", () => {
+  assert.throws(() => openStudio(studioWith({ theme: "nope" })), { code: "unknown_theme", message: /no theme called "nope"\. Themes: angle, default, or a folder/ });
+  assert.throws(() => openStudio(studioWith({ formats: ["16x9", "21x9"] })), { code: "config_key", message: /^filmkit\.json: formats\[1\]: "21x9" should be one of/ });
+  assert.throws(() => openStudio(studioWith({ formats: [] })), /filmkit\.json: formats: list at least 1/);
+  assert.throws(() => openStudio(studioWith({ theme: { accent: "red" } })), /filmkit\.json: theme\.accent: "red" should be a hex colour/);
+  assert.throws(() => openStudio(studioWith(null)), { code: "config_key", message: /null should be an object/, fix: /schema\/filmkit\.schema\.json$/ });
 });
 
 test("a filmkit.json that isn't JSON points at the line and column", () => {
@@ -65,5 +69,5 @@ test("a film's master needs a root, and mounts only scenes the kit has", () => {
 });
 
 test("the angle theme is a theme the studio can name", () => {
-  assert.equal(openStudio(studioWith({ theme: "angle" })).theme, "angle");
+  assert.equal(openStudio(studioWith({ theme: "angle" })).theme.name, "angle");
 });

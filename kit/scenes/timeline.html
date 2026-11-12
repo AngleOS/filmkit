@@ -1,0 +1,103 @@
+<template>
+  <!-- Ticks on a ruler: the ruler draws, then each tick lands in order with when it was and what happened. Across the
+       frame in 16:9, down it in the narrow frames. Ticks sit evenly, or to scale by the number in each when (a year) as far as their labels allow.
+       One tick can take the accent. Sits in AL.chart, under a title placed at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #tl-box { position: absolute; }
+    .tl-dot { position: absolute; border-radius: 50%; background: var(--foreground); }
+    .tl-dot.hi { background: var(--accent); }
+    .tl-tick { position: absolute; display: flex; flex-direction: column; gap: 4px; }
+    .tl-tick.hi .chart-num { color: var(--accent); }
+    .tl-tick .chart-label { white-space: normal; text-wrap: balance; }
+  </style>
+  <div id="root" data-composition-id="timeline" data-composition-variables='[
+    {"id":"ticks","type":"string","label":"Ticks in order, one \"when | what\" a line","default":"2019 | The first film\n2022 | A hundred films\n2024 | Four formats\n2026 | The kit"},
+    {"id":"spacing","type":"enum","label":"Spacing","default":"even","options":[{"value":"even","label":"Even"},{"value":"scale","label":"To scale, by the number in each when (a year)"}]},
+    {"id":"highlight","type":"string","label":"The tick in the accent (its when; empty for none)","default":""},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="tl-box"><div id="tl-rule" class="chart-rule"></div></div>
+    <div id="tl-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const items = KC.fields(v.ticks), n = items.length;
+      const when = items.map(([w = ""]) => w), what = items.map(([, w = ""]) => w);
+      // A when's number is its last one: 2026 in "Q3 2026".
+      const values = when.map((w) => +((w.match(/-?\d+(\.\d+)?/g) || ["0"]).at(-1)));
+      const room = AL.source($("tl-source"), v.source);
+      const across = mode === "L", dot = 18, height = chart.height - room;
+      const ticks = [];
+      let ruleSet;
+      if (across) {
+        // Labels under the ruler, each a slot wide and centred on its tick; to scale, a tick gives way to keep its label
+        // clear of the next.
+        const width = chart.width, slot = width / n, labelW = R(slot - 24);
+        const whenSize = KC.fit(when, labelW, 48), whatSize = 30;
+        const whatLines = Math.max(1, ...what.map((w) => KC.lines(w, labelW, whatSize)));
+        const block = dot + 28 + R(whenSize * 1.3) + 4 + whatLines * R(whatSize * 1.3);
+        const top = chart.top + Math.max(0, R((height - block) / 2));
+        gsap.set($("tl-box"), { left: chart.left, top, width, height: block });
+        const at = KC.spread(KC.ticks(values, width, v.spacing), slot, slot / 2, width - slot / 2);
+        ruleSet = { left: at[0] - dot, top: R(dot / 2) - 1, width: at.at(-1) - at[0] + 2 * dot, borderTopWidth: 3, transformOrigin: "0 50%" };
+        at.forEach((x) => ticks.push({ dot: { left: x - dot / 2, top: 0 }, label: { left: R(x - labelW / 2), top: dot + 28, width: labelW, textAlign: "center", alignItems: "center" }, whenSize, whatSize }));
+      } else {
+        // A row a tick beside the ruler, when over what; the type shrinks, down to 28 px, until every row fits.
+        const labelW = chart.width - dot - 32;
+        let whatSize = pick({ S: 30, V: 34 }), whenSize, rowH;
+        for (;;) {
+          whenSize = KC.fit(when, labelW, R(whatSize * 1.4));
+          const whatLines = Math.max(1, ...what.map((w) => KC.lines(w, labelW, whatSize)));
+          rowH = R(whenSize * 1.3) + 4 + whatLines * R(whatSize * 1.3);
+          if (whatSize <= 28 || n * (rowH + 16) <= height) break;
+          whatSize -= 2;
+        }
+        const whenMid = R(whenSize * 0.65);
+        gsap.set($("tl-box"), { left: chart.left, top: chart.top, width: chart.width, height });
+        // Each tick's dot sits on its when's line, so the rows spread by their whens.
+        const at = KC.spread(KC.ticks(values, height, v.spacing), rowH + 16, whenMid, height - rowH + whenMid);
+        ruleSet = { left: R(dot / 2) - 1, top: at[0] - dot, height: at.at(-1) - at[0] + 2 * dot, borderLeftWidth: 3, transformOrigin: "50% 0" };
+        at.forEach((y) => ticks.push({ dot: { left: 0, top: y - dot / 2 }, label: { left: dot + 32, top: y - whenMid, width: labelW, textAlign: "left", alignItems: "flex-start" }, whenSize, whatSize }));
+      }
+      gsap.set($("tl-rule"), { position: "absolute", ...ruleSet });
+
+      const els = ticks.map((t, i) => {
+        const hi = v.highlight !== "" && when[i] === String(v.highlight) ? " hi" : "";
+        const d = document.createElement("div");
+        d.className = "tl-dot" + hi;
+        gsap.set(d, { ...t.dot, width: dot, height: dot });
+        const label = document.createElement("div");
+        label.className = "tl-tick" + hi;
+        label.innerHTML = `<span class="chart-num"></span><span class="chart-label"></span>`;
+        label.children[0].textContent = when[i];
+        label.children[1].textContent = what[i];
+        gsap.set(label, t.label);
+        gsap.set(label.children[0], { fontSize: t.whenSize, lineHeight: 1.3 });
+        gsap.set(label.children[1], { fontSize: t.whatSize });
+        $("tl-box").append(d, label);
+        return { d, label };
+      });
+
+      // The ruler draws, then each tick lands along it, 0.35 s apart.
+      tl.fromTo($("tl-rule"), across ? { scaleX: 0 } : { scaleY: 0 }, { scaleX: 1, scaleY: 1, duration: 0.7, ease: "expo.out" }, 0.1);
+      els.forEach((e, i) => {
+        const t = 0.5 + 0.35 * i;
+        tl.fromTo(e.d, { scale: 0 }, { scale: 1, duration: 0.5, ease: "expo.out" }, t);
+        KM.arrive(tl, e.label, t + 0.05);
+      });
+      tl.fromTo($("tl-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("tl-box"), $("tl-source")], v.out);
+      window.__timelines["timeline"] = tl;
+    })();
+  </script>
+</template>

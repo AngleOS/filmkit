@@ -5,6 +5,8 @@ import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { startTags } from "./build/html.js";
 import { fail } from "./errors.js";
+import { validate } from "./schema.js";
+import { loadTheme } from "./theme.js";
 
 export { FilmkitError, RequirementError } from "./errors.js";
 
@@ -16,8 +18,8 @@ export const SIZES = /** @type {const} */ ({ "16x9": [1920, 1080], "9x16": [1080
 export const FORMATS = Object.keys(SIZES);
 
 /**
- * @typedef {{ dir: string, name: string, formats: string[], theme: string, themeDir: string }} Studio
- *   `name` is the brand or product the films are for, which templates fill in
+ * @typedef {{ dir: string, name: string, formats: string[], theme: import("./theme.js").Theme, renders: string }} Studio
+ *   `name` is the brand or product the films are for, which templates fill in; `renders` is the folder renders go to
  * @typedef {{ name: string, dir: string, html: string, root: Record<string, string> }} Film
  */
 
@@ -31,23 +33,16 @@ export function openStudio(dir) {
   const file = join(root, "filmkit.json");
   if (!root || !existsSync(file)) throw fail("no_studio", { dir: dir ? root : process.cwd(), walked: !dir });
   const config = readConfig(file);
-  const theme = config.theme ?? "default";
-  const themes = readdirSync(join(PACKAGE, "themes")).filter((t) => existsSync(join(PACKAGE, "themes", t, "theme.css")));
-  if (typeof theme !== "string") throw fail("config_key", { key: "theme", want: "a theme's name", example: '"theme": "default"' });
-  if (!themes.includes(theme)) throw fail("unknown_theme", { theme, themes });
-  const formats = config.formats ?? FORMATS;
-  if (!Array.isArray(formats) || !formats.length) {
-    throw fail("config_key", { key: "formats", want: "a list of formats", example: `"formats": ${JSON.stringify(FORMATS)}` });
-  }
-  const name = config.name ?? basename(root);
-  if (typeof name !== "string") throw fail("config_key", { key: "name", want: "the brand's name, as a string", example: '"name": "Acme"' });
-  return { dir: root, name, formats: checkFormats(formats, 'filmkit.json "formats"'), theme, themeDir: join(PACKAGE, "themes", theme) };
+  const problems = validate(config);
+  if (problems.length) throw fail("config_key", { problems, schema: join(PACKAGE, "schema", "filmkit.schema.json") });
+  const theme = loadTheme(root, config.theme);
+  return { dir: root, name: config.name ?? basename(root), formats: config.formats ?? FORMATS, theme, renders: resolve(root, config.renders ?? "renders") };
 }
 
 /**
- * filmkit.json's object; a syntax error points at its line and column.
+ * filmkit.json's value, for the schema to check; a syntax error points at its line and column.
  * @param {string} file
- * @returns {Record<string, unknown>}
+ * @returns {any}
  */
 function readConfig(file) {
   const text = readFileSync(file, "utf8");

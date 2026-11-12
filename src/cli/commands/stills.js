@@ -17,7 +17,7 @@ export async function run({ args, options, json, log }) {
   if (!at || !(+at >= 0)) throw fail("no_time", { film: film.name });
   const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), log);
   if (!checked.ok) return { ...checked, stills: [] };
-  const renders = join(studio.dir, "renders");
+  const renders = studio.renders;
   mkdirSync(renders, { recursive: true });
   const failed = [];
   const stills = [];

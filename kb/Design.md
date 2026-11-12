@@ -53,7 +53,10 @@ user's films.
 
   All arrivals use expo.out over 0.5–0.7 s.
 - **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
-  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time.
+  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time; a grid's
+  cells (the largest square that fits, filled a column at a time so a bracket spans the lit columns), ticks evenly or
+  to scale, labels spread clear of each other, and a line's wrap.
+- **icons.js (`KI`)**: a small lucide set (ISC) for `cards` and `grid`, stroked in the text colour.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;
@@ -149,7 +152,10 @@ A theme is a folder: `theme.json` (grounds, accent, text, fonts, logo, motif, cr
 and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy) }`. The built-ins are
 `angle` (the full brand; the reference implementation is `themes/angle/`), `default` (Angle's look with the studio's
 logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points to its own folder, and can override
-single values. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
+single values (`{ "extends": "angle", "accent": "#ff5a1f" }`); a `theme.json` can extend another theme the same way.
+`filmkit.json` and `theme.json` are validated against `schema/filmkit.schema.json`. `theme.json`'s `grounds` use the
+names scenes take (`ink`, `accent-dark`, `paper`, and any others), and the build compiles the merged values to
+`kit/theme/theme.css` (`docs/themes.md`). End cards carry "Made with Angle Filmkit" unless `"credit": false`.
 
 ### 8. Install, setup and onboarding (D-008)
 The goal is that someone with an agent goes from nothing to a first film in their brand **in one command, or one

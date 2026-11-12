@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/AngleOS/filmkit/schema/filmkit.schema.json",
+  "title": "filmkit.json",
+  "description": "An Angle Filmkit studio: the brand's name, its theme, the default formats and where renders go.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "name": { "type": "string", "description": "the brand or product the films are for" },
+    "formats": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["16x9", "9x16", "1x1", "4x5"] },
+      "description": "the formats a film is made in when it names none of its own"
+    },
+    "theme": {
+      "type": ["string", "object"],
+      "description": "a built-in theme (angle, default), a theme folder in the studio such as \"brand/theme\", or { \"extends\": one of those, …single values to override }",
+      "$ref": "#/$defs/theme"
+    },
+    "renders": { "type": "string", "description": "the folder renders go to, from the studio (renders by default)" }
+  },
+  "$defs": {
+    "colour": { "type": "string", "pattern": "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$", "description": "a hex colour such as \"#e3ef26\"" },
+    "family": { "type": "string", "pattern": "^[^\"'\\\\;{}<>]+$", "description": "a font family name, without quotes" },
+    "file": { "type": "string", "pattern": "^[^\"'\\\\()]+$", "description": "a path inside the theme folder, without quotes or brackets" },
+    "code": {
+      "type": "object",
+      "description": "the code scene's syntax colours; without them, keywords take the accent and the rest the text colour",
+      "additionalProperties": false,
+      "properties": {
+        "keyword": { "$ref": "#/$defs/colour" },
+        "string": { "$ref": "#/$defs/colour" },
+        "title": { "$ref": "#/$defs/colour" },
+        "number": { "$ref": "#/$defs/colour" },
+        "attr": { "$ref": "#/$defs/colour" }
+      }
+    },
+    "font": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "family": { "$ref": "#/$defs/family" },
+        "weight": { "type": "integer", "minimum": 100, "maximum": 900 },
+        "tracking": { "type": "string", "pattern": "^-?(\\d+|\\d*\\.\\d+)(em|px)?$", "description": "a letter-spacing such as \"-0.035em\"" },
+        "leading": { "type": "number", "minimum": 0.5, "maximum": 3 }
+      }
+    },
+    "theme": {
+      "description": "theme.json: the brand as data, compiled to the custom properties the kit reads",
+      "additionalProperties": false,
+      "properties": {
+        "extends": { "type": "string", "description": "the theme this one overrides: a built-in name or a folder" },
+        "name": { "type": "string" },
+        "label": { "type": "string", "pattern": "^((?!\\*/)[^\\n])*$", "description": "the theme's name for people, on one line and without */ (it heads theme.css in a comment)" },
+        "description": { "type": "string" },
+        "grounds": {
+          "type": "object",
+          "description": "the fills a scene stands on: ink, accent-dark and paper, and any others the brand names",
+          "propertyNames": { "pattern": "^(?!(accent|foreground|muted-foreground|none|over-paper)$)(?!(font|title|brand|code|fk)-)[a-z][a-z0-9-]*$", "description": "a ground name such as \"jet\": lowercase, and not a name the kit gives another value" },
+          "additionalProperties": { "$ref": "#/$defs/colour" }
+        },
+        "accent": { "$ref": "#/$defs/colour" },
+        "accentOn": { "type": "object", "additionalProperties": false, "properties": { "paper": { "$ref": "#/$defs/colour" } } },
+        "text": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ink": { "$ref": "#/$defs/colour" },
+            "muted": { "$ref": "#/$defs/colour" },
+            "onPaper": { "$ref": "#/$defs/colour" },
+            "mutedOnPaper": { "$ref": "#/$defs/colour" },
+            "wordmark": { "$ref": "#/$defs/colour" }
+          }
+        },
+        "code": { "$ref": "#/$defs/code" },
+        "codeOn": { "type": "object", "additionalProperties": false, "properties": { "paper": { "$ref": "#/$defs/code" } } },
+        "fonts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dir": { "$ref": "#/$defs/file" },
+            "display": { "$ref": "#/$defs/font" },
+            "ui": { "$ref": "#/$defs/font" },
+            "mono": { "$ref": "#/$defs/font" },
+            "faces": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["family", "weight", "file"],
+                "properties": {
+                  "family": { "$ref": "#/$defs/family" },
+                  "weight": { "type": "integer", "minimum": 100, "maximum": 900 },
+                  "style": { "enum": ["normal", "italic"] },
+                  "file": { "$ref": "#/$defs/file" }
+                }
+              }
+            }
+          }
+        },
+        "tokens": { "$ref": "#/$defs/file" },
+        "logo": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mark": { "$ref": "#/$defs/file" },
+            "wordmark": { "$ref": "#/$defs/file" },
+            "onDark": { "$ref": "#/$defs/file" },
+            "onLight": { "$ref": "#/$defs/file" }
+          }
+        },
+        "brand": { "$ref": "#/$defs/file" },
+        "motif": { "enum": ["lines", "grid", "dots", "none"] },
+        "credit": { "type": ["string", "boolean"], "description": "the end card's credit line, or false for none" }
+      }
+    },
+    "complete": {
+      "description": "what a theme needs once its values are merged",
+      "required": ["grounds", "accent", "text", "fonts"],
+      "properties": {
+        "grounds": { "required": ["ink", "accent-dark", "paper"] },
+        "text": { "required": ["ink", "muted", "onPaper", "mutedOnPaper"] },
+        "fonts": {
+          "required": ["display", "ui", "mono"],
+          "properties": { "display": { "required": ["family"] }, "ui": { "required": ["family"] }, "mono": { "required": ["family"] } }
+        }
+      }
+    }
+  }
+}

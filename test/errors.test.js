@@ -16,13 +16,13 @@ const CASES = {
     "/s/filmkit.json:2:3",
   ],
   config_key: [
-    { key: "formats", want: "a list of formats", example: '"formats": ["16x9"]' },
-    'filmkit.json "formats" should be a list of formats. For example: "formats": ["16x9"]',
-    '"formats": ["16x9"]',
+    { problems: ['formats[1]: "21x9" should be one of 16x9, 9x16, 1x1, 4x5'], schema: "/p/schema/filmkit.schema.json" },
+    'filmkit.json: formats[1]: "21x9" should be one of 16x9, 9x16, 1x1, 4x5. Each key is described in: /p/schema/filmkit.schema.json',
+    "/p/schema/filmkit.schema.json",
   ],
   unknown_theme: [
     { theme: "nope", themes: ["angle", "default"] },
-    'filmkit.json "theme": there\'s no theme called "nope". Themes: angle, default. Set it to one of them, as in: "theme": "default"',
+    'There\'s no theme called "nope". Themes: angle, default, or a folder with a theme.json. Name one of them, as in: "theme": "default"',
     '"theme": "default"',
   ],
   unknown_format: [{ formats: ["16:9"], known: FORMATS }, 'There\'s no format called "16:9". Use one of: 16x9 9x16 1x1 4x5', "16x9 9x16 1x1 4x5"],

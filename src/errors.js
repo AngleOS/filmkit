@@ -72,17 +72,18 @@ export const CATALOGUE = {
   },
   config_key: {
     exit: 2,
-    message: ({ key, want }) => `filmkit.json "${key}" should be ${want}.`,
-    fix: ({ example }) => ["For example", example],
-    why: "Each key in filmkit.json has one shape: \"theme\" is a theme's name, \"formats\" a list of formats. " +
-      "Leave a key out to take its default.",
+    message: ({ problems }) => `filmkit.json: ${problems.join("; ")}.`,
+    fix: ({ schema }) => ["Each key is described in", schema],
+    why: "filmkit.json is checked against Filmkit's JSON schema whenever a command opens the studio: \"name\", " +
+      "\"formats\", \"theme\" and \"renders\", each with one shape. Leave a key out to take its default; an editor " +
+      "that reads the schema (\"$schema\") completes and checks the keys as you type.",
   },
   unknown_theme: {
     exit: 2,
-    message: ({ theme, themes }) => `filmkit.json "theme": there's no theme called "${theme}". Themes: ${list(themes)}.`,
-    fix: ({ themes }) => ["Set it to one of them, as in", `"theme": "${themes.includes("default") ? "default" : themes[0]}"`],
-    why: "A theme is the brand as data: grounds, accent, fonts, logo and motif. filmkit.json names one of the " +
-      "built-in themes, or leaves \"theme\" out for \"default\".",
+    message: ({ theme, themes }) => `There's no theme called "${theme}". Themes: ${themes.join(", ")}, or a folder with a theme.json.`,
+    fix: ({ themes }) => ["Name one of them, as in", `"theme": "${themes.includes("default") ? "default" : themes[0]}"`],
+    why: "A theme is the brand as data: grounds, accent, fonts, logo and motif. filmkit.json names a built-in " +
+      "theme, a theme folder in the studio, or single values over one of those; with no \"theme\" it's \"default\".",
   },
   unknown_format: {
     exit: 2,
