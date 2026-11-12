@@ -1,0 +1,39 @@
+{
+  "name": "angle",
+  "label": "Angle",
+  "description": "Angle's brand: Night ground, Pear accent, Geist type, the brand lines and the ANGLE lockup. Angle Filmkit's own films and the example studio use it; the default theme shares its look with the studio's own logo.",
+  "grounds": {
+    "night": "#07120f",
+    "castleton": "#145237",
+    "jet": "#2c2c2c",
+    "paper": "#ffffff"
+  },
+  "ground": "night",
+  "accent": "#e3ef26",
+  "accentOn": { "paper": "#145237" },
+  "text": { "ink": "#eef3ec", "muted": "#a9bdb2", "onPaper": "#07120f", "mutedOnPaper": "#56665e" },
+  "fonts": {
+    "dir": "fonts",
+    "display": { "family": "Geist", "weight": 600, "tracking": "-0.035em", "leading": 1.02 },
+    "ui": { "family": "Geist" },
+    "mono": { "family": "Geist Mono" },
+    "faces": [
+      { "family": "Geist", "weight": 400, "file": "Geist-Regular.woff2" },
+      { "family": "Geist", "weight": 500, "file": "Geist-Medium.woff2" },
+      { "family": "Geist", "weight": 600, "file": "Geist-SemiBold.woff2" },
+      { "family": "Geist", "weight": 700, "file": "Geist-Bold.woff2" },
+      { "family": "Geist Mono", "weight": 400, "file": "GeistMono-Regular.woff2" },
+      { "family": "Geist Mono", "weight": 500, "file": "GeistMono-Medium.woff2" }
+    ]
+  },
+  "tokens": "tokens.css",
+  "logo": {
+    "mark": "logo/angle-icon.svg",
+    "onDark": "logo/angle-logo-on-night.svg",
+    "onLight": "logo/angle-logo-on-light.svg",
+    "wordmark": "logo/angle-wordmark.svg"
+  },
+  "brand": "brand.js",
+  "motif": "lines",
+  "credit": "Made with Angle Filmkit"
+}

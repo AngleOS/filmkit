@@ -26,7 +26,7 @@ test("the studio's formats and theme default to all four and the default theme",
 });
 
 test("an unknown theme or format in filmkit.json is an error", () => {
-  assert.throws(() => openStudio(studioWith({ theme: "nope" })), /no theme "nope" \(default\)/);
+  assert.throws(() => openStudio(studioWith({ theme: "nope" })), /no theme "nope" \(angle, default\)/);
   assert.throws(() => openStudio(studioWith({ formats: ["16x9", "21x9"] })), /unknown format 21x9/);
   assert.throws(() => openStudio(studioWith({ formats: [] })), /list one or more/);
 });
@@ -45,4 +45,8 @@ test("formats: the named ones, else the film's data-formats, else the studio's",
   assert.deepEqual(resolveFormats(studio, hook), ["9x16"]);
   assert.deepEqual(resolveFormats(studio, plain), ["16x9", "1x1"]);
   assert.throws(() => resolveFormats(studio, plain, ["16:9"]), /unknown format 16:9/);
+});
+
+test("the angle theme is a theme the studio can name", () => {
+  assert.equal(openStudio(studioWith({ theme: "angle" })).theme, "angle");
 });

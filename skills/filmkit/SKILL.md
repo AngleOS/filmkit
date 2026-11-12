@@ -1,9 +1,9 @@
 ---
 name: filmkit
-description: Make a short brand or product film with filmkit, from a brief to 16:9, 1:1, 4:5 and 9:16 renders with sound and SRT/VTT captions. Use when asked to make, change, review or post a launch film, feature clip, explainer, infographic film or 9:16 hook loop in a filmkit studio (a repo with filmkit.json).
+description: Make a short brand or product film with Angle Filmkit (filmkit), from a brief to 16:9, 1:1, 4:5 and 9:16 renders with sound and SRT/VTT captions. Use when asked to make, change, review or post a launch film, feature clip, explainer, infographic film or 9:16 hook loop in a filmkit studio (a repo with filmkit.json).
 ---
 
-# filmkit: make a film
+# Angle Filmkit: make a film
 
 A film is an HTML page of kit scenes and GSAP compositions that filmkit renders through HyperFrames. One master
 becomes four formats, each laid out for its own frame. You write the brief, check the claims, build, check, look at

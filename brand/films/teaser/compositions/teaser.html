@@ -1,0 +1,59 @@
+<template>
+  <!-- Angle Filmkit's teaser, the hero in motion: the brand lines, the ANGLE lockup with FILMKIT beside it, the promise, and the four frames
+       one master becomes. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--night); }
+    #hr-lines { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0.32; }
+    #hr-lockup { position: absolute; }
+    #hr-kit { position: absolute; font: 500 34px var(--mono); letter-spacing: 0.32em; color: var(--pear); }
+    #hr-line { position: absolute; color: var(--foreground); text-wrap: balance; }
+    #hr-sub { position: absolute; font: 400 30px var(--ui); color: var(--muted-foreground); }
+    .hr-frame { position: absolute; border: 3px solid var(--pear); border-radius: 10px; background: var(--night); }
+    .hr-frame { display: flex; align-items: center; justify-content: center; }
+    .hr-frame span { font: 500 28px var(--mono); color: var(--pear); }
+  </style>
+  <div id="root" data-composition-id="teaser">
+    <svg id="hr-lines" data-layout-ignore></svg>
+    <svg id="hr-lockup" data-layout-allow-overflow></svg>
+    <div id="hr-kit"><span>FILMKIT</span></div>
+    <div id="hr-line" class="display"></div>
+    <div id="hr-sub"><span>A brief in. Every format out, with sound and captions.</span></div>
+    <div class="hr-frame" id="f169"><span>16:9</span></div>
+    <div class="hr-frame" id="f11"><span>1:1</span></div>
+    <div class="hr-frame" id="f45"><span>4:5</span></div>
+    <div class="hr-frame" id="f916"><span>9:16</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const $ = (id) => document.getElementById(id);
+      const { safe } = AL;
+      const lines = KB.motif($("hr-lines"));
+      const L = KB.lockupBox(420, 190);
+      const left = safe.left + 40;
+      gsap.set($("hr-lockup"), { left, top: L.top, width: L.w, height: L.h });
+      const parts = KB.lockup($("hr-lockup"));
+      gsap.set($("hr-kit"), { left: left + L.w + 34, top: L.top + L.h / 2 - 22 });
+      gsap.set($("hr-line"), { left, top: 330, width: 1000, fontSize: 132 });
+      $("hr-line").innerHTML = KM.wordSpans("Your agent makes the *film.*");
+      gsap.set($("hr-sub"), { left, top: 660 });
+      // The four frames, to scale with each other, on one baseline at the right.
+      const base = 930, u = 0.135, frames = [["f169", 1920, 1080], ["f11", 1080, 1080], ["f45", 1080, 1350], ["f916", 1080, 1920]];
+      let x = AL.W - safe.right - 40 - frames.reduce((a, f) => a + f[1] * u, 0) - 3 * 40;
+      for (const [id, w, h] of frames) {
+        gsap.set($(id), { left: x, top: base - h * u, width: w * u, height: h * u });
+        x += w * u + 40;
+      }
+
+      // Lines draw; the mark's pieces meet at 1.0 s and the wordmark wipes in; FILMKIT, the promise word by word, the
+      // line under it, then the four frames land one after another and hold.
+      KM.drawMotif(tl, lines, 0.1);
+      KM.assemble(tl, $("hr-lockup"), parts, L, 1.0);
+      KM.arrive(tl, $("hr-kit"), 1.75);
+      const t = KM.words(tl, $("hr-line").querySelectorAll(".word"), 2.0);
+      KM.arrive(tl, $("hr-sub"), t + 0.25);
+      ["f169", "f11", "f45", "f916"].forEach((id, i) => KM.arrive(tl, $(id), t + 0.8 + i * 0.22));
+      window.__timelines["teaser"] = tl;
+    })();
+  </script>
+</template>
