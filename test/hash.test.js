@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, renameSync, writeFileSync } from "node:fs";
+import { cpSync, mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -46,4 +46,26 @@ test("a changed, added or renamed film file invalidates, sound.json included", (
     hashes.add(formatHash(studio, film, "16x9"));
   }
   assert.equal(hashes.size, 4);
+});
+
+test("a symlink counts by where it points: a broken one hashes, and one to a parent folder doesn't recurse", () => {
+  const { studio, film } = hook();
+  symlinkSync("..", join(film.dir, "up"));
+  symlinkSync("missing.mp4", join(film.dir, "broll.mp4"));
+  const before = formatHash(studio, film, "16x9");
+  assert.equal(formatHash(studio, film, "16x9"), before);
+  renameSync(join(film.dir, "broll.mp4"), join(film.dir, "old.mp4"));
+  symlinkSync("other.mp4", join(film.dir, "broll.mp4"));
+  assert.notEqual(formatHash(studio, film, "16x9"), before);
+});
+
+test("a film folder that is itself a link hashes its contents", () => {
+  const { studio, film } = hook();
+  const elsewhere = mkdtempSync(join(tmpdir(), "filmkit-film-"));
+  cpSync(film.dir, elsewhere, { recursive: true });
+  rmSync(film.dir, { recursive: true });
+  symlinkSync(elsewhere, film.dir);
+  const before = formatHash(studio, film, "16x9");
+  writeFileSync(join(elsewhere, "sound.json"), "{}");
+  assert.notEqual(formatHash(studio, film, "16x9"), before);
 });
