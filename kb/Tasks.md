@@ -6,14 +6,17 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [sound: cues from the picture, the pad and the mix in Node (port cues.py, pad.mjs, mix.sh, sound-sheet)](https://github.com/AngleOS/filmkit/issues/4) `filmkit#4` · High
 - [scenes: chat, code, terminal, composer and a generic app frame, themed](https://github.com/AngleOS/filmkit/issues/6) `filmkit#6` · High
-- [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
-- [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
 - [contact sheets: filmkit contact renders one review image per format](https://github.com/AngleOS/filmkit/issues/9) `filmkit#9` · High
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
 - [setup: register the filmkit MCP server and skill in every detected agent tool](https://github.com/AngleOS/filmkit/issues/20) `filmkit#20` · High
 - [speed: parallel formats, skip unchanged formats, resumable renders, one live progress line](https://github.com/AngleOS/filmkit/issues/23) `filmkit#23` · High
 - [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
 - [preview: live reload on save, a format switcher, and the film's scenes as a timeline](https://github.com/AngleOS/filmkit/issues/25) `filmkit#25` · Medium
+
+## In Progress
+
+- [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
+- [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
 
 ## Todo
 
@@ -34,3 +37,4 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 - [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
 - [brand: Angle Filmkit — the angle theme, the README hero, trademarks](https://github.com/AngleOS/filmkit/pull/16) `filmkit#16`
 - [site: the Angle Filmkit one-pager on GitHub Pages](https://github.com/AngleOS/filmkit/pull/26) `filmkit#26`
+- [fix master: Dependabot](https://github.com/AngleOS/filmkit/issues/48) `filmkit#48`

@@ -21,7 +21,7 @@ function studioCopy() {
 test("help lists every command and exits 0", () => {
   const { status, stdout } = filmkit(["--help"]);
   assert.equal(status, 0);
-  for (const name of ["captions", "check", "preview", "render", "snapshot", "stills"]) assert.match(stdout, new RegExp(`^  ${name} <film>`, "m"));
+  for (const name of ["captions", "check", "contact", "preview", "render", "snapshot", "stills"]) assert.match(stdout, new RegExp(`^  ${name} <film>`, "m"));
   assert.match(stdout, /^  explain \[code\]/m);
 });
 
