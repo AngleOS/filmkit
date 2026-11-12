@@ -95,7 +95,8 @@ export function labelCanvas(layout, labels) {
     const { x, y } = layout.cells[i];
     // A narrow cell drops the format (the file names it), then cuts from the left: the time is what matters.
     const fits = Math.floor((layout.frame.w - PAD) / (6 * SCALE));
-    const text = label.length > fits ? label.split(" ").at(-1)?.slice(-fits) ?? "" : label;
+    const time = label.split(" ").at(-1) ?? "";
+    const text = label.length <= fits ? label : fits > 0 ? time.slice(-fits) : "";
     [...text].forEach((c, n) => {
       GLYPHS[c].forEach((row, gy) => {
         [...row].forEach((bit, gx) => {
