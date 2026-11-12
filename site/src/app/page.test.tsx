@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 import { render, screen, within } from "@testing-library/react";
 import axe from "axe-core";
 import { describe, expect, it } from "vitest";
@@ -37,6 +39,19 @@ describe("the one page", () => {
       expect(v.getAttribute("preload")).toBe("none");
     }
     expect(screen.getAllByRole("button", { name: /^(Play|Pause): / })).toHaveLength(videos.length);
+  });
+
+  // jsdom never fetches preload="none" media and Lighthouse never plays it, so a missing film only shows up here.
+  it("ships every film and poster it references", () => {
+    const { container } = render(<Home />);
+    const base = process.env.SITE_BASE_PATH ?? "";
+    for (const v of container.querySelectorAll("video")) {
+      for (const src of [v.getAttribute("src"), v.getAttribute("poster")]) {
+        expect(src).toBeTruthy();
+        const file = join(process.cwd(), "public", (src ?? "").slice(base.length));
+        expect(existsSync(file), file).toBe(true);
+      }
+    }
   });
 
   it("lists the steps and the agent tools", () => {

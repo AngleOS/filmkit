@@ -7,3 +7,4 @@ renders/
 *.wav
 *.m4a
 .claude/skills/
+!/site/public/media/*.mp4

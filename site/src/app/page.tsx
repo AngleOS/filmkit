@@ -302,11 +302,6 @@ export default function Home() {
                   MIT licence
                 </a>
               </li>
-              <li>
-                <a className="nav-link" href={`${REPO_URL}/blob/master/TRADEMARKS.md`}>
-                  Trademarks
-                </a>
-              </li>
             </ul>
           </div>
           <p className="border-t border-line pt-6 text-[13px] leading-relaxed text-muted">

@@ -23,7 +23,7 @@ export function InstallTabs({ paths }: { paths: InstallPath[] }) {
         ))}
       </Tabs.List>
       {paths.map((p) => (
-        <Tabs.Content key={p.id} value={p.id} className="flex flex-col gap-4 outline-none">
+        <Tabs.Content key={p.id} value={p.id} className="flex flex-col gap-4">
           <CopyCommand command={p.command} label={`${p.tab} command`} multiline={p.multiline} />
           <ul className="grid grid-cols-1 gap-x-8 gap-y-2.5 text-[15px] leading-relaxed text-muted sm:grid-cols-2">
             {p.notes.map((n) => (

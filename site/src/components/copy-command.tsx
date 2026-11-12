@@ -41,7 +41,7 @@ export function CopyCommand({
       <button
         type="button"
         onClick={copy}
-        className="grid size-9 shrink-0 place-items-center rounded-[4px] text-muted transition hover:bg-line hover:text-ink"
+        className="grid size-11 shrink-0 place-items-center rounded-[4px] text-muted transition hover:bg-line hover:text-ink"
         aria-label={`Copy ${label}`}
       >
         {copied ? (

@@ -167,7 +167,7 @@ export function installPaths(prompt: string): InstallPath[] {
         "Installs Node and ffmpeg with Homebrew, apt, dnf or pacman if they're missing. It asks first.",
         "Then runs the guided setup.",
         "After launch, this becomes one curl line.",
-        "Undo it any time with filmkit setup --remove.",
+        "Undo it any time with npx -y github:AngleOS/filmkit setup --remove.",
       ],
     },
     {
@@ -178,7 +178,7 @@ export function installPaths(prompt: string): InstallPath[] {
         "Installs Node and ffmpeg with winget if they're missing. It asks first.",
         "Then runs the guided setup.",
         "Works in Windows Terminal and PowerShell 7.",
-        "Undo it any time with filmkit setup --remove.",
+        "Undo it any time with npx -y github:AngleOS/filmkit setup --remove.",
       ],
     },
   ];
