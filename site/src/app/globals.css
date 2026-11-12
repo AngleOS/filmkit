@@ -1,0 +1,596 @@
+@import "tailwindcss";
+
+/* Angle's palette (themes/angle/theme.json) and Geist. Night is the ground, Pear the one accent per line. */
+@theme {
+  --color-night: #07120f;
+  --color-night-2: #0b1916;
+  --color-castleton: #145237;
+  --color-line: #1c3a2d;
+  --color-ink: #eef3ec;
+  --color-muted: #a9bdb2;
+  --color-pear: #e3ef26;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  html {
+    background: var(--color-night);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+  body {
+    min-height: 100dvh;
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-pear);
+    color: var(--color-night);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-pear);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+  /* A film's grain: a faint, fixed noise over everything, never in the way of a click. */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 60;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+}
+
+@layer components {
+  .display {
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+  /* The page's column: 1200 px wide, a 20 px gutter on a phone, 32 px from a tablet up. */
+  .shell {
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+  @media (min-width: 640px) {
+    .shell {
+      padding-inline: 2rem;
+    }
+  }
+  /* A slate: mono, tracked, small caps. */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+  .tick {
+    width: 1.5rem;
+    height: 2px;
+    background: var(--color-pear);
+  }
+  .lead {
+    max-width: 34rem;
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  @media (min-width: 640px) {
+    .lead {
+      font-size: 19px;
+      line-height: 1.55;
+    }
+  }
+  .body {
+    font-size: 16px;
+    line-height: 1.65;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  @media (min-width: 640px) {
+    .body {
+      font-size: 17px;
+    }
+  }
+  .body-sm {
+    font-size: 15px;
+    line-height: 1.65;
+    color: var(--color-muted);
+    text-wrap: pretty;
+  }
+  /* Inline code never breaks mid-flag. */
+  :where(p, li, dd) > code {
+    white-space: nowrap;
+  }
+  .footnote {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+  .text-link {
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-decoration-color: var(--color-line);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 0.2s;
+  }
+  .text-link:hover {
+    text-decoration-color: var(--color-pear);
+  }
+  .skip-link {
+    position: absolute;
+    left: 1rem;
+    top: -4rem;
+    z-index: 100;
+    padding: 0.6rem 1rem;
+    border-radius: 6px;
+    background: var(--color-pear);
+    color: var(--color-night);
+    font-weight: 600;
+  }
+  .skip-link:focus {
+    top: 1rem;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid color-mix(in oklab, var(--color-line) 70%, transparent);
+    background: color-mix(in oklab, var(--color-night) 82%, transparent);
+    backdrop-filter: blur(12px);
+  }
+  .nav-link {
+    transition: color 0.2s;
+  }
+  .nav-link:hover {
+    color: var(--color-ink);
+  }
+  .btn-pear {
+    display: inline-flex;
+    align-items: center;
+    height: 2.5rem;
+    padding: 0 1.1rem;
+    border-radius: 999px;
+    background: var(--color-pear);
+    color: var(--color-night);
+    font-weight: 600;
+    font-size: 14px;
+    transition: transform 0.25s var(--ease-expo);
+  }
+  .btn-pear:hover {
+    transform: translateY(-1px);
+  }
+  .link-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 500;
+  }
+  .link-arrow:hover {
+    color: var(--color-pear);
+  }
+  .chip {
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    padding: 0.45rem 0.9rem;
+    font-size: 14px;
+    color: var(--color-ink);
+  }
+  .tab-list {
+    display: flex;
+    gap: 0.25rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-bottom: 1px solid var(--color-line);
+    margin-inline: -0.25rem;
+  }
+  /* On a phone the row scrolls; a soft fade at the right edge says there's more. */
+  @media (max-width: 479px) {
+    .tab-list {
+      mask-image: linear-gradient(to right, #000 82%, transparent);
+      scroll-snap-type: x proximity;
+    }
+  }
+  .tab-list::-webkit-scrollbar {
+    display: none;
+  }
+  .tab-trigger {
+    position: relative;
+    flex: none;
+    min-height: 2.75rem;
+    padding: 0.7rem 0.85rem;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-muted);
+    transition: color 0.2s;
+  }
+  .tab-trigger:hover {
+    color: var(--color-ink);
+  }
+  .tab-trigger[data-state="active"] {
+    color: var(--color-ink);
+  }
+  .tab-trigger[data-state="active"]::after {
+    content: "";
+    position: absolute;
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: -1px;
+    height: 2px;
+    background: var(--color-pear);
+  }
+  /* Examples: the landscape films in a grid (1 column on a phone, 2 from a tablet) and the 9:16 hook beside them on
+     a desktop, below them, narrower, on anything smaller, never full-width tall. */
+  .examples-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 3rem 2.5rem;
+  }
+  .examples-landscape {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.75rem 2rem;
+  }
+  .examples-vertical {
+    width: min(100%, 280px);
+  }
+  @media (min-width: 640px) {
+    .examples-landscape {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1024px) {
+    .examples-grid {
+      grid-template-columns: minmax(0, 1fr) 270px;
+      align-items: start;
+    }
+    .examples-vertical {
+      width: 100%;
+    }
+  }
+  /* The examples grid's open slot: a blank frame that asks for the visitor's film. */
+  .your-film {
+    display: grid;
+    place-content: center;
+    gap: 0.75rem;
+    aspect-ratio: 16 / 9;
+    border: 1px dashed var(--color-line);
+    border-radius: 6px;
+    text-align: center;
+    background: var(--color-night-2);
+    transition: border-color 0.2s;
+  }
+  .your-film:hover {
+    border-color: var(--color-pear);
+  }
+  .kit-item {
+    border-top: 1px solid var(--color-line);
+    padding-top: 1.4rem;
+    position: relative;
+  }
+  .kit-item::before {
+    content: "";
+    position: absolute;
+    top: -1px;
+    left: 0;
+    width: 2.25rem;
+    height: 1px;
+    background: var(--color-pear);
+  }
+
+  /* Viewfinder corner marks: how the page frames every piece of film. */
+  .vf-corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--color-pear);
+    z-index: 2;
+    pointer-events: none;
+  }
+  .vf-tl {
+    top: -7px;
+    left: -7px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+  }
+  .vf-tr {
+    top: -7px;
+    right: -7px;
+    border-top: 2px solid;
+    border-right: 2px solid;
+  }
+  .vf-bl {
+    bottom: -7px;
+    left: -7px;
+    border-bottom: 2px solid;
+    border-left: 2px solid;
+  }
+  .vf-br {
+    bottom: -7px;
+    right: -7px;
+    border-bottom: 2px solid;
+    border-right: 2px solid;
+  }
+
+  /* The brand lines draw in once. They appear in one place only: inside the format switcher's film frame. */
+  .brand-line {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 0.9s var(--ease-expo) forwards;
+  }
+  /* The hero's arrivals: expo.out, staggered, like a film's title entrance. */
+  .rise {
+    animation: rise 0.8s var(--ease-expo) both;
+  }
+  .rise {
+    animation-delay: 0.12s;
+  }
+
+  /* ---- The format switcher ---- */
+  .switcher {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .switcher-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  /* Four formats as one segmented control, each segment a 44 px touch target. */
+  .segmented {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    flex: 1;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    background: var(--color-night-2);
+  }
+  .segment {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-muted);
+    transition:
+      color 0.2s,
+      background 0.25s var(--ease-expo);
+  }
+  .segment:hover {
+    color: var(--color-ink);
+  }
+  .segment[aria-pressed="true"] {
+    color: var(--color-night);
+    background: var(--color-pear);
+  }
+  .fmt-icon {
+    display: inline-block;
+    height: 11px;
+    border: 1.5px solid currentColor;
+    border-radius: 2px;
+  }
+  @media (max-width: 379px) {
+    .fmt-icon {
+      display: none;
+    }
+  }
+  .guides-toggle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0 0.9rem;
+    border: 1px solid var(--color-line);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-muted);
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+  .guides-toggle:hover {
+    color: var(--color-ink);
+    border-color: var(--color-muted);
+  }
+  .guides-dot {
+    width: 9px;
+    height: 9px;
+    border: 1.5px dashed currentColor;
+    border-radius: 2px;
+  }
+  .guides-toggle[aria-pressed="true"] {
+    color: var(--color-pear);
+    border-color: var(--color-pear);
+  }
+  .switcher-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .switcher-caption {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-muted);
+  }
+  /* The stage is as tall as the frame, so a 16:9 frame leaves no dead space. The controls above it never move, and the
+     hero's columns align to the top, so switching (a click, not a layout shift) only lengthens the hero downward. */
+  .frame-stage {
+    --stage-h: min(440px, 112vw);
+    display: flex;
+    justify-content: center;
+  }
+  @media (min-width: 1024px) {
+    .frame-stage {
+      --stage-h: 440px;
+    }
+  }
+  .master-frame {
+    container-type: size;
+    position: relative;
+    overflow: hidden;
+    width: min(100%, calc(var(--stage-h) * var(--ratio)));
+    aspect-ratio: var(--ratio);
+    background: var(--color-night);
+    border: 1px solid var(--color-line);
+    border-radius: 8px;
+    box-shadow: 0 40px 80px -40px rgb(0 0 0 / 0.85);
+    transition: width 0.6s var(--ease-expo);
+  }
+  .mf-lines {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.4;
+  }
+  .mf-lockup,
+  .mf-title,
+  .mf-tc,
+  .mf-safe {
+    position: absolute;
+    transition:
+      top 0.6s var(--ease-expo),
+      left 0.6s var(--ease-expo),
+      width 0.6s var(--ease-expo),
+      font-size 0.6s var(--ease-expo),
+      inset 0.6s var(--ease-expo),
+      opacity 0.3s;
+  }
+  /* Lumen's wordmark: a sample customer's logo, set in Geist like any studio's own. */
+  .mf-brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+  }
+  .mf-brand-dot {
+    width: 0.62em;
+    height: 0.62em;
+    border-radius: 50%;
+    background: var(--color-pear);
+  }
+  .mf-tc {
+    right: 4cqw;
+    bottom: 3.5cqh;
+    font-size: max(10px, 2.2cqw);
+    letter-spacing: 0.12em;
+    color: var(--color-muted);
+  }
+  .mf-safe {
+    border: 1px dashed color-mix(in oklab, var(--color-pear) 70%, transparent);
+    border-radius: 2px;
+    opacity: 0;
+  }
+  .master-frame[data-guides] .mf-safe {
+    opacity: 1;
+  }
+  /* L: 16:9. The lockup top-left, the title low on the left, the action-safe box at 5%. */
+  .master-frame[data-mode="L"] .mf-lockup {
+    left: 6cqw;
+    top: 9cqh;
+    font-size: 3.6cqw;
+  }
+  .master-frame[data-mode="L"] .mf-title {
+    left: 6cqw;
+    top: 46cqh;
+    width: 60cqw;
+    font-size: 7.4cqw;
+  }
+  .master-frame[data-mode="L"] .mf-safe {
+    inset: 5cqh 5cqw;
+  }
+  /* S: 1:1 and 4:5. The title larger and wider, from mid-frame. */
+  .master-frame[data-mode="S"] .mf-lockup {
+    left: 8cqw;
+    top: 8cqh;
+    font-size: 5.3cqw;
+  }
+  .master-frame[data-mode="S"] .mf-title {
+    left: 8cqw;
+    top: 44cqh;
+    width: 82cqw;
+    font-size: 11cqw;
+  }
+  .master-frame[data-mode="S"] .mf-safe {
+    inset: 7cqh 6cqw;
+  }
+  /* V: 9:16. The statement at the top, clear of the feeds' header; the safe box keeps off the action rail and the
+     caption block, as in the kit's layout.js. */
+  .master-frame[data-mode="V"] .mf-lockup {
+    left: 7cqw;
+    top: 15cqh;
+    font-size: 6.4cqw;
+  }
+  .master-frame[data-mode="V"] .mf-title {
+    left: 7cqw;
+    top: 22cqh;
+    width: 82cqw;
+    font-size: 13.5cqw;
+  }
+  .master-frame[data-mode="V"] .mf-safe {
+    inset: 14cqh 11cqw 22cqh 6cqw;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    /* biome-ignore-start lint/complexity/noImportantStyles: reduced motion must beat every component's own timing */
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    /* biome-ignore-end lint/complexity/noImportantStyles: reduced motion must beat every component's own timing */
+  }
+  .brand-line {
+    stroke-dashoffset: 0;
+  }
+}
