@@ -9,7 +9,7 @@ taught us, and the gotchas).
 src/cli/       the `filmkit` CLI: init, new, check, snapshot, contact, preview, render, stills, scenes, doctor, skills, mcp
 src/mcp/       the MCP server: the CLI's operations as tools, plus guide resources and the make_film prompt
 src/build/     assembling a film into build/<film>/<format>/, sound, seam and captions
-kit/           what each build copies in: layout.js (AL), motion.js (KM), theme → CSS and KB, scenes/, sound/
+kit/           what each build copies in: layout.js (AL), motion.js (KM), theme → CSS and KB, scenes/; sound/ runs in Node, never copied
 themes/        built-in themes (angle, the reference; default, paper); a studio's own theme is in its filmkit.json
 brand/         Angle Filmkit's own films: the README hero, teaser and example GIFs (Angle trademarks, TRADEMARKS.md)
 templates/     starting films for `filmkit new --template`
@@ -23,7 +23,8 @@ kb/            design, decisions, constraints (part of the hub vault)
 ## Test first
 - Red, green, refactor. New behaviour comes with tests, and a bug fix starts with a test that reproduces it.
 - Node's built-in test runner (`node --test`). Tests are offline and deterministic. Fixtures are small HTML films and
-  JSON cue sheets.
+  JSON cue sheets. The one test that renders (the smoke film's sound, measured in its MP4) needs HyperFrames' Chrome,
+  so it runs only with `FILMKIT_RENDER=1`; run it after a change to the sound.
 - **A kit or scene change** is checked by `filmkit check` on the smoke film (it mounts every scene) and on
   `examples/` in all four formats. Look at contact sheets of each before calling it done. Renders go to a temp
   directory, never into git.

@@ -140,3 +140,14 @@ test("the smoke film's sound is mastered to −19 LUFS ±0.5 with its hits held 
   assert.equal(buildSound(studio, film), null);
   assert.ok(!existsSync(sound.path));
 });
+
+// A render needs HyperFrames' Chrome and takes a minute, so it runs only when asked: FILMKIT_RENDER=1 node --test.
+test("the smoke film renders with its sound at −19 LUFS ±0.5, which HyperFrames leaves alone", { skip: process.env.FILMKIT_RENDER !== "1" && "set FILMKIT_RENDER=1 to render" }, () => {
+  const { dir } = studioCopy("../examples/studio", "smoke");
+  const cli = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
+  const render = spawnSync(process.execPath, [cli, "render", "smoke", "16x9"], { cwd: dir, encoding: "utf8" });
+  assert.equal(render.status, 0, render.stderr);
+  const measured = /** @type {{ lufs: number, truePeak: number }} */ (loudness(join(dir, "renders/smoke-16x9.mp4")));
+  assert.ok(Math.abs(measured.lufs + 19) <= 0.5, `${measured.lufs} LUFS`);
+  assert.ok(measured.truePeak <= -1, `${measured.truePeak} dBTP`);
+});
