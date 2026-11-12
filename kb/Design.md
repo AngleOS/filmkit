@@ -42,6 +42,7 @@ user's films.
   - L = 16:9, S = 1:1 and 4:5, V = 9:16;
   - safe boxes per frame (clear of the feeds' buttons), the caption box, a content column and a stage;
   - `pick({L,S,V})` for per-frame values;
+  - the chart box: the stage stopped above two caption lines (three in 9:16), with the source line on its floor;
   - `vars()` for scene variables. It merges the declared defaults back in, working around a HyperFrames quirk.
 - **motion.js (`KM`)**:
   - title entrances: blur, rise, ink, none;
@@ -50,6 +51,8 @@ user's films.
   - the motif and the logo reveal.
 
   All arrivals use expo.out over 0.5–0.7 s.
+- **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
+  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;
