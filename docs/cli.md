@@ -24,8 +24,8 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 **Assembly.** Each format is a HyperFrames project in `build/<film>/<format>/`: the film, a copy of the kit
 (`kit/layout.js`, `kit/motion.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
-`kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js` and
-`kit/motion.js`: see `examples/studio/films/smoke`.
+`kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
+`kit/motion.js` and `kit/theme/brand.js`: see `examples/studio/films/smoke`.
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
 `kb/Interfaces.md`, with absolute paths; progress and HyperFrames' own output go to stderr. Global options (`--json`,

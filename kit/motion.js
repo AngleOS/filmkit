@@ -1,5 +1,6 @@
 // The kit's motion, so every film moves alike: arrivals expo.out ~0.6 s, words blur in 6 → 0 px 0.07 s apart, a
-// press scales the cursor to 0.84, prompts type at 15 chars/s and replies stream at ~160.
+// press scales the cursor to 0.84, prompts type at 15 chars/s and replies stream at ~160, the motif draws in and the
+// logo assembles.
 // Each helper adds tweens to the scene's paused timeline `tl` at time `t` and returns the time it ends. Pass elements
 // (the scene's own document.querySelectorAll), never selector strings: these helpers run outside the scene's scope,
 // so a string would also match the same scene mounted elsewhere in the film.
@@ -67,6 +68,31 @@ var KM = (function () {
     return t + 0.4;
   };
 
+  // The theme's motif (KB.motif) draws in: each group of strokes 0.1 s after the last, stroke by stroke.
+  /** @param {gsap.core.Timeline} tl @param {Record<string, Element[]>} motif @param {number} t */
+  const drawMotif = (tl, motif, t) => {
+    const groups = Object.values(motif);
+    groups.forEach((strokes, i) =>
+      tl.fromTo(strokes, { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5, stagger: 0.04, ease: "expo.out" }, t + 0.1 * i));
+    return t + 0.1 * (groups.length - 1) + 0.5;
+  };
+  // The logo's mark (KB.lockup) arrives as two pieces that accelerate into contact along a 45° edge at `contact`, with
+  // no bounce: the sound's hit lands there. Then the mark steps left as the wordmark wipes in. L is KB.lockupBox's box.
+  /**
+   * @param {gsap.core.Timeline} tl @param {SVGSVGElement} svg
+   * @param {{ mark: Element, para: Element, tri: Element, wipe: Element }} parts
+   * @param {{ h: number, markCx: number, shift: number }} L @param {number} contact
+   */
+  const assemble = (tl, svg, parts, L, contact) => {
+    tl.fromTo(svg, { x: L.shift, scale: 1.45, transformOrigin: `${L.markCx}px ${L.h / 2}px` }, { x: L.shift, scale: 1.45, duration: 0.01 }, 0);
+    tl.fromTo(parts.mark, { opacity: 0 }, { opacity: 1, duration: 0.08, ease: "none" }, contact - 0.36);
+    tl.fromTo(parts.para, { x: -26, y: 26 }, { x: 0, y: 0, duration: 0.36, ease: "power3.in" }, contact - 0.36);
+    tl.fromTo(parts.tri, { x: 26, y: -26 }, { x: 0, y: 0, duration: 0.36, ease: "power3.in" }, contact - 0.36);
+    tl.to(svg, { x: 0, scale: 1, duration: 0.55, ease: "expo.inOut" }, contact + 0.2);
+    tl.fromTo(parts.wipe, { attr: { width: 0 } }, { attr: { width: 60 }, duration: 0.45, ease: "power2.out" }, contact + 0.4);
+    return contact + 0.85;
+  };
+
   // A copy line with *one* accent word and \n line breaks, as word spans for the entrances above.
   /** @param {string} text */
   const wordSpans = (text) =>
@@ -77,5 +103,5 @@ var KM = (function () {
       }).join(""),
     ).join("<br>");
 
-  return { words, rise, ink, out, arrive, type, press, cursorIn, cursorTo, cursorOut, wordSpans };
+  return { words, rise, ink, out, arrive, type, press, cursorIn, cursorTo, cursorOut, drawMotif, assemble, wordSpans };
 })();

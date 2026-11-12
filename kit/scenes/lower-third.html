@@ -1,0 +1,37 @@
+<template>
+  <!-- A lower third over another scene: an accent bar grows, a name and a role rise beside it, and it clears at `out`. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #lt-box { position: absolute; display: flex; gap: 24px; align-items: stretch; color: var(--foreground); }
+    #lt-bar { width: 10px; background: var(--accent); }
+    #lt-name { font: 600 48px var(--font-ui); letter-spacing: -0.02em; }
+    #lt-role { font: 400 32px var(--font-ui); color: var(--muted-foreground); margin-top: 6px; }
+  </style>
+  <div id="root" data-composition-id="lower-third" data-composition-variables='[
+    {"id":"name","type":"string","label":"Name","default":"A name"},
+    {"id":"role","type":"string","label":"Role","default":"What they do, in a few words"},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="lt-box">
+      <div id="lt-bar"></div>
+      <div><div id="lt-name"></div><div id="lt-role"></div></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { H, pick, safe } = AL;
+      const $ = (id) => document.getElementById(id);
+      $("lt-name").textContent = v.name;
+      $("lt-role").textContent = v.role;
+      gsap.set($("lt-box"), { left: safe.left, top: H - safe.bottom - pick({ L: 150, S: 170, V: 190 }) });
+
+      tl.fromTo($("lt-bar"), { scaleY: 0, transformOrigin: "50% 100%" }, { scaleY: 1, duration: 0.4, ease: "expo.out" }, 0.1);
+      KM.rise(tl, $("lt-name"), 0.2);
+      KM.rise(tl, $("lt-role"), 0.3);
+      if (v.out > 0) KM.out(tl, $("lt-box"), v.out);
+      window.__timelines["lower-third"] = tl;
+    })();
+  </script>
+</template>
