@@ -72,7 +72,7 @@
       gsap.set($("tl-rule"), { position: "absolute", ...ruleSet });
 
       const els = ticks.map((t, i) => {
-        const hi = v.highlight !== "" && when[i] === v.highlight ? " hi" : "";
+        const hi = v.highlight !== "" && when[i] === String(v.highlight) ? " hi" : "";
         const d = document.createElement("div");
         d.className = "tl-dot" + hi;
         gsap.set(d, { ...t.dot, width: dot, height: dot });

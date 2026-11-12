@@ -55,7 +55,7 @@
 
       const cards = items.map(([icon = "", line = "", source = ""], i) => {
         const card = document.createElement("div");
-        card.className = "ca-card" + (i + 1 === v.highlight ? " hi" : "");
+        card.className = "ca-card" + (i + 1 === Number(v.highlight) ? " hi" : "");
         card.innerHTML = `<div class="ca-icon">${KI.svg(icon, iconSize)}</div><div class="ca-words"><div class="ca-line"></div><div class="ca-src"></div></div>`;
         card.querySelector(".ca-line").textContent = line;
         card.querySelector(".ca-src").textContent = source;
