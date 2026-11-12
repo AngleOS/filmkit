@@ -65,13 +65,15 @@ user's films.
     after, with the delta), `grid` (n of m lit, with a bracket), `cards` (flip-in cards with source lines),
     `timeline` (ticks on a ruler), `mesh` (nodes connecting, with a pulse), `meter`;
   - **captions:** `captions`. It draws nothing; it is the source of the SRT/VTT, and `burn` puts them in the picture.
-- **sound**:
-  - cues from the picture (impact, tick, whoosh, type…) resolved against scene starts;
-  - a tonal chord pad;
+- **sound**, from the film's `sound.json` (how to write it: `docs/sound.md`):
+  - cues from the picture (impact, tick, whoosh, type…), each placed by a scene's `id` and seconds into it, resolved
+    against the master's scene starts, so a retimed scene keeps its sound;
+  - a tonal chord pad (`kit/sound/pad.js`) on the chords, blooms and pockets;
   - a foley stem from the vendored sound-sheet renderer (MIT);
-  - mixed and mastered to −19 LUFS and −1 dBTP with ffmpeg.
+  - mixed with the pad `bed` dB under the foley and mastered to −19 LUFS and −1 dBTP with ffmpeg (two-pass
+    `loudnorm`), as `build/<film>/sound.m4a`, which every format mounts as an `<audio>`.
 
-  There is no licensed music.
+  Both renderers are deterministic, so the sound is rebuilt only when its score changes. There is no licensed music.
 - **seam**: the loop gate for hooks. It fails when the last frame doesn't flow into frame 0.
 - **captions**: the captions scene's lines become `<film>.srt` and `.vtt`.
 

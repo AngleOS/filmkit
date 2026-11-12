@@ -5,14 +5,14 @@ the one `--studio <dir>` names.
 
 ```
 filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
-films/<name>/       index.html (the master), compositions/ (the film's own scenes), assets
+films/<name>/       index.html (the master), compositions/ (the film's own scenes), sound.json, assets
 build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
 | Command | What it does |
 |---|---|
-| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings, and a loop's seam gate |
+| `check <film> [formats…]` | builds the film's sound, then assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings, and a loop's seam gate |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `preview <film> [format]` | HyperFrames Studio on one format |
 | `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions |
@@ -39,14 +39,18 @@ the last frame back to frame 0 is over max(0.4, 1.5 × the median step at the en
 still passes when nothing changes. The rules for making one are in
 `skills/filmkit/references/look-and-motion.md` § Hook loops, and `examples/studio/films/loop` is one.
 
+**Sound.** A film with a `sound.json` gets `build/<film>/sound.m4a`, built by `check` (so `render` and `stills` too) and
+`preview`, mastered to −19 LUFS and −1 dBTP and mounted in every format. `check` prints its loudness and fails when it
+can't be built. How to write `sound.json`: [sound.md](sound.md).
+
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as
 `start-end text`, one per line, in seconds of the scene. `render` and `captions` write them, moved to the film's time,
 as `renders/<film>.srt` and `.vtt`: one pair serves every format, to upload as closed captions. A film with no captions
 scene gets no files. With `burn` the scene also draws them into the picture, in `AL.captions`.
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
-`kb/Interfaces.md` (`captions` and `stills` as the MCP tools of the same name, `doctor` as
-`{ ok, checks: [{ name, ok, detail, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
+`kb/Interfaces.md` (`check`'s `sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same
+name; `doctor` as `{ ok, checks: [{ name, ok, detail, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
 
 **Exit codes.** `0` ok, `1` the film failed a check, `2` a usage error (no studio, an unknown film, format or option),
