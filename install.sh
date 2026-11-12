@@ -28,10 +28,13 @@ say() { printf '%s\n' "$*"; }
 step() { printf '%s▸%s %s\n' "$P" "$R" "$*"; }
 die() { printf '%sfilmkit install:%s %s\n' "$B" "$R" "$*" >&2; exit 1; }
 
+# /dev/tty exists even without a controlling terminal (an agent's subprocess), so open it to find out.
+tty_ok() { (: < /dev/tty) 2> /dev/null; }
+
 # Questions read from the terminal, not stdin, so they work when the script is piped from curl.
 ask() {
   [ "$YES" = 1 ] && return 0
-  [ -r /dev/tty ] || die "$1 Re-run with --yes to accept, or install it yourself."
+  tty_ok || die "$1 Re-run with --yes to accept, or install it yourself."
   printf '%s [Y/n] ' "$1" > /dev/tty
   read -r reply < /dev/tty || reply=
   case $reply in [nN]*) return 1 ;; *) return 0 ;; esac
@@ -54,8 +57,8 @@ install_pkg() {  # install_pkg <what> <brew> <apt> <dnf> <pacman>
   case $(pm) in
     brew) brew install "$2" ;;
     apt) sudo_if_needed apt-get update -qq && sudo_if_needed apt-get install -y "$3" ;;
-    dnf) sudo_if_needed dnf install -y "$4" ;;
-    pacman) sudo_if_needed pacman -S --noconfirm "$5" ;;
+    dnf) sudo_if_needed dnf install -y "$4" || die "dnf couldn't install $4: for ffmpeg, enable RPM Fusion or install ffmpeg-free, then re-run" ;;
+    pacman) sudo_if_needed pacman -Sy --needed --noconfirm "$5" ;;
     none) die "no package manager found to install $1: install it from its website, then re-run" ;;
   esac
 }
@@ -87,9 +90,12 @@ if have ffmpeg; then
   say "  ${D}$(ffmpeg -version 2>/dev/null | head -1 | cut -d' ' -f1-3)${R}"
 else
   ask "ffmpeg isn't installed (Filmkit mixes sound and encodes video with it). Install it now?" || die "Filmkit needs ffmpeg (https://ffmpeg.org)."
-  install_pkg ffmpeg ffmpeg ffmpeg ffmpeg ffmpeg
+  # Fedora ships ffmpeg-free; the full ffmpeg needs RPM Fusion.
+  install_pkg ffmpeg ffmpeg ffmpeg ffmpeg-free ffmpeg
   have ffmpeg || die "ffmpeg still isn't on PATH after installing"
 fi
 
 step "Setting up Filmkit"
+# Under `curl | sh` stdin is the spent script pipe, so setup's walkthrough reads the terminal instead.
+if [ "$YES" = 0 ] && tty_ok; then exec npx -y "$FILMKIT_PKG" setup "$@" < /dev/tty; fi
 exec npx -y "$FILMKIT_PKG" setup "$@"
