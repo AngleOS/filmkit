@@ -1,6 +1,6 @@
 import { mkdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { writeCaptions } from "../../build/captions.js";
+import { readCaptions, writeCaptions } from "../../build/captions.js";
 import { hyperframes } from "../../hyperframes.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 import { checkFilm } from "./check.js";
@@ -12,6 +12,8 @@ export const summary = "check, then renders/<film>-<format>.mp4 at delivery qual
 export async function run({ args, options, json, log }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
+  // Read before the long renders, so a broken captions host fails first rather than after every MP4.
+  const lines = readCaptions(film);
   const checked = checkFilm(studio, film, resolveFormats(studio, film, args.slice(1)), log);
   if (!checked.ok) return { ...checked, renders: [] };
   const renders = join(studio.dir, "renders");
@@ -27,7 +29,7 @@ export async function run({ args, options, json, log }) {
     rendered.push({ format, path, seconds: +film.root["data-duration"], bytes: statSync(path).size });
     log(path);
   }
-  const { srt, vtt } = writeCaptions(studio, film);
+  const { srt, vtt } = writeCaptions(studio, film, lines);
   if (srt) log(`${srt}\n${vtt}`);
   if (failed.length) log(`✗ ${film.name}: render failed in ${failed.join(", ")}`);
   return { film: film.name, ok: !failed.length, renders: rendered, captions: { srt, vtt }, ...(failed.length && { failed, exit: 4 }) };

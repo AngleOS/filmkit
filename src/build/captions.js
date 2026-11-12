@@ -76,18 +76,25 @@ export const srt = (lines) => lines.map((l, i) => `${i + 1}\n${stamp(l.start, ",
 export const vtt = (lines) => "WEBVTT\n\n" + lines.map((l) => `${stamp(l.start, ".")} --> ${stamp(l.end, ".")}\n${l.text}\n`).join("\n");
 
 /**
- * Writes renders/<film>.srt and .vtt, replacing the last ones. A film with no captions gets no files.
- * @param {import("../studio.js").Studio} studio
+ * The film's caption lines; a broken captions host is a usage error that names the film.
  * @param {import("../studio.js").Film} film
- * @returns {{ srt: string | null, vtt: string | null, lines: CaptionLine[] }}
  */
-export function writeCaptions(studio, film) {
-  let lines;
+export function readCaptions(film) {
   try {
-    lines = captionLines(film.html);
+    return captionLines(film.html);
   } catch (e) {
     throw new FilmkitError(`films/${film.name}/index.html: ${/** @type {Error} */ (e).message}`);
   }
+}
+
+/**
+ * Writes renders/<film>.srt and .vtt, replacing the last ones. A film with no captions gets no files.
+ * @param {import("../studio.js").Studio} studio
+ * @param {import("../studio.js").Film} film
+ * @param {CaptionLine[]} [lines]
+ * @returns {{ srt: string | null, vtt: string | null, lines: CaptionLine[] }}
+ */
+export function writeCaptions(studio, film, lines = readCaptions(film)) {
   const renders = join(studio.dir, "renders");
   const paths = { srt: join(renders, `${film.name}.srt`), vtt: join(renders, `${film.name}.vtt`) };
   for (const path of Object.values(paths)) rmSync(path, { force: true });

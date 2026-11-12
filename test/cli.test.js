@@ -87,3 +87,12 @@ test("doctor reports each requirement and exits 3 when one is missing", () => {
   assert.equal(ok, false);
   assert.deepEqual(checks.map((/** @type {{ name: string, ok: boolean }} */ c) => [c.name, c.ok]), [["Node.js", true], ["ffmpeg", false], ["HyperFrames", false]]);
 });
+
+test("render reads the captions before it renders, so a broken captions host fails first", () => {
+  const dir = studioCopy();
+  const page = join(dir, "films/plain/index.html");
+  writeFileSync(page, readFileSync(page, "utf8").replace("</div>\n", `<div id="cc" data-composition-src="kit/scenes/captions.html" data-start="cc" data-duration="3"></div>\n$&`));
+  const { status, stderr } = filmkit(["render", "plain"], dir, { ...process.env, PATH: "/nonexistent" });
+  assert.equal(status, 2);
+  assert.match(stderr, /films\/plain\/index\.html: start of "cc" is circular/);
+});
