@@ -1,6 +1,6 @@
 // HyperFrames renders every film, run through npx at one pinned version: the pin is what makes a re-render identical.
 // Move it only for a fix that matters, then check every example film in every format.
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { RequirementError } from "./studio.js";
 
 export const HYPERFRAMES = "hyperframes@0.8.186";
@@ -26,4 +26,24 @@ export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
   }
   if (error) throw error;
   return { ok: status === 0, stdout: stdout ?? "" };
+}
+
+/**
+ * Starts the pinned HyperFrames CLI in `cwd` and leaves it running, its stdout piped to the caller. It runs in its own
+ * process group so that stop() ends HyperFrames itself: npx doesn't pass a signal on to the CLI it started.
+ * @param {string[]} args
+ * @param {{ cwd: string }} options
+ */
+export function startHyperframes(args, { cwd }) {
+  const group = process.platform !== "win32";
+  const child = spawn("npx", ["--yes", HYPERFRAMES, ...args], { cwd, stdio: ["ignore", "pipe", "inherit"], detached: group });
+  const stop = () => {
+    try {
+      if (group && child.pid) process.kill(-child.pid, "SIGTERM");
+      else child.kill();
+    } catch {
+      // it has already exited
+    }
+  };
+  return { child, stop };
 }
