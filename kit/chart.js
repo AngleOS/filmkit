@@ -49,6 +49,49 @@ var KC = (function () {
     return Array.from({ length: n }, (_, i) => ({ start: R(slot * i + (slot - size) / 2), size, centre: R(slot * i + slot / 2) }));
   };
 
+  // A scene's items, one a line, their fields split at "|": cards ("icon | line | source"), ticks ("when | what").
+  /** @param {string} text */
+  const fields = (text) =>
+    text.split("\n").filter((line) => line.trim()).map((line) => line.split("|").map((f) => f.trim()));
+
+  // m square cells in `width` × `height`: the largest that fits (at most `most` px, `gap` of a cell apart), fewer rows
+  // on a tie, or in `rows` rows when set. Filled a column at a time, so the first n cells are the left columns and a
+  // bracket under them spans just those.
+  /** @param {number} m @param {number} width @param {number} height @param {{ most?: number, gap?: number, rows?: number }} [options] */
+  const grid = (m, width, height, { most = Infinity, gap = 0.25, rows: asked = 0 } = {}) => {
+    let best = { size: -1, rows: 1 };
+    for (let rows = asked || 1; rows <= (asked || m); rows++) {
+      const cols = Math.ceil(m / rows);
+      const size = Math.floor(Math.min(most, width / (cols + gap * (cols - 1)), height / (rows + gap * (rows - 1))));
+      if (size > best.size) best = { size, rows };
+    }
+    const { size, rows } = best, cols = Math.ceil(m / rows), g = R(size * gap), step = size + g;
+    const cells = Array.from({ length: m }, (_, i) => ({ x: Math.floor(i / rows) * step, y: (i % rows) * step }));
+    return { cols, rows, size, gap: g, width: cols * step - g, height: rows * step - g, cells };
+  };
+  // How wide the columns holding a grid's first n cells are.
+  /** @param {{ rows: number, size: number, gap: number }} g @param {number} n */
+  const span = (g, n) => Math.ceil(n / g.rows) * (g.size + g.gap) - g.gap;
+
+  // Where n ticks sit along `length` px: evenly, or to scale between the first and last value, half a slot in from
+  // each end so the end labels fit.
+  /** @param {number[]} values @param {number} length @param {string} spacing "scale", else even */
+  const ticks = (values, length, spacing) => {
+    const lo = Math.min(...values), hi = Math.max(...values), slot = length / values.length;
+    if (spacing !== "scale" || hi === lo) return bands(values.length, length).map((b) => b.centre);
+    return values.map((v) => R(slot / 2 + ((v - lo) / (hi - lo)) * (length - slot)));
+  };
+  // Label centres at `xs`, pushed at least `least` apart and kept within lo..hi: a label stays as near its tick as
+  // its neighbours allow.
+  /** @param {number[]} xs @param {number} least @param {number} lo @param {number} hi */
+  const spread = (xs, least, lo, hi) => {
+    /** @type {number[]} */
+    const out = [];
+    xs.forEach((x, i) => out.push(Math.max(x, i ? out[i - 1] + least : lo)));
+    for (let i = out.length - 1; i >= 0; i--) out[i] = Math.min(out[i], i < out.length - 1 ? out[i + 1] - least : hi);
+    return out;
+  };
+
   // How wide a line sets at `size` px: an upper bound for the theme's fonts, since a scene lays out before they load.
   /** @param {string} text @param {number} size */
   const textWidth = (text, size) => Math.ceil(text.length * size * 0.62);
@@ -58,6 +101,18 @@ var KC = (function () {
   const fit = (texts, width, size, least = 28) => {
     const longest = Math.max(1, ...texts.map((t) => t.length));
     return Math.max(least, Math.min(size, Math.floor(width / (longest * 0.62))));
+  };
+
+  // How many lines `text` wraps to in `width` at `size` px, a word at a time.
+  /** @param {string} text @param {number} width @param {number} size */
+  const lines = (text, width, size) => {
+    const most = Math.max(1, Math.floor(width / (size * 0.62)));
+    let count = 0, line = -1;
+    for (const word of text.split(/\s+/).filter(Boolean)) {
+      if (line < 0 || line + 1 + word.length > most) [count, line] = [count + 1, word.length];
+      else line += 1 + word.length;
+    }
+    return count;
   };
 
   // A label `h` tall at `top` that a line at `y` would strike through moves to sit on the line instead.
@@ -92,6 +147,6 @@ var KC = (function () {
     return t + dur;
   };
 
-  return { format, rows, top, lengths, bands, textWidth, fit, clear, delta, steps, roll };
+  return { format, rows, fields, top, lengths, bands, grid, span, ticks, spread, textWidth, fit, lines, clear, delta, steps, roll };
 })();
 window.KC = KC;

@@ -1,0 +1,102 @@
+<template>
+  <!-- n of m lit: a grid of square cells (plain, or each an icon) arrives, then the first n light in the accent, a
+       column at a time, and a bracket under their columns carries the label. Sits in AL.chart, under a title placed
+       at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #gr-cells, #gr-lab, #gr-sub { position: absolute; }
+    .gr-cell, .gr-lit { position: absolute; display: grid; place-items: center; border-radius: 18%; }
+    .gr-cell.icon, .gr-lit.icon { border: 2px solid color-mix(in srgb, var(--foreground) 22%, transparent); color: var(--muted-foreground); }
+    .gr-lit.icon { border-color: var(--accent); color: var(--accent); }
+    .gr-cell svg, .gr-lit svg { width: 62%; height: 62%; }
+    #gr-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #gr-bracket { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+    #gr-lab { text-align: center; color: var(--foreground); font-weight: 500; }
+    #gr-sub { text-align: center; }
+  </style>
+  <div id="root" data-composition-id="grid" data-composition-variables='[
+    {"id":"total","type":"number","label":"Cells in all","default":10},
+    {"id":"lit","type":"number","label":"Cells lit, in the accent","default":7},
+    {"id":"rows","type":"number","label":"Rows (0 = the largest cells that fit)","default":0},
+    {"id":"icon","type":"string","label":"An icon in each cell, such as cpu or user (empty for plain squares); kit/icons.js lists them","default":""},
+    {"id":"label","type":"string","label":"The label under a bracket below the lit cells (empty for no bracket)","default":"7 of 10"},
+    {"id":"sub","type":"string","label":"A line under the label","default":""},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="gr-cells"></div>
+    <svg id="gr-svg"><path id="gr-bracket" pathLength="1" /></svg>
+    <div id="gr-lab"></div>
+    <div id="gr-sub" class="chart-label"></div>
+    <div id="gr-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const total = Math.max(1, R(v.total)), lit = Math.max(0, Math.min(total, R(v.lit)));
+      const room = AL.source($("gr-source"), v.source);
+      // Under the grid: the bracket, its label and the line under it, each only when there is one.
+      const labSize = pick({ L: 40, S: 36, V: 40 }), subSize = pick({ L: 30, S: 28, V: 30 });
+      const bracketH = 18, braced = v.label && lit > 0;
+      const under = (braced ? 22 + bracketH + 10 + 24 + R(labSize * 1.3) : 0) + (braced && v.sub ? 8 + R(subSize * 1.3) : 0);
+      const g = KC.grid(total, chart.width, chart.height - room - under, { most: pick({ L: 120, S: 100, V: 116 }), rows: R(v.rows) });
+      // 16:9 sets the grid left under its left-aligned title; the narrow frames centre it. The block sits on the
+      // middle of the room the source leaves.
+      const left = mode === "L" ? chart.left : R(chart.left + (chart.width - g.width) / 2);
+      const top = chart.top + Math.max(0, R((chart.height - room - under - g.height) / 2));
+      gsap.set($("gr-cells"), { left, top, width: g.width, height: g.height });
+
+      const icon = v.icon ? KI.svg(v.icon) : "";
+      const cells = g.cells.map((c, i) => {
+        const cell = document.createElement("div");
+        cell.className = icon ? "gr-cell icon" : "gr-cell chart-track";
+        cell.innerHTML = icon;
+        gsap.set(cell, { left: c.x, top: c.y, width: g.size, height: g.size });
+        $("gr-cells").appendChild(cell);
+        if (i >= lit) return { cell };
+        const on = document.createElement("div");
+        on.className = icon ? "gr-lit icon" : "gr-lit chart-mark hi";
+        on.innerHTML = icon;
+        gsap.set(on, { left: c.x, top: c.y, width: g.size, height: g.size });
+        $("gr-cells").appendChild(on);
+        return { cell, on };
+      });
+
+      // The bracket: down, across with a notch at its middle, and up, under the lit cells' columns.
+      const x1 = left, x2 = left + KC.span(g, lit), y = top + g.height + 22, mid = R((x1 + x2) / 2);
+      $("gr-svg").setAttribute("viewBox", `0 0 ${W} ${H}`);
+      $("gr-bracket").setAttribute("d", braced ? `M ${x1} ${y} v ${bracketH} H ${mid - 10} l 10 10 l 10 -10 H ${x2} v ${-bracketH}` : "");
+      // The label centres on the bracket, but a short bracket's label stays inside the chart box.
+      const place = (el, text, size, at) => {
+        const w = Math.min(chart.width, KC.textWidth(text, size));
+        el.textContent = text;
+        gsap.set(el, { left: Math.max(chart.left, Math.min(mid - R(w / 2), chart.left + chart.width - w)), width: w, top: at, fontSize: size, lineHeight: 1.3, whiteSpace: "nowrap" });
+      };
+      const labTop = y + bracketH + 10 + 24;
+      if (braced) place($("gr-lab"), v.label, labSize, labTop);
+      if (braced && v.sub) place($("gr-sub"), v.sub, subSize, labTop + R(labSize * 1.3) + 8);
+
+      // The cells arrive together, then light a column at a time (in 1.2 s at most however many), then the bracket
+      // draws and its label lands.
+      tl.fromTo(cells.map((c) => c.cell), { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.5, stagger: Math.min(0.04, 0.6 / total), ease: "expo.out" }, 0.1);
+      const step = Math.min(0.13, 1.2 / Math.max(1, lit)), lights = 0.8;
+      cells.forEach((c, i) => c.on && tl.fromTo(c.on, { opacity: 0, scale: 1.12 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, lights + i * step));
+      const drawn = lights + lit * step + 0.1;
+      if (braced) {
+        tl.fromTo($("gr-bracket"), { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.6, ease: "expo.out" }, drawn);
+        KM.arrive(tl, $("gr-lab"), drawn + 0.3);
+        if (v.sub) tl.fromTo($("gr-sub"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, drawn + 0.6);
+      }
+      tl.fromTo($("gr-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("gr-cells"), $("gr-svg"), $("gr-lab"), $("gr-sub"), $("gr-source")], v.out);
+      window.__timelines["grid"] = tl;
+    })();
+  </script>
+</template>

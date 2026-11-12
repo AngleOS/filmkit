@@ -53,7 +53,10 @@ user's films.
 
   All arrivals use expo.out over 0.5–0.7 s.
 - **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
-  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time.
+  placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time; a grid's
+  cells (the largest square that fits, filled a column at a time so a bracket spans the lit columns), ticks evenly or
+  to scale, labels spread clear of each other, and a line's wrap.
+- **icons.js (`KI`)**: a small lucide set (ISC) for `cards` and `grid`, stroked in the text colour.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;
@@ -87,11 +90,11 @@ user's films.
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
-| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format, and the seam gate for loops; non-zero exit on failure |
+| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
 | `preview <film> [format]` | HyperFrames Studio |
-| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt` |
+| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt`; keeps MP4s still current (`--force` redoes all) |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |

@@ -31,11 +31,14 @@ piece. The brand comes from the studio's theme (`filmkit.json`); never hard-code
 - **Nothing decorative moves on UI.** No floating, no wobble.
 
 ## Infographics
-- **Use the kit's scenes** (`bars`, `counter`, `stat`) under a title placed at the top (`"place": "top"`, `"ground":
+- **Use the kit's scenes** (`bars`, `counter`, `stat`, `grid`, `cards`, `timeline`) under a title placed at the top (`"place": "top"`, `"ground":
   "none"`, or `"over-paper"` over a paper chart). They sit in `AL.chart`, which stops above the caption block.
 - **Every chart has a `source`**: one short line, on the chart's floor. Keep it to one line in 9:16 (about 55
   characters); `check` flags one that runs out of the frame.
-- **One highlight,** in the accent: the bar the title is about, the counter's number, the after bar and its delta.
+- **One highlight,** in the accent: the bar the title is about, the counter's number, the after bar and its delta, the
+  lit cells and their bracket, one card, one tick.
+- **Cards carry one short line each,** with their own source line under it; three at most. A timeline's ticks sit
+  evenly, or to scale (by the year in each) as far as their labels allow.
 - **Values are drawn to scale** from zero; a reference line (a cap, a goal) is drawn before the bars rise to it.
 
 ## Motion
