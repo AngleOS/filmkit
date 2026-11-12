@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
-// A static export for GitHub Pages. The site lives under /filmkit on angleos.github.io, so the build takes the base
-// path from SITE_BASE_PATH (the Pages workflow sets it; local dev and Lighthouse run at /).
+// A static export for GitHub Pages, served at the root of filmkit.anglehq.net (D-009). SITE_BASE_PATH stays available
+// for a build served under a path (e.g. angleos.github.io/filmkit), but the deployed site needs none.
 const basePath = process.env.SITE_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {

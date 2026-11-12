@@ -2,7 +2,8 @@ name: site
 
 # The marketing one-pager (site/): lint, types, tests with axe, the static build, and Lighthouse (mobile) asserted at
 # 0.95+ for performance, best practices and SEO and 1.0 for accessibility (site/lighthouserc.json). On master it deploys
-# to GitHub Pages at https://angleos.github.io/filmkit/. Self-hosted runners only (AngleOS CI policy); Lighthouse needs
+# to GitHub Pages at https://filmkit.anglehq.net/ (the custom domain is set on the repo's Pages settings, and
+# public/CNAME carries it in the artifact). Self-hosted runners only (AngleOS CI policy); Lighthouse needs
 # x64 Chrome, which the runner image has.
 on:
   pull_request:
@@ -69,9 +70,7 @@ jobs:
           node-version: 26
       - run: npm install -g pnpm@10.27.0
       - run: pnpm install --frozen-lockfile
-      - name: Build for Pages (/filmkit)
-        env:
-          SITE_BASE_PATH: /filmkit
+      - name: Build for Pages (filmkit.anglehq.net, served at the root)
         run: pnpm build && touch out/.nojekyll
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
       # A Pages artifact is a few MB and kept a day, well inside the account's artifact quota.

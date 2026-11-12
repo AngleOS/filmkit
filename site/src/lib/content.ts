@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import type { InstallPath } from "@/components/install-tabs";
 
-export const SITE_URL = "https://angleos.github.io/filmkit/";
+export const SITE_URL = "https://filmkit.anglehq.net/";
 export const REPO_URL = "https://github.com/AngleOS/filmkit";
 export const asset = (path: string) => `${process.env.SITE_BASE_PATH ?? ""}${path}`;
 
