@@ -195,7 +195,7 @@ export const CATALOGUE = {
   },
   no_report: {
     exit: 1,
-    message: () => "HyperFrames gave no report.",
+    message: ({ why }) => `HyperFrames gave no report${why ? ` (${why})` : ""}.`,
     fix: () => ["See what's missing with", "filmkit doctor"],
     why: "check runs HyperFrames on each format and reads its report. With none, HyperFrames itself didn't run: " +
       "most often it couldn't be fetched (the first run needs the network) or Chrome is missing. `filmkit doctor` " +

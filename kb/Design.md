@@ -87,11 +87,11 @@ user's films.
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
-| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format, and the seam gate for loops; non-zero exit on failure |
+| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
 | `preview <film> [format]` | HyperFrames Studio |
-| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt` |
+| `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt`; keeps MP4s still current (`--force` redoes all) |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
