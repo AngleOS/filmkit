@@ -30,7 +30,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
   "formats": [
     { "format": "16x9", "ok": true,  "errors": [], "warnings": [{ "code": "line_unread", "message": "…", "selector": "#t-sub" }] },
     { "format": "9x16", "ok": false, "errors": [{ "code": "text_box_overflow", "message": "…", "selector": "#src" }], "warnings": [],
-      "seam": { "ok": true, "step": 0.21, "limit": 0.4 } }      // loops only
+      "seam": { "ok": true, "step": 0.21, "median": 0.12, "limit": 0.4 } }      // loops only; { ok: false, error } when its frames didn't render
   ],
   "sound": { "built": true, "lufs": -19.0 } }
 
@@ -41,6 +41,12 @@ the MCP server share one implementation: MCP tools call the same functions the C
 // render
 { "film": "launch", "renders": [{ "format": "16x9", "path": "/abs/renders/launch-16x9.mp4", "seconds": 45.2, "bytes": 6405542 }],
   "captions": { "srt": "/abs/renders/launch.srt", "vtt": "/abs/renders/launch.vtt" } }
+
+// init  (`filmkit init [dir] --json`): what it wrote, and what was already there and kept
+{ "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/filmkit.json", "…"], "kept": [] }
+
+// new  (`filmkit new <film> [--template t] --json`)
+{ "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }
 
 // scenes
 { "scenes": [{ "name": "bars", "description": "…", "variables": [{ "id": "values", "type": "string", "label": "…", "default": "…" }] }] }

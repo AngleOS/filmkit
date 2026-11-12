@@ -8,7 +8,7 @@
     #mk-line { position: absolute; left: 0; right: 0; text-align: center; color: var(--foreground); }
   </style>
   <div id="root" data-composition-id="mark" data-composition-variables='[
-    {"id":"line","type":"string","label":"Line under the logo","default":"Made for *you.*"},
+    {"id":"line","type":"string","label":"Line under the logo (empty for none)","default":"Made for *you.*"},
     {"id":"contact","type":"number","label":"The pieces meet at (s)","default":1},
     {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
   ]'>
@@ -31,7 +31,7 @@
       KM.drawMotif(tl, KB.motif(motif), Math.max(0, c - 0.66));
       tl.to(motif, { opacity: 0.22, duration: 0.5, ease: "power2.out" }, c);
       KM.assemble(tl, svg, KB.lockup(svg), L, c);
-      KM.words(tl, line.querySelectorAll(".word"), c + 0.95);
+      if (v.line) KM.words(tl, line.querySelectorAll(".word"), c + 0.95);
       if (v.out > 0) KM.out(tl, [svg, line, motif], v.out);
       window.__timelines["mark"] = tl;
     })();
