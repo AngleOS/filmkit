@@ -6,16 +6,16 @@ the one `--studio <dir>` names.
 ```
 filmkit.json        { "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default" }
 films/<name>/       index.html (the master), compositions/ (the film's own scenes), assets
-build/              git-ignored: build/<film>/<format>/, rebuilt on every run; never edit it
+build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
 | Command | What it does |
 |---|---|
-| `check <film> [formats…]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings |
+| `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `preview <film> [format]` | HyperFrames Studio on one format |
-| `render <film> [formats…]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions |
+| `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
@@ -29,6 +29,13 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
 `kit/motion.js` and `kit/theme/brand.js`: see `examples/studio/films/smoke`.
+
+**Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop.
+It hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version)
+and skips a format whose hash matches its last pass, in `build/<film>/<format>/.filmkit-hash`, printing
+`16x9 unchanged ✓` with the warnings it passed with. A failed format is always checked again. `render` keeps an MP4
+made from the same hash (`build/<film>/render-<format>.json`), so an interrupted render redoes only what's missing or
+stale. Renders run one at a time, as each already uses every core. `--force` redoes everything.
 
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as
 `start-end text`, one per line, in seconds of the scene. `render` and `captions` write them, moved to the film's time,
