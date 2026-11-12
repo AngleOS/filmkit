@@ -156,5 +156,7 @@ ca-server reboots), and GitHub-only deploys. Pages serves the site publicly whil
 **Consequences:** the build needs no base path (`SITE_BASE_PATH` stays for a build served under a path). Canonical,
 OG and sitemap URLs come from `SITE_URL` in `site/src/lib/content.ts`.
 
+- **D-20261112-13-delegated** (AngleOS/filmkit#13, 2026-11-12 20:11 UTC): filmkit's npm release job (only on v* tags) runs on a GitHub-hosted ubuntu-latest runner so the package is published with npm provenance; all CI stays on the self-hosted runners and hosted use stays within the included minutes ($0 spending limit). *Why:* A — put only the release job on `ubuntu-latest` and publish with `npm publish --provenance`. `ci.yml` stays on `[self-hosted, ci, Linux]`. Why: - **Cost.** The release job runs about 2 minutes per `v*` tag. That fits in the plan's included Actions minutes, and the org's spending limit stays at $0, so it can never cost money. The rule is "included quota only, never overage", not "never hosted". Once the repo is public, the minutes are free. - **Provenance is worth it.** Provenance is the supply-chain proof users get for a CLI they run through `npx`. We would lose it on self-hosted runners and c *Reverse:* In .github/workflows/release.yml set runs-on back to [self-hosted, ci, Linux] and drop --provenance (and the id-token permission). (decided by the Expert)
+
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
