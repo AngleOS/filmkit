@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- {{film}}: a statement, from filmkit's statement template. The motif draws, the promise blurs in over it, then
+         the end card's sting. The beats and what to change are in brief.md. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="12" data-width="1920" data-height="1080">
+      <div id="motif" data-composition-id="motif" data-composition-src="kit/scenes/motif.html" data-start="0" data-duration="6.5" data-track-index="1" data-track-kind="graphics"></div>
+      <div id="promise" data-hold data-composition-id="promise" data-composition-src="kit/scenes/title.html" data-start="0.3" data-duration="6.2" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"{{name}}, in one *line.*","ground":"none","out":5.7}'></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="kit/scenes/endcard.html" data-start="6.5" data-duration="5.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"line":"Now available","cta":"example.com"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="12" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.5-6.0 {{name}}, in one line."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

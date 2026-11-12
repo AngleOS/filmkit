@@ -42,6 +42,12 @@ the MCP server share one implementation: MCP tools call the same functions the C
 { "film": "launch", "renders": [{ "format": "16x9", "path": "/abs/renders/launch-16x9.mp4", "seconds": 45.2, "bytes": 6405542 }],
   "captions": { "srt": "/abs/renders/launch.srt", "vtt": "/abs/renders/launch.vtt" } }
 
+// init  (`filmkit init [dir] --json`): what it wrote, and what was already there and kept
+{ "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/filmkit.json", "…"], "kept": [] }
+
+// new  (`filmkit new <film> [--template t] --json`)
+{ "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }
+
 // scenes
 { "scenes": [{ "name": "bars", "description": "…", "variables": [{ "id": "values", "type": "string", "label": "…", "default": "…" }] }] }
 ```
