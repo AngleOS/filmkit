@@ -70,6 +70,10 @@ One master; each format is laid out for its own frame with `AL.pick({L, S, V})`.
   Text is fully on or fully off there.
 - **The returning state is its own layer.** A `fromTo` late in a timeline renders its from-state at frame 0 and blanks
   the poster.
+- **Or keep moving at one speed:** a cycle whose frame at the end would be frame 0 (a dot once round a ring) carries
+  on across the seam. The gate passes a seam step up to 1.5 × the median step at the ends.
+- **`check`'s `line_unread` on a loop's first and last lines counts one side of the seam only,** though the line is on
+  screen on both. Give the returning line 2 s anyway, and the warning stays quiet.
 
 See [formats](research/launch-video-formats.md) for the measured rules behind loops and vertical cuts.
 
