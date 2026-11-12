@@ -23,6 +23,12 @@
   --font-mono: "Geist Mono", monospace;
   --title-weight: 600;
   --title-tracking: -0.035em;
+  /* Code: the syntax colours of the code scene. */
+  --code-keyword: #ffab8a;
+  --code-string: #a5d6ff;
+  --code-title: #d2a8ff;
+  --code-number: #79c0ff;
+  --code-attr: #ffd08a;
 }
 
 /* Text on paper. */
@@ -30,4 +36,9 @@
   --foreground: #16171c;
   --muted-foreground: #5b5d66;
   --accent: #c2410c;
+  --code-keyword: #b42318;
+  --code-string: #0a3069;
+  --code-title: #6639ba;
+  --code-number: #0550ae;
+  --code-attr: #8a4b00;
 }
