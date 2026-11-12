@@ -1,0 +1,45 @@
+<template>
+  <!-- A title card, or a title over another scene (ground "none", place "top" or "head"). *One* word in the accent; \n
+       breaks a line. Entrances: blur for statements, rise for section titles, ink (grey to full) for a promise, none
+       for a line already on screen at frame 0 (a loop's poster). -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ti-box { position: absolute; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px; text-align: center; }
+    #ti-text { color: var(--foreground); text-wrap: balance; }
+    #ti-sub { font: 400 44px var(--font-ui); color: var(--muted-foreground); letter-spacing: -0.01em; }
+  </style>
+  <div id="root" data-composition-id="title" data-composition-variables='[
+    {"id":"text","type":"string","label":"Title","default":"A title, with *one* word in the accent."},
+    {"id":"sub","type":"string","label":"Second line","default":""},
+    {"id":"entrance","type":"enum","label":"Entrance","default":"blur","options":[{"value":"blur","label":"Blur in, word by word"},{"value":"rise","label":"Rise out of a mask"},{"value":"ink","label":"Grey to full, word by word"},{"value":"none","label":"None: on from the first frame"}]},
+    {"id":"place","type":"enum","label":"Place","default":"center","options":[{"value":"center","label":"Centre of the frame"},{"value":"top","label":"Top, over a product shot"},{"value":"head","label":"Top, at statement size (a vertical hook)"}]},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="ti-box"><div id="ti-text" class="display"></div><div id="ti-sub"></div></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, safe } = AL;
+      AL.ground(document.getElementById("root"), v.ground);
+
+      const box = document.getElementById("ti-box"), text = document.getElementById("ti-text"), sub = document.getElementById("ti-sub");
+      const top = v.place !== "center";
+      gsap.set(box, { left: safe.left, width: W - safe.left - safe.right, top: safe.top, height: top ? "auto" : H - safe.top - safe.bottom, alignItems: top && AL.mode === "L" ? "flex-start" : "center", textAlign: top && AL.mode === "L" ? "left" : "center" });
+      gsap.set(text, { fontSize: v.place === "top" ? pick({ L: 72, S: 64, V: 84 }) : pick({ L: 104, S: 84, V: 120 }) });
+      gsap.set(sub, { fontSize: pick({ L: 44, S: 48, V: 60 }) });
+      // Each line is its own block, so a long one wraps balanced on its own instead of leaving a word alone.
+      text.innerHTML = v.text.split("\n").map((line) => `<div>${KM.wordSpans(line)}</div>`).join("");
+      sub.innerHTML = KM.wordSpans(v.sub);
+
+      const words = text.querySelectorAll(".word");
+      const enter = { blur: () => KM.words(tl, words, 0.15), rise: () => KM.rise(tl, text, 0.15), ink: () => KM.ink(tl, words, 0.15) }[v.entrance];
+      if (enter && v.sub) KM.words(tl, sub.querySelectorAll(".word"), enter() + 0.15);
+      else if (enter) enter();
+      if (v.out > 0) KM.out(tl, box, v.out);
+      window.__timelines["title"] = tl;
+    })();
+  </script>
+</template>

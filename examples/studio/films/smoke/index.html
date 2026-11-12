@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- The kit's smoke film: every kit scene, so `filmkit check smoke` checks them all in all four frames. Not for
+         posting. Later hosts paint over earlier ones. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="13" data-width="1920" data-height="1080">
+      <div id="poster" data-composition-id="poster" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="2.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"Films are *code*\nnow.","entrance":"none"}'></div>
+      <div id="statement" data-composition-id="statement" data-composition-src="kit/scenes/title.html" data-start="2.5" data-duration="2.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"One master,\nfour *frames.*","sub":"Each laid out for its own."}'></div>
+      <div id="section" data-composition-id="section" data-composition-src="kit/scenes/title.html" data-start="5" data-duration="2.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"Built from the *kit.*","entrance":"rise","ground":"accent-dark"}'></div>
+      <div id="promise" data-composition-id="promise" data-composition-src="kit/scenes/title.html" data-start="7.5" data-duration="2.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"Light grounds read *too.*","entrance":"ink","ground":"paper"}'></div>
+      <div id="headline" data-composition-id="headline" data-composition-src="kit/scenes/title.html" data-start="10" data-duration="3" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"A title at the top,\nover a *product* shot.","place":"top"}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

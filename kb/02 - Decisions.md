@@ -123,5 +123,26 @@ never prompts", and every prompt has a flag, so `--yes` runs them unattended.
 **Why:** the people this is for (the owner's friend, other founders) have an agent but won't hand-edit four tools'
 MCP configs or write a theme file.
 
+## D-009 · 2026-11-12 · The website: an Angle-branded one-pager on GitHub Pages, built like angle-ai's site
+**Decision (owner, 2026-11-12):** "make a basic but very well thought out and laid out marketing site one pager with
+install directions, examples, etc. angle branded … use github pages … latest and greatest tools … lighthouse
+performance checks, a11y."
+
+- **The site:** `site/` (PR #26). It uses angle-ai `apps/site`'s stack: Next.js 16 static export, React 19,
+  Tailwind 4, Geist, Biome, TypeScript, and Vitest with axe-core.
+- **The quality bar:** Lighthouse CI on mobile, with performance, best practices and SEO at 0.95 or more and
+  accessibility at 1.0. The first local run scored 99/100/100/100.
+- **Deploy:** GitHub Pages from master (`.github/workflows/site.yml`, self-hosted runners) at
+  https://angleos.github.io/filmkit/.
+- **Pages is public.** A Pages site is public even though the repo is private (the org has no Enterprise private
+  Pages). The site holds only marketing copy and example films. Its install commands work only for people with repo
+  access until the repo goes public (#15).
+- **Design:**
+  - The page reads as a storyboard: numbered beats, timecodes, viewfinder marks.
+  - The hero is a live format switcher that re-lays a sample customer film (Lumen, default theme).
+  - The brand lines appear only inside that frame (owner: "ease up on the lines").
+  - No "early access" wording (owner).
+  - Mobile first, checked at 360, 390, 768 and 1440 px under real device emulation.
+
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
