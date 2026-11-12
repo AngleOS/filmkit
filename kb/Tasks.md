@@ -4,7 +4,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
-- [loops: the seam gate in Node, so hook loops flow from their last frame into frame 0](https://github.com/AngleOS/filmkit/issues/5) `filmkit#5` · High
 - [scenes: chat, code, terminal, composer and a generic app frame, themed](https://github.com/AngleOS/filmkit/issues/6) `filmkit#6` · High
 - [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
 - [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
@@ -33,6 +32,7 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 ## Done
 
 - [seed: the filmkit package, CLI core and kit core, ported from angle-ai's video kit](https://github.com/AngleOS/filmkit/issues/3) `filmkit#3` · High
+- [loops: the seam gate in Node, so hook loops flow from their last frame into frame 0](https://github.com/AngleOS/filmkit/issues/5) `filmkit#5` · High
 - [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
 - [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
 - [brand: Angle Filmkit — the angle theme, the README hero, trademarks](https://github.com/AngleOS/filmkit/pull/16) `filmkit#16`
