@@ -5,9 +5,9 @@ tags: [filmkit, design]
 updated: 2026-11-12
 issues: [AngleOS/filmkit#2]
 ---
-# filmkit design
+# Angle Filmkit design
 
-filmkit lets AI agents make short brand and product films. A film is an HTML page: kit scenes and the film's own
+**Angle Filmkit** (package and CLI `filmkit`, D-007) lets AI agents make short brand and product films. A film is an HTML page: kit scenes and the film's own
 GSAP compositions, rendered to video by [HyperFrames](https://github.com/heygen-com/hyperframes). The agent writes a
 brief, researches the claims, builds the film from the kit, checks it in every format, looks at the frames, and
 renders. One master becomes **16:9, 1:1, 4:5 and 9:16**, each laid out for its own frame. Sound is generated from the
@@ -126,13 +126,25 @@ This is the workflow that made the Angle films, written for any agent:
 
 ### 6. Templates and examples
 - **Templates:** `new --template` copies a starting film with placeholder copy and beats.
-- **Examples** (`examples/`): a complete studio with two films made for a fictional brand. One is an argument film
-  built on infographics, the other a product demo. CI renders them, and they double as the visual regression set.
+- **Examples** (`examples/`): Angle Filmkit's own studio, in the `angle` theme (D-007). It has films that introduce
+  Filmkit:
+  - an argument film built on the infographic scenes;
+  - a product demo of Filmkit itself: a brief going in, an agent at work, four formats out;
+  - a 9:16 hook.
+
+  CI renders them, and they double as the visual regression set.
+
+### 7. Themes (D-007)
+A theme is a folder: `theme.json` (grounds, accent, text, fonts, logo, motif, credit), `tokens.css`, `fonts/`, `logo/`
+and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy) }`. The built-ins are
+`angle` (the full brand; the reference implementation is `themes/angle/`), `default` (Angle's look with the studio's
+logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points to its own folder, and can override
+single values. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
 
 ## What stays in Angle
-Angle's theme (Night and Pear, the brand lines, the ANGLE lockup), its rebuilt app UI (`picker`, the Angle
-composer), its films, and their claims stay in `angle-ai/marketing/video`. That folder later becomes a filmkit studio
-with an Angle theme (filmkit epic, last step).
+Angle's *product* films, their claims, and the rebuilt Angle app UI (`picker`, the Angle composer) stay in
+`angle-ai/marketing/video`. That folder later becomes a Filmkit studio using the `angle` theme (angle-ai#3867).
+Angle's brand itself ships here as the `angle` theme (D-007).
 
 ## Roadmap
 - **v0.1:** the CLI, the kit core and the default theme; sound; seam; captions; studio init; the MCP server; the

@@ -72,5 +72,38 @@ output ships broken layouts.
 
 The foundation (kb, AGENTS.md, README, LICENSE) was written by the orchestrating session.
 
+## D-007 · 2026-11-12 · Angle Filmkit: an Angle-branded product, with Angle's look as the default
+**Decision (owner, 2026-11-12):** "make this an angle branded product though. use our logo branding etc wherever
+appropriate and cool." The repo stays private for now; the owner adds collaborators.
+
+- **Name.** The product is **Angle Filmkit**. The package and CLI stay `filmkit`, and the MCP server is
+  `filmkit` ("Angle Filmkit").
+- **The tool's own surfaces carry the full Angle brand:** the README hero (`docs/assets/hero.png`, rendered with the
+  kit), the docs, the CLI's banner and `doctor`, the MCP server's name and description, and the example studio.
+- **Built-in themes:**
+  - **`angle`**: the complete brand (Night, Castleton, Jet and Paper grounds; the Pear accent; Geist; the brand lines;
+    the ANGLE lockup). It's used for Angle's and Filmkit's own films and the example studio.
+  - **`default`**: Angle's *look* (the same palette, type and lines motif) with the **studio's own logo**, so
+    everything made with Filmkit looks like Angle until someone rethemes it.
+  - **`paper`**: the light variant.
+- **The theme contract.** A theme is a folder:
+  - `theme.json`: grounds, `ground`, accent, `accentOn`, text, fonts and faces, tokens, logo files, motif, credit;
+  - `tokens.css`: CSS custom properties;
+  - `fonts/`;
+  - `logo/`;
+  - optionally `brand.js`, which sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy) }`.
+
+  The kit's `motif`, `mark` and `endcard` scenes call `KB`, and a theme with no `brand.js` gets the kit's generic
+  logo reveal. `themes/angle/` is the reference implementation.
+- **The credit.** End cards show a small "Made with Angle Filmkit" line by default (`theme.credit`). A studio turns it
+  off with `"credit": false`.
+- **The example studio is Angle's own:** films that introduce Angle Filmkit, in the `angle` theme. Filmkit makes its
+  own launch film, and that is the visual regression set.
+- **Brand assets aren't MIT.** The Angle name, logo, mark, wordmark and lines are trademarks (`TRADEMARKS.md`). The
+  code stays MIT.
+
+This revises D-003 and the "No Angle content" constraint. Angle's *product* films, their claims and the rebuilt Angle
+app UI (`picker`, the Angle composer) still stay in `angle-ai`.
+
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
