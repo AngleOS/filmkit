@@ -1,0 +1,50 @@
+<template>
+  <!-- The end card: an optional claim, then the motif and the mark (contact at 2.7 s after a claim, 1.0 s without:
+       the sting), the wordmark, and the status line with the URL slot, then a still hold. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; background: var(--ink); }
+    #ec-motif { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #ec-claim { position: absolute; text-align: center; color: var(--foreground); }
+    #ec-lockup { position: absolute; }
+    #ec-cta { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; letter-spacing: 0.02em; color: var(--muted-foreground); }
+    #ec-url { color: var(--foreground); }
+  </style>
+  <div id="root" data-composition-id="endcard" data-composition-variables='[
+    {"id":"claim","type":"string","label":"Claim before the logo (empty for the sting)","default":""},
+    {"id":"line","type":"string","label":"Status","default":"Now in beta"},
+    {"id":"cta","type":"string","label":"URL","default":""}
+  ]'>
+    <svg id="ec-motif" data-layout-ignore></svg>
+    <div id="ec-claim" class="display"></div>
+    <svg id="ec-lockup" data-layout-allow-overflow></svg>
+    <div id="ec-cta"><span id="ec-line"></span><span id="ec-url"></span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, safe } = AL;
+      const R = Math.round;
+      const motif = document.getElementById("ec-motif"), claim = document.getElementById("ec-claim"), svg = document.getElementById("ec-lockup"), cta = document.getElementById("ec-cta");
+      const L = KB.lockupBox(pick({ L: 760, S: 600, V: 600 }), pick({ L: 520, S: R(H * 0.47), V: R(H * 0.46) }));
+      gsap.set(svg, { left: L.left, top: L.top, width: L.w, height: L.h });
+      gsap.set(cta, { top: L.top + L.h + pick({ L: 74, S: 64, V: 80 }), fontSize: pick({ L: 40, S: 40, V: 46 }) });
+      gsap.set(claim, { left: safe.left, width: W - safe.left - safe.right, top: pick({ L: 400, S: R(H * 0.27), V: R(H * 0.36) }), fontSize: pick({ L: 96, S: 92, V: 104 }) });
+      claim.innerHTML = KM.wordSpans(v.claim);
+      document.getElementById("ec-line").textContent = v.line;
+      document.getElementById("ec-url").textContent = v.cta ? ` · ${v.cta}` : "";
+
+      // the claim, then it clears for the mark
+      const contact = v.claim ? 2.7 : 1.0;
+      if (v.claim) {
+        KM.words(tl, claim.querySelectorAll(".word"), 0.15);
+        KM.out(tl, claim, 2.0);
+      }
+      KM.drawMotif(tl, KB.motif(motif), contact - 0.65);
+      tl.to(motif, { opacity: 0.18, duration: 0.6, ease: "power2.out" }, contact);
+      KM.assemble(tl, svg, KB.lockup(svg), L, contact);
+      tl.fromTo(cta, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "none" }, contact + 0.75);
+      window.__timelines["endcard"] = tl;
+    })();
+  </script>
+</template>
