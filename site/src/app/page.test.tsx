@@ -41,6 +41,9 @@ describe("the one page", () => {
       expect(src).toMatch(/\.webp$/);
       const file = join(process.cwd(), "public", src.slice(base.length));
       expect(existsSync(file), file).toBe(true);
+      // the loop beside it (a root .gitignore rule once kept every .mp4 out of the deploy)
+      const loop = file.replace(/\.webp$/, ".mp4");
+      expect(existsSync(loop), loop).toBe(true);
     }
   });
 
