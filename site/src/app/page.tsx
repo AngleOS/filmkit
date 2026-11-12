@@ -32,8 +32,12 @@ export default function Home() {
   return (
     <>
       <header className="site-header">
-        <nav aria-label="Main" className="shell flex h-14 items-center gap-6 sm:h-16">
-          <a href="#top" className="text-[19px] sm:text-[22px]" aria-label="Angle Filmkit, home">
+        <nav aria-label="Main" className="shell flex h-14 items-center gap-4 sm:h-16 sm:gap-6">
+          <a
+            href="#top"
+            className="min-w-0 text-[16px] min-[380px]:text-[19px] sm:text-[22px]"
+            aria-label="Angle Filmkit, home"
+          >
             <Lockup />
           </a>
           <ul className="ml-auto hidden items-center gap-7 whitespace-nowrap text-[14px] text-muted lg:flex">
@@ -45,7 +49,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
-          <a href="#install" className="btn-pear ml-auto lg:ml-0">
+          <a href="#install" className="btn-pear ml-auto shrink-0 lg:ml-0">
             Install
           </a>
         </nav>
@@ -280,7 +284,7 @@ export default function Home() {
           </p>
           <div className="flex flex-col gap-8 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex flex-col gap-3">
-              <span className="text-[24px] sm:text-[26px]">
+              <span className="text-[20px] min-[380px]:text-[24px] sm:text-[26px]">
                 <Lockup />
               </span>
               <span className="text-[14px] text-muted">

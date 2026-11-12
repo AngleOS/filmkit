@@ -173,6 +173,12 @@
     font-size: 14px;
     transition: transform 0.25s var(--ease-expo);
   }
+  @media (max-width: 379px) {
+    .btn-pear {
+      height: 2.25rem;
+      padding: 0 0.9rem;
+    }
+  }
   .btn-pear:hover {
     transform: translateY(-1px);
   }
