@@ -92,7 +92,8 @@ export function buildSound(studio, film) {
   if (foley.status !== 0) return { built: false, error: "sound-sheet couldn't render the foley" };
   const padWav = pad(sheet);
   if (padWav) writeFileSync(files.pad, padWav);
-  if (!master(files.foley, padWav && files.pad, bed ?? -12, files.mix)) return { built: false, error: "ffmpeg couldn't mix and master the sound" };
+  const mastering = master(files.foley, padWav && files.pad, bed ?? -12, files.mix);
+  if (mastering) return { built: false, error: mastering };
   if (!ffmpeg(["-i", files.mix, "-c:a", "aac", "-b:a", "320k", path])) return { built: false, error: "ffmpeg couldn't encode sound.m4a" };
   const measured = loudness(path);
   if (!measured) return { built: false, error: "ffmpeg couldn't measure sound.m4a" };
@@ -126,7 +127,7 @@ function readScore(film, source) {
  * Mixes the foley with the bed `gain` dB under it, then masters it: a gain to the target loudness, and a limiter on the
  * hits. Dry hits peak far over the rest, too far for a linear loudnorm, whose fallback squashes the whole mix; the
  * limiter touches only the hits. It runs 4× oversampled, so it holds true peaks rather than samples. What it takes off
- * the hits lowers the loudness a little, so the gain is measured again until it lands. Returns whether it succeeded.
+ * the hits lowers the loudness a little, so the gain is measured again until it lands. Returns what went wrong, or null.
  * @param {string} foley
  * @param {string | null} bed
  * @param {number} gain
@@ -138,16 +139,18 @@ function master(foley, bed, gain, out) {
     ? ffmpeg(["-i", foley, "-i", bed, "-filter_complex", `[1:a]volume=${gain}dB[b];[0:a][b]amix=inputs=2:normalize=0:duration=first[m]`, "-map", "[m]", "-c:a", "pcm_s24le", premix])
     : ffmpeg(["-i", foley, "-c:a", "pcm_s24le", premix]);
   const level = mixed ? loudness(premix)?.lufs : undefined;
-  if (level === undefined) return false;
+  if (level === undefined) return "ffmpeg couldn't mix the sound";
   let boost = TARGET.lufs - level;
+  let lufs;
   for (let pass = 0; pass < 4; pass++) {
     const limited = `volume=${boost.toFixed(2)}dB,aresample=192000,alimiter=limit=${10 ** (CEILING / 20)}:level=false:latency=true:attack=1:release=60,aresample=48000`;
-    const lufs = ffmpeg(["-i", premix, "-af", limited, "-c:a", "pcm_s24le", out]) ? loudness(out)?.lufs : undefined;
-    if (lufs === undefined) return false;
-    if (Math.abs(lufs - TARGET.lufs) <= 0.1) return true;
+    lufs = ffmpeg(["-i", premix, "-af", limited, "-c:a", "pcm_s24le", out]) ? loudness(out)?.lufs : undefined;
+    if (lufs === undefined) return "ffmpeg couldn't master the sound";
+    if (Math.abs(lufs - TARGET.lufs) <= 0.1) return null;
     boost += TARGET.lufs - lufs;
   }
-  return false;
+  // Only hits, with little between them: the limiter takes off what the gain adds.
+  return `the sound reached ${lufs} LUFS, not ${TARGET.lufs}: with its hits held to ${CEILING} dBTP, it needs more sound between them`;
 }
 
 /**

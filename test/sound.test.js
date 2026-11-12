@@ -117,6 +117,13 @@ test("the foley stays dry: sound-sheet never sees the pad's bed, so it is silent
   assert.ok(beforeHit.every((byte) => byte === 0));
 });
 
+test("a sound too sparse to reach −19 LUFS under the limiter says so, with the loudness it reached", { skip: !hasFfmpeg && "no ffmpeg" }, () => {
+  const { dir, studio, film } = studioCopy("fixtures/studio", "hook");
+  writeFileSync(join(dir, "films/hook/sound.json"), JSON.stringify({ cues: [{ id: "t", kind: "tick", t: 1, x: 960, y: 540, w: 40, h: 20 }] }));
+  const sound = buildSound(studio, film);
+  assert.ok(sound && !sound.built && /reached -2\d\.\d LUFS/.test(sound.error), JSON.stringify(sound));
+});
+
 test("the smoke film's sound is mastered to −19 LUFS ±0.5 with its hits held near −3 dBTP, and kept while its score holds", { skip: !hasFfmpeg && "no ffmpeg" }, () => {
   const { dir, studio, film } = studioCopy("../examples/studio", "smoke");
   const sound = buildSound(studio, film);
