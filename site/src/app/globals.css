@@ -23,6 +23,7 @@
     scroll-behavior: smooth;
   }
   body {
+    position: relative;
     min-height: 100dvh;
     background-color: var(--color-night);
     overflow-x: clip;
@@ -36,10 +37,12 @@
     outline-offset: 3px;
     border-radius: 4px;
   }
-  /* A film's grain: a faint, fixed noise over everything, never in the way of a click. */
+  /* A film's grain: a faint noise over everything, never in the way of a click. Absolute over the whole page, not
+     fixed: iOS 26 Safari colours its status bar from the fixed or sticky element at the top edge (WebKit's
+     fixedContainerEdges), and a full-screen fixed layer there hid the sticky header from it, leaving the bar blank. */
   body::after {
     content: "";
-    position: fixed;
+    position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 60;
