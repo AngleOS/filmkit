@@ -31,12 +31,16 @@ the MCP server share one implementation: MCP tools call the same functions the C
 // check  (`filmkit check <film> [formats…] --json`)
 { "film": "launch", "ok": false,
   "formats": [
-    { "format": "16x9", "ok": true,  "errors": [], "warnings": [{ "code": "line_unread", "message": "…", "selector": "#t-sub" }] },
+    { "format": "16x9", "ok": true,  "errors": [], "warnings": [{ "code": "line_unread", "message": "…", "selector": "#t-sub", "time": 4.1,
+        "fix": "filmkit snapshot launch 16x9 --at 4.1" }] },   // time and fix where the finding has them; fix is the snapshot that shows it
     { "format": "9x16", "ok": false, "errors": [{ "code": "text_box_overflow", "message": "…", "selector": "#src" }], "warnings": [],
       "seam": { "ok": true, "step": 0.21, "median": 0.12, "limit": 0.4 } }      // loops only; { ok: false, error } when its frames didn't render
   ],
   "sound": { "built": true, "path": "/abs/build/launch/sound.m4a", "lufs": -19.0, "truePeak": -1.2 } }
   // sound: null for a film without sound.json; { "built": false, "error": "…" } fails the check
+
+// explain  (`filmkit explain <code> --json`); with no code: { ok, codes: [...] }
+{ "ok": true, "code": "content_overlap", "why": "…", "source": "filmkit" }   // or "hyperframes-reference", "hyperframes"
 
 // snapshot / contact
 { "film": "launch", "format": "9x16", "frames": [{ "t": 4.5, "path": "/abs/build/launch/snaps-9x16/frame-00-4.500.png" }] }

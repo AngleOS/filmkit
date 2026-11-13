@@ -1,0 +1,128 @@
+{
+  "ok": false,
+  "lint": {
+    "findings": [
+      {
+        "code": "css_transition_used",
+        "severity": "warning",
+        "message": "CSS declaration `transition: opacity 1s` runs on the browser clock and cannot be seeked deterministically across render workers.",
+        "fixHint": "Keep the class or attribute swap for state; put the visual change on the paused GSAP timeline.",
+        "elementId": "b",
+        "file": "/studio/build/bad/16x9/index.html",
+        "line": 17
+      }
+    ]
+  },
+  "layout": {
+    "findings": [
+      {
+        "code": "text_box_overflow",
+        "severity": "error",
+        "time": 0.222,
+        "selector": "#d",
+        "message": "Text extends outside its nearest visual/container box.",
+        "containerSelector": "#root",
+        "text": "Off the edge of it",
+        "fixHint": "Text is 927px x 96px inside 1920px x 1080px and overflows by up to 707px; widen the container to at least ~2627px, or allow wrapping with max-width/fitTextFontSize.",
+        "overflow": {
+          "right": 706.58
+        },
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "content_overlap",
+        "severity": "error",
+        "time": 0.222,
+        "selector": "#a",
+        "message": "Two text blocks overlap and may render unreadable.",
+        "containerSelector": "#b",
+        "text": "Films are code",
+        "fixHint": "Give each block its own zone, or put data-layout-allow-overlap on the text or on a container inside the scene. A marker on the scene root does not apply.",
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "canvas_overflow",
+        "severity": "warning",
+        "time": 0.222,
+        "selector": "#d",
+        "message": "Text extends outside the composition canvas.",
+        "containerSelector": "#root",
+        "text": "Off the edge of it",
+        "fixHint": "Move the text inward, reduce its size, or mark intentional off-canvas animation with data-layout-allow-overflow.",
+        "overflow": {
+          "right": 706.58
+        },
+        "sourceFile": "index.html"
+      }
+    ]
+  },
+  "contrast": {
+    "findings": [
+      {
+        "code": "contrast_aa_failure",
+        "severity": "error",
+        "time": 0.222,
+        "selector": "#c",
+        "message": "Contrast is 1.49:1; WCAG AA requires 3:1.",
+        "text": "Dim words here",
+        "ratio": 1.49,
+        "requiredRatio": 3,
+        "suggestedColor": "rgb(96,96,96)",
+        "sourceFile": "index.html"
+      }
+    ]
+  },
+  "craft": {
+    "findings": [
+      {
+        "code": "first_frame_empty",
+        "severity": "warning",
+        "time": 0,
+        "selector": "[data-composition-id]",
+        "message": "Frame 0 shows only the background, and the first frame is the thumbnail on social players: have the title or key image already on screen at 0 s instead of entering from nothing; see references/review.md.",
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "film_silent",
+        "severity": "warning",
+        "time": 0,
+        "selector": "[data-composition-id]",
+        "message": "This 20 s film has no sound source (no <audio>, no <video> with sound): add a music bed and sounds on the visible actions unless the person asked for silence; see references/sound.md.",
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "line_unread",
+        "severity": "warning",
+        "time": 1,
+        "selector": "#e",
+        "message": "The film's last line \"A line that goes by far too fast to read\" (10 words) is on screen 0.50 s (±0.01 s), under the 2.63 s a closing line needs: hold it about 0.5 s + 0.3 s a word and at least 2 s before the film ends; see references/motion.md.",
+        "text": "A line that goes by far too fast to read",
+        "seconds": 0.5,
+        "floorSeconds": 2.625,
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "text_below_floor",
+        "severity": "warning",
+        "time": 2,
+        "selector": "#f",
+        "message": "Type floor is 28 px (2.6% of the 1080 px short side, what a phone can read) and \"Small print nobody reads\" renders at 18 px for 18.00 s: set reading text to at least 28 px, or put data-layout-ignore on text that is texture rather than reading; see references/look.md.",
+        "text": "Small print nobody reads",
+        "seconds": 18,
+        "fontPx": 18,
+        "floorPx": 28,
+        "sourceFile": "index.html"
+      },
+      {
+        "code": "dead_stretch",
+        "severity": "warning",
+        "time": 2.875,
+        "selector": "[data-composition-id]",
+        "message": "Nothing on screen changes for 14.13 s (2.88–17.00 s): start the next move within 3 s, or put data-hold on the element whose stillness is deliberate; see references/motion.md.",
+        "seconds": 14.125,
+        "floorSeconds": 3,
+        "sourceFile": "index.html"
+      }
+    ]
+  }
+}

@@ -5,6 +5,7 @@ import { formatHash } from "../../build/hash.js";
 import { isLoop, measureSeam } from "../../build/seam.js";
 import { buildSound } from "../../build/sound.js";
 import { describe } from "../../errors.js";
+import { translate } from "../../findings.js";
 import { hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
 import { progress } from "../../progress.js";
@@ -18,7 +19,7 @@ export const options = { force: { type: /** @type {const} */ ("boolean") } };
 const PASSED = ".filmkit-hash";
 
 /**
- * @typedef {{ code: string, message: string, selector?: string }} Finding
+ * @typedef {import("../../findings.js").Finding} Finding
  * @typedef {import("../../build/seam.js").SeamCheck} SeamCheck
  * @typedef {{ format: string, dir: string, ok: boolean, errors: Finding[], warnings: Finding[], seam?: SeamCheck }} FormatCheck
  */
@@ -54,11 +55,18 @@ export async function checkFilm(studio, film, formats, live, force = false) {
   return { film: film.name, ok: !failed.length, formats: checked, sound };
 }
 
-/** @param {SeamCheck} seam */
-function seamLine(seam) {
+/**
+ * @param {SeamCheck} seam
+ * @param {string} film
+ * @param {string} format
+ * @param {number} duration
+ */
+function seamLine(seam, film, format, duration) {
   if ("error" in seam) return `  ✗ seam: ${seam.error}`;
-  const measured = `step ${seam.step}, limit ${seam.limit} (median step at the ends ${seam.median})`;
-  return seam.ok ? `  ✓ seam: ${measured}` : `  ✗ seam: the last frame doesn't flow into frame 0: ${measured}`;
+  if (seam.ok) return `  ✓ seam: step ${seam.step}, limit ${seam.limit} (median step at the ends ${seam.median})`;
+  // The last frame at 30 fps, and frame 0 after it.
+  const end = Math.floor((duration - 1 / 30) * 100) / 100;
+  return `  ✗ seam: ${describe("seam", { ...seam, film, format, end }).message}`;
 }
 
 /**
@@ -73,6 +81,7 @@ async function checkFormat(studio, film, format, live, force) {
   const started = Date.now();
   const hash = formatHash(studio, film, format);
   const dir = buildDir(studio, film, format);
+  const duration = Number(film.root["data-duration"]);
   const passed = force ? null : lastPass(dir);
   /** @type {FormatCheck} */
   let result;
@@ -82,20 +91,21 @@ async function checkFormat(studio, film, format, live, force) {
   } else {
     live.step(format, "checking");
     assemble(studio, film, format);
-    result = { format, dir, ...findings(await hyperframesAsync(["check", "--json"], { cwd: dir })) };
+    const where = { film: film.name, format, dir, root: film.root.id ? `#${film.root.id}` : null, duration };
+    result = { format, dir, ...findings(await hyperframesAsync(["check", "--json"], { cwd: dir }), where) };
     if (isLoop(film.root)) {
       live.step(format, "measuring the seam");
       const out = join(studio.dir, "build", film.name, `seam-${format}`);
-      result.seam = await measureSeam(dir, Number(film.root["data-duration"]), out);
+      result.seam = await measureSeam(dir, duration, out);
       result.ok &&= result.seam.ok;
     }
     if (result.ok) writeFileSync(join(dir, PASSED), JSON.stringify({ hash, warnings: result.warnings, seam: result.seam }) + "\n");
     live.end(format);
     live.log(`${format} ${result.ok ? "✓" : "✗"} ${((Date.now() - started) / 1000).toFixed(1)} s`);
   }
-  for (const e of result.errors) live.log(`  ✗ ${e.code}: ${e.message}${e.selector ? ` (${e.selector})` : ""}`);
-  for (const w of result.warnings) live.log(`  ⚠ ${w.code}: ${w.message}${w.selector ? ` (${w.selector})` : ""}`);
-  if (result.seam) live.log(seamLine(result.seam));
+  for (const e of result.errors) live.log(`  ✗ ${e.code}: ${e.message}`);
+  for (const w of result.warnings) live.log(`  ⚠ ${w.code}: ${w.message}`);
+  if (result.seam) live.log(seamLine(result.seam, film.name, format, duration));
   return result;
 }
 
@@ -114,11 +124,12 @@ export function lastPass(dir) {
 
 /**
  * The errors and warnings in `hyperframes check --json`'s report, from every pass (lint, runtime, layout, motion,
- * contrast, craft).
+ * contrast, craft), in Filmkit's words.
  * @param {{ ok: boolean, stdout: string, stderr?: string }} run
+ * @param {import("../../findings.js").Where} where
  * @returns {{ ok: boolean, errors: Finding[], warnings: Finding[] }}
  */
-export function findings({ ok, stdout, stderr = "" }) {
+export function findings({ ok, stdout, stderr = "" }, where) {
   let report;
   try {
     report = JSON.parse(stdout);
@@ -127,9 +138,11 @@ export function findings({ ok, stdout, stderr = "" }) {
     const why = stderr.trim().split("\n").at(-1);
     return { ok: false, errors: [{ code: "no_report", message: describe("no_report", { why }).message }], warnings: [] };
   }
-  /** @type {{ severity: string, code: string, message: string, selector?: string }[]} */
+  /** @type {import("../../findings.js").Raw[]} */
   const all = Object.values(report).flatMap((pass) => (Array.isArray(pass?.findings) ? pass.findings : []));
+  // Translated together, so a finding can name what it collides with by the text another one gives.
+  const said = translate(all, where);
   /** @param {string} severity */
-  const of = (severity) => all.filter((f) => f.severity === severity).map(({ code, message, selector }) => ({ code, message, ...(selector && { selector }) }));
+  const of = (severity) => said.filter((_, i) => all[i].severity === severity);
   return { ok: ok && report.ok !== false, errors: of("error"), warnings: of("warning") };
 }
