@@ -156,7 +156,9 @@ logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points t
 single values (`{ "extends": "angle", "accent": "#ff5a1f" }`); a `theme.json` can extend another theme the same way.
 `filmkit.json` and `theme.json` are validated against `schema/filmkit.schema.json`. `theme.json`'s `grounds` use the
 names scenes take (`ink`, `accent-dark`, `paper`, and any others), and the build compiles the merged values to
-`kit/theme/theme.css` (`docs/themes.md`). End cards carry "Made with Angle Filmkit" unless `"credit": false`.
+`kit/theme/theme.css` (`docs/themes.md`). Each folder's `brand.js` adds to `window.KB`, base first, after the studio's
+name, its logo's mark and the credit, which the build compiles in; `default` keeps `angle`'s lines and reveals the
+studio's `brand/logo.svg` beside its name. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
 
 ### 8. Install, setup and onboarding (D-008)
 The goal is that someone with an agent goes from nothing to a first film in their brand **in one command, or one

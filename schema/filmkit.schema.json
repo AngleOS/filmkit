@@ -16,7 +16,7 @@
     },
     "theme": {
       "type": ["string", "object"],
-      "description": "a built-in theme (angle, default), a theme folder in the studio such as \"brand/theme\", or { \"extends\": one of those, …single values to override }",
+      "description": "a built-in theme (angle, default, paper), a theme folder in the studio such as \"brand/theme\", or { \"extends\": one of those, …single values to override }",
       "$ref": "#/$defs/theme"
     },
     "renders": { "type": "string", "description": "the folder renders go to, from the studio (renders by default)" }
@@ -103,6 +103,7 @@
         "tokens": { "$ref": "#/$defs/file" },
         "logo": {
           "type": "object",
+          "description": "the logo's files; the studio's brand/logo.svg takes the mark's place when there is one",
           "additionalProperties": false,
           "properties": {
             "mark": { "$ref": "#/$defs/file" },
@@ -113,7 +114,7 @@
         },
         "brand": { "$ref": "#/$defs/file" },
         "motif": { "enum": ["lines", "grid", "dots", "none"] },
-        "credit": { "type": ["string", "boolean"], "description": "the end card's credit line, or false for none" }
+        "credit": { "type": ["string", "boolean"], "description": "the end card's credit line (\"Made with Angle Filmkit\" when true or not given), or false for none" }
       }
     },
     "complete": {
