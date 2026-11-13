@@ -74,7 +74,7 @@ export function initStudio(dir, name) {
  */
 export function installSkills(studio, hyperframesSkills) {
   const hyperframes = readdirSync(hyperframesSkills).filter((n) => existsSync(join(hyperframesSkills, n, "SKILL.md"))).sort();
-  if (!hyperframes.length) throw new RequirementError(`${HYPERFRAMES} ships no skills in ${hyperframesSkills}: delete npx's cache (the _npx folder in `npm config get cache`) and run filmkit skills again`);
+  if (!hyperframes.length) throw new RequirementError(`${HYPERFRAMES} ships no skills in ${hyperframesSkills}: delete npx's cache (the _npx folder in npm config get cache) and run filmkit skills again`);
   const sources = [{ name: "filmkit", from: "filmkit", dir: SKILL }, ...hyperframes.map((name) => ({ name, from: HYPERFRAMES, dir: join(hyperframesSkills, name) }))];
   const skills = sources.map(({ name, from, dir }) => {
     const path = join(studio.dir, ".claude", "skills", name);
