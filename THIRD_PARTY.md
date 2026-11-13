@@ -6,7 +6,7 @@
 | GSAP | npm dependency `gsap` (3.14.2), copied into each build as `kit/vendor/gsap.min.js` | GSAP Standard "no charge" licence | https://gsap.com/standard-license |
 | sound-sheet.mjs | `kit/sound/vendor/` (once ported) | MIT | AgentsORG/design-engineering |
 | Launch-video research notes | `skills/filmkit/references/research/` | MIT | AgentsORG/design-engineering |
-| Geist, Geist Mono | `themes/angle/fonts/`, `themes/default/fonts/` (each with `OFL.txt`) | SIL OFL 1.1 | https://github.com/vercel/geist-font |
+| Geist, Geist Mono | `themes/angle/fonts/` (with `OFL.txt`), which `default` and `paper` use | SIL OFL 1.1 | https://github.com/vercel/geist-font |
 | lucide icons | `kit/icons.js`, a subset taken from lucide-react 1.61 (licence in `kit/LICENSE-lucide.txt`); the plus and arrow-up paths in `kit/scenes/composer.html` | ISC | https://lucide.dev |
 
 Each vendored file keeps its upstream header. Add a row here when you vendor anything.
