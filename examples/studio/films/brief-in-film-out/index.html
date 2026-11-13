@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- Brief in, film out: Angle Filmkit's product demo (brief.md). The product scenes carry it: a studio made in the
+         terminal, the brief handed to the agent in a chat with its MCP tool steps, a contact sheet it reads and fixes,
+         the render in four formats with its captions, then the end card. Commands, tool names and file names are the
+         real ones; every line is in the studio's CLAIMS.md. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="35.5" data-width="1920" data-height="1080">
+      <div id="init" data-composition-id="init" data-composition-src="kit/scenes/terminal.html" data-start="0" data-duration="8.3" data-hold data-track-index="1" data-track-kind="graphics" data-variable-values='{"command":"npx -y github:AngleOS/filmkit init my-studio","output":"✓ a studio for my-studio in /Users/you/my-studio\n  wrote filmkit.json, brand/logo.svg, films/smoke, AGENTS.md, CLAIMS.md, POSTING.md, .claude/skills/filmkit, .gitignore"}'></div>
+      <div id="init-title" data-composition-id="init-title" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="8.3" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Start a *studio.*","place":"top","ground":"none","entrance":"none"}'></div>
+      <div id="hand" data-composition-id="hand" data-composition-src="kit/scenes/title.html" data-start="8.3" data-duration="2" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"Hand your agent\nthe *brief.*"}'></div>
+      <div id="ask" data-composition-id="ask" data-composition-src="kit/scenes/chat.html" data-start="10.3" data-duration="6" data-track-index="1" data-track-kind="graphics" data-variable-values='{"prompt":"Make a 20-second launch film from films/launch/brief.md.","reply":"I’ll start it from the statement template, then check every format."}'></div>
+      <div id="steps" data-composition-id="steps" data-composition-src="compositions/steps.html" data-start="10.3" data-duration="6" data-track-index="2" data-track-kind="graphics"></div>
+      <div id="window" data-composition-id="window" data-composition-src="kit/scenes/ui.html" data-start="16.3" data-duration="7.2" data-track-index="1" data-track-kind="graphics" data-variable-values='{"title":"contact_sheet · launch"}'></div>
+      <div id="sheet" data-composition-id="sheet" data-composition-src="compositions/sheet.html" data-start="16.3" data-duration="7.2" data-track-index="2" data-track-kind="graphics"></div>
+      <div id="sheet-title" data-composition-id="sheet-title" data-composition-src="kit/scenes/title.html" data-start="16.3" data-duration="7.2" data-track-index="3" data-track-kind="graphics" data-variable-values='{"text":"It checks\nevery *frame.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="render" data-composition-id="render" data-composition-src="compositions/render.html" data-start="23.5" data-duration="6" data-track-index="1" data-track-kind="graphics"></div>
+      <div id="render-title" data-composition-id="render-title" data-composition-src="kit/scenes/title.html" data-start="23.5" data-duration="6" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Every format.\nSound and *captions.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="kit/scenes/endcard.html" data-start="29.5" data-duration="6" data-track-index="1" data-track-kind="graphics" data-variable-values='{"claim":"Brief in. Film *out.*","line":"Pre-alpha · MIT","cta":"filmkit.anglehq.net"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="35.5" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.3-8.0 Start a studio: one command writes a first film, the claims ledger and the agent’s skill.\n8.4-10.1 Hand your agent the brief.\n10.5-16.1 It makes the film with Filmkit’s tools, then checks it in every format.\n16.5-23.3 It reads the contact sheet, finds a source line under the captions and fixes it.\n23.7-29.3 Then it renders every format, with sound and captions.\n29.8-34 Brief in. Film out."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/icons.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

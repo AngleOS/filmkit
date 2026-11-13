@@ -74,7 +74,7 @@ The foundation (kb, AGENTS.md, README, LICENSE) was written by the orchestrating
 
 ## D-007 · 2026-11-12 · Angle Filmkit: an Angle-branded product, with Angle's look as the default
 **Decision (owner, 2026-11-12):** "make this an angle branded product though. use our logo branding etc wherever
-appropriate and cool." The repo stays private for now; the owner adds collaborators.
+appropriate and cool." The repo stayed private until D-010.
 
 - **Name.** The product is **Angle Filmkit**. The package and CLI stay `filmkit`, and the MCP server is
   `filmkit` ("Angle Filmkit").
@@ -178,6 +178,19 @@ edges.
 - **D-20261113-24-delegated** (AngleOS/filmkit#24, 2026-11-13 01:42 UTC): `filmkit explain` has hand-written explanations only for Filmkit's own check codes (layout, contrast, type floor, safe zone, seam, sound, craft). For any other HyperFrames code it shows the paragraph from the pinned HyperFrames skill references, or else a generic line pointing to the fix in that code's check finding. *Why:* A — Write Filmkit's own `why` in the `src/errors.js` catalogue for the codes a film really hits: layout/overlap, contrast, type floor, safe zone, seam, sound, and the craft rules. For any other HyperFrames code, `explain` prints the paragraph that names it in the pinned version's skill references. If there's none, or the package isn't in the npx cache (offline), it prints "A HyperFrames <version> rule. Its finding in `filmkit check` carries the fix." and adds a line saying what HyperFrames is checking for that code family (lint, layout, render). How to build it: - `explain` looks up the catalo *Reverse:* Add a generated or hand-written catalogue entry for every HyperFrames finding code in src/errors.js, and drop the reference/fallback lookup in src/cli/commands/explain.js. (decided by the Expert)
 
 - **D-20261113-8-delegated** (AngleOS/filmkit#8, 2026-11-13 05:55 UTC): The explainer and product-demo templates run to their scenes' own motion, about 31 s and about 26 s instead of 40 s and 30 s, so they pass check with no dead_stretch warnings and no data-hold padding. *Why:* A — Tighten the beats to the kit scenes' own motion: explainer about 31 s and product-demo about 26 s. That makes both templates pass `check` in all four formats with no dead_stretch warnings. In the same PR, update the lengths and beat times in kb/Templates.md and in each template's brief.md beats table. Why: - Templates teach. A starting film that comes with five warnings per format teaches users to ignore `check`, so C is out. - B misuses `data-hold`. It's meant for stillness that is the point, like the statement held over its motif (Templates.md). Here the holds are just padding, and the d *Reverse:* Set explainer back to 40 s and product-demo back to 30 s in templates/ and kb/Templates.md, and add real motion or data-hold to fill the stretched beats. (decided by the Expert)
+
+## D-010 · 2026-11-13 · The repo is public, closed to outside interaction
+
+**Decision:** AngleOS/filmkit went public on 2026-11-13, history and issues as they were, after a leak review (no
+secrets in 380 commits, every PR ref, or 463 issue and PR texts; what's exposed is internal detail: host names, session
+ids, the owner's commit emails). Only the owner pushes or opens PRs, so the repo is closed to everyone else:
+- an org-wide interaction limit, `collaborators_only`, stops outsiders opening issues or PRs or commenting. That also
+  keeps agentd's intake (issue forms that label `agent`, `/agent` and review relays, triage, the Expert) to us,
+  since agentd doesn't check authors. **It expires 2027-05-13**; renew it (`gh api -X PUT orgs/AngleOS/interaction-limits
+  -f limit=collaborators_only -f expiry=six_months`) or gate agentd on `author_association` before then;
+- fork PR workflows need approval from every outside contributor, and the default workflow token is read-only;
+- CI stays on the self-hosted runners, so the `Default` runner group must allow public repositories.
+**Why:** "peace of mind, not perfect": no secrets leak, and nobody outside can drive the fleet or the runners.
 
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]

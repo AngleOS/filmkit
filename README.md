@@ -38,7 +38,9 @@ Short films made with the kit. Each one is a few dozen lines of HTML, and the da
 
 [`examples/studio`](examples/studio) is Angle Filmkit's own studio: its films with their briefs, sound, claims and
 posting copy, checked in every format by CI. [Films are code](examples/studio/films/films-are-code) is the argument
-film, built on the infographic scenes.
+film, built on the infographic scenes; [Brief in, film out](examples/studio/films/brief-in-film-out) is the product
+demo, built on the terminal, chat and UI scenes; [The four frames](examples/studio/films/the-four-frames) is a 9:16
+hook that loops without a seam.
 
 <table>
 <tr>
@@ -68,10 +70,10 @@ It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you t
 - **setting up your brand:** from your website, or by answering a few questions;
 - **making a first film.**
 
-`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it.
+`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it. In the studio, `filmkit tour`
+walks through the first film one command at a time, explaining each.
 
-> While the repo is private, collaborators run `install.sh` from a clone; the curl URLs work once it's public. Filmkit
-> isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
+> Filmkit isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
 
 ### Or let your agent do it
 Paste [this prompt](docs/install-with-your-agent.md) into your agent (or run `npx -y github:AngleOS/filmkit prompt`). It installs and

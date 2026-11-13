@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- The four frames: Angle Filmkit's 9:16 hook (brief.md). Frame 0 is the poster, the promise already on screen; one
+         16:9 frame splits into four, they fill as they're made, and they fold back into one as the promise returns,
+         then hold still across the seam, so `check` runs the seam gate. Silent: feeds play hooks muted, and a sound
+         would restart on every pass. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1080" data-height="1920" data-formats="9x16" data-loop="true">
+      <div id="hook" data-composition-id="hook" data-composition-src="compositions/hook.html" data-start="0" data-duration="8" data-track-index="1" data-track-kind="graphics"></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="8" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.0-3.0 Your agent makes the film.\n3.3-5.6 Brief in. Film out.\n5.9-8.0 Your agent makes the film."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

@@ -18,6 +18,15 @@ function studioCopy() {
   return dir;
 }
 
+test("--version prints package.json's version and exits 0", () => {
+  const { version } = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8"));
+  for (const flag of ["--version", "-v"]) {
+    const { status, stdout } = filmkit([flag]);
+    assert.equal(status, 0);
+    assert.equal(stdout.trim(), version);
+  }
+});
+
 test("help lists every command and exits 0", () => {
   const { status, stdout } = filmkit(["--help"]);
   assert.equal(status, 0);

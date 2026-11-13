@@ -1,14 +1,16 @@
 name: release
 
-# A `v*` tag publishes that version to npm with provenance. Until the owner adds the NPM_TOKEN secret and makes the
-# repo public (npm refuses provenance from a private one; both filmkit#15) it runs a dry run and says so.
+# A `v*` tag publishes that version to npm by trusted publishing: npm takes this workflow's OIDC token instead of a
+# stored one (npm no longer lets a token skip 2FA) and attaches provenance itself. The package's trusted publisher on
+# npmjs.com names AngleOS/filmkit and release.yml; the first version (0.1.0) was published by hand, since npm only
+# trusts a workflow for a package that already exists.
 on:
   push:
     tags: ['v*']
 
 permissions:
   contents: read
-  id-token: write # provenance: the signed statement of which workflow built the package
+  id-token: write # trusted publishing: npm takes this run's OIDC token in place of a stored one
 
 jobs:
   publish:
@@ -30,13 +32,4 @@ jobs:
           [ "$TAG" = "v$version" ] || { echo "::error::tag $TAG, but package.json's version is $version"; exit 1; }
       - run: npm ci
       - run: npm test
-      - name: publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: |
-          if [ -z "$NODE_AUTH_TOKEN" ]; then
-            npm publish --dry-run --provenance --access public
-            echo "::notice::No NPM_TOKEN secret: a dry run only. Publishing waits on the owner (filmkit#15)."
-            exit 0
-          fi
-          npm publish --provenance --access public
+      - run: npm publish --access public

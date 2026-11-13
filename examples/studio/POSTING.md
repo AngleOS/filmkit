@@ -22,3 +22,28 @@ comes from the motion. Cover: the frame at 2.5 s, the three file names under "Ev
 
 Pinned reply, for "is it on npm?": "Not yet. Filmkit is pre-alpha; the site says when it ships." (README.md, "Filmkit
 isn't on npm yet")
+
+### brief-in-film-out (36 s, every format)
+The demo a person forwards: a studio made in one command, the brief handed to the agent, the agent checking every
+frame and fixing what it finds, then four formats with sound and captions. Cover: the frame at 15.5 s, the agent's
+tool steps with every format ticked.
+
+- **YouTube** (16:9, upload the `.srt`). Title: *Brief in, film out: an agent makes a launch film.* Description:
+  > Write a brief; your AI agent makes the film. It builds it from Filmkit's scenes, checks every format, looks at
+  > its own frames and renders 16:9, 1:1, 4:5 and 9:16 with sound and SRT/VTT captions. Status: pre-alpha.
+  > https://filmkit.anglehq.net/
+- **LinkedIn** (4:5, upload the `.srt`):
+  > Brief in, film out. Your agent starts a Filmkit studio, makes the film from your brief, reads its own contact
+  > sheet and fixes what collides, then renders every format with captions. Pre-alpha. https://filmkit.anglehq.net/
+- **X** (16:9, upload the `.srt`):
+  > Brief in. Film out. Your AI agent makes the film, checks every frame and renders four formats.
+  > https://filmkit.anglehq.net/
+
+### the-four-frames (8 s loop, 9:16 only)
+The hook for a vertical feed with the sound off: one frame becomes four and folds back, over and over. Cover: frame 0,
+the promise over the one 16:9 frame. No URL on screen: it goes in the caption or a link sticker.
+
+- **YouTube Shorts** (upload the `.srt`). Title: *Your agent makes the film.* Description:
+  > Brief in. Film out. One master, laid out for 16:9, 1:1, 4:5 and 9:16. Pre-alpha. https://filmkit.anglehq.net/
+- **TikTok, Instagram Reels** (turn on auto-captions and check them against the `.srt`):
+  > Your agent makes the film: one master, four frames. Brief in, film out. filmkit.anglehq.net

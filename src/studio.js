@@ -66,6 +66,8 @@ function findStudio(from) {
  */
 export function openFilm(studio, name) {
   if (!name) throw fail("film_unnamed", { films: filmNames(studio) });
+  // A film is a folder directly in films/: a name with a path in it ("../x", an MCP client's) never reaches outside.
+  if (basename(name) !== name || name.startsWith(".")) throw fail("no_film", { film: name, films: filmNames(studio) });
   const dir = join(studio.dir, "films", name);
   if (!existsSync(join(dir, "index.html"))) throw fail("no_film", { film: name, films: filmNames(studio) });
   const html = readFileSync(join(dir, "index.html"), "utf8");

@@ -6,8 +6,9 @@ metadata:
 ---
 
 filmkit's `ci.yml` runs on the AngleOS self-hosted runners, picking pools the way angle-ai's `ci.yml` does: the
-`runners` job and `ci-ok` take `ci-light`. The heavy jobs ask for `ci-priority` on agentd's landing candidates
-(`agentd/train/*`) and master pushes, so a landing doesn't queue behind PR CI, and for `ci` otherwise. They never ask
+jobs of seconds (`runners`, `test`, `types`, `ci-ok`) take `ci-light` (0.5 CPU, 1 GiB; filmkit#125). `films` asks for
+`ci-priority` on agentd's landing candidates (`agentd/train/*`) and master pushes, so a landing doesn't queue behind
+PR CI, and for `ci` otherwise. They never ask
 for both labels. (On 2026-11-12 a candidate's `ci-ok` sat queued for 3 hours on `ci` while the `ci-light` runners were
 idle.) Two jobs can't take just any runner:
 
@@ -18,5 +19,8 @@ idle.) Two jobs can't take just any runner:
   publishing without provenance (D-20261112-13-delegated); it's the only GitHub-hosted job.
 
 **Why:** both look like they could move to the self-hosted pool and silently can't; a gate on a full pool waits hours.
-**How to apply:** a new job takes `needs.runners.outputs.pool` (seconds of work: `ci-light`); keep the `X64` label on any job that runs HyperFrames; leave the release job GitHub-hosted until npm
-supports self-hosted provenance.
+- **`test` runs at `--test-concurrency=2` on `ci-light`.** `node --test` starts a process per CPU it sees, and in a
+  runner's container it can see the host's: 9 processes took 800 MB, past the light runner's 1 GiB with its dockerd.
+
+**How to apply:** a new job of seconds takes `ci-light`, anything heavier `needs.runners.outputs.pool`; keep the `X64`
+label on any job that runs HyperFrames; leave the release job GitHub-hosted until npm supports self-hosted provenance.
