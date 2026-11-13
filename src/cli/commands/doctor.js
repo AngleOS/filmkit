@@ -17,6 +17,7 @@ const missing = (name, detail, code, params) => ({ name, ok: false, detail, code
 
 /** @param {import("../index.js").Context} ctx */
 export async function run({ log, json }) {
+  // banner() checks stdout, which is where log writes when json is false.
   const top = banner(json);
   if (top) log(`${top}\n`);
   const checks = [node(), ffmpegVersion(), ...hyperframesAndChrome()];
