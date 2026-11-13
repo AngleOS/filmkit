@@ -31,7 +31,7 @@ test("a clean report passes", () => {
 
 test("no report is a failure, with the last word from HyperFrames' stderr", () => {
   const [error] = findings({ ok: false, stdout: "", stderr: "[hyperframes] probe\nError: Chrome crashed\n" }).errors;
-  assert.deepEqual(error, { code: "hyperframes", message: "hyperframes check gave no report: Error: Chrome crashed" });
+  assert.deepEqual(error, { code: "no_report", message: "HyperFrames gave no report (Error: Chrome crashed). See what's missing with: filmkit doctor" });
 });
 
 // Without npx on the PATH, anything that runs HyperFrames exits 3: a 0 proves nothing ran.

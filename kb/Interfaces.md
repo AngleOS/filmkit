@@ -22,6 +22,9 @@ the MCP server share one implementation: MCP tools call the same functions the C
   - `3` missing requirement (Node, ffmpeg, Chrome);
   - `4` render failed.
 - **Never prompts.** Paths in output are absolute.
+- **Errors:** when there's no result to give, `--json` prints `{ "ok": false, "error": "<the sentence>", "code":
+  "no_film", "fix": "filmkit new launch" }`. `code` is from the error catalogue (`filmkit explain <code>`); `fix` is the
+  next step on its own, a command where there is one.
 
 ## Shapes
 ```jsonc
