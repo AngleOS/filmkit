@@ -72,6 +72,19 @@ export const CATALOGUE = {
     fix: () => ["See each command's options with", "filmkit --help"],
     why: "An option that takes a value has it next, as --every 2s or --every=2s; a flag such as --force stands alone.",
   },
+  option_choice: {
+    exit: 2,
+    message: ({ command, option, value, choices }) => `In filmkit ${command}, ${option} is ${choices.join(" or ")}, not "${value}".`,
+    fix: ({ option, choices }) => ["For example", `${option} ${choices[0]}`],
+    why: "Some options take one of a few words, such as setup's --ground dark or light; `filmkit --help` names them.",
+  },
+  prompt_missing: {
+    exit: 2,
+    message: ({ page }) => `${page} has no \`\`\`\`text block, so there's no prompt to print.`,
+    fix: () => ["Copy it from", "https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md"],
+    why: "filmkit prompt prints the fenced block of docs/install-with-your-agent.md, which ships in the package. A " +
+      "page without it was edited or damaged: the copy on GitHub has the prompt.",
+  },
   no_studio: {
     exit: 2,
     message: ({ dir, walked }) => `No filmkit.json in ${dir}${walked ? " or above" : ""}, so there's no studio here.`,
@@ -264,15 +277,15 @@ export const CATALOGUE = {
   node_missing: {
     exit: 3,
     message: () => "npx isn't on the PATH, so HyperFrames can't run.",
-    fix: ({ platform }) => ["Install Node ≥ 20 (it brings npx) with", install("node", platform)],
+    fix: ({ platform }) => ["Install Node ≥ 20.12 (it brings npx) with", install("node", platform)],
     why: "HyperFrames renders every film, and runs through npx at the version Filmkit pins. npx comes with Node: " +
-      "install Node ≥ 20 (https://nodejs.org), then `filmkit doctor` checks it.",
+      "install Node ≥ 20.12 (https://nodejs.org), then `filmkit doctor` checks it.",
   },
   node_old: {
     exit: 3,
-    message: ({ version }) => `Node ${version} is older than 20.`,
-    fix: ({ platform }) => ["Install Node ≥ 20 with", install("node", platform)],
-    why: "Filmkit and HyperFrames use Node 20's built-in APIs. Install Node ≥ 20 (https://nodejs.org), then " +
+    message: ({ version }) => `Node ${version} is older than 20.12.`,
+    fix: ({ platform }) => ["Install Node ≥ 20.12 with", install("node", platform)],
+    why: "Filmkit and HyperFrames use Node 20.12's built-in APIs. Install Node ≥ 20.12 (https://nodejs.org), then " +
       "`filmkit doctor` checks it.",
   },
   ffmpeg_missing: {

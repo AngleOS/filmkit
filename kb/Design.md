@@ -89,7 +89,7 @@ user's films.
 - **seam**: the loop gate for hooks. It fails when the last frame doesn't flow into frame 0.
 - **captions**: the captions scene's lines become `<film>.srt` and `.vtt`.
 
-### 3. The CLI (`filmkit`, Node ≥ 20 and ffmpeg)
+### 3. The CLI (`filmkit`, Node ≥ 20.12 and ffmpeg)
 | Command | What it does |
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
@@ -174,7 +174,7 @@ prompt to their agent**.
     with their git credentials.
 
   The script:
-  1. checks Node ≥ 20 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
+  1. checks Node ≥ 20.12 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
   2. checks ffmpeg the same way;
   3. runs `filmkit setup`.
 - **`filmkit setup`:** a guided walkthrough in a terminal; with `--yes` and flags (`--agents`, `--studio`, `--brand-url`,
