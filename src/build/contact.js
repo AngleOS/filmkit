@@ -119,7 +119,7 @@ export function labelCanvas(layout, labels) {
  * @param {string} out
  */
 export function tile(frames, format, dir, out) {
-  const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
+  const [width, height] = SIZES[/** @type {keyof typeof SIZES} */ (format)];
   const layout = sheetLayout(frames.length, width, height);
   const canvas = join(dir, "labels.pgm");
   writeFileSync(canvas, labelCanvas(layout, frames.map((f) => `${format} ${f.t}s`)));
