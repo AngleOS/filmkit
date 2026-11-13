@@ -32,7 +32,25 @@ it's given:
 npx filmkit brand --name Acme --logo ~/Downloads/acme.svg --accent '#ff5a1f'
 npx filmkit brand --ground light   # the same accent, on white
 npx filmkit brand --font 'IBM Plex Sans'
+npx filmkit brand --from-url acme.com --ground light   # read from the website, the ground given
 ```
+
+- `--from-url`: the brand's website, read for the logo, the accent, the ground and the font; a flag given beside it
+  wins over what the site says. `brand` says what it found and what it didn't, so you can give the rest:
+  - the logo: an SVG in the page's header (the one in a link home or named logo or brand), else the site's SVG icon
+    (`<link rel=icon>`), else its Apple touch icon, else its `og:image` when that's a PNG;
+  - the accent: a CSS custom property named for the brand, primary or accent colour, else the page's `theme-color`,
+    else its pinned-tab colour, else the logo's commonest colour, passing over greys, near-black and near-white;
+  - the ground: the page's background, from `--background` or `--bg` or the `body`'s, light or dark; a dark-scheme
+    override doesn't count, as the site's own ground is the one people know;
+  - the font: the first Google Fonts family the page or its CSS loads, else the `body`'s font, else its first
+    `@font-face`, passing over code fonts. A family on Google Fonts is downloaded as `--font`'s is; one that isn't
+    can't be copied, as its licence doesn't let it ship, so the theme keeps its type and `brand` names an open font
+    like it to give as `--font`, where it knows one (Inter for Graphik or Helvetica, say).
+
+  It reads the page, the stylesheets it links (up to 8, not Google's) and the logo, once each, and no other page.
+  It asks `robots.txt` first and keeps to it, as `filmkit` or else as any agent, and sends one user agent,
+  `filmkit (+https://github.com/AngleOS/filmkit)`, so a site can tell it apart.
 
 - `--logo`: an SVG is copied as it is to `brand/logo.svg`, the mark the logo reveal and the end card draw (see
   [the studio's logo](#the-studios-logo)); a PNG is embedded in an SVG at its own size.

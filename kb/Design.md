@@ -93,7 +93,7 @@ user's films.
 | Command | What it does |
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
-| `brand [--name] [--logo] [--accent] [--ground] [--font]` | the studio's brand (§8): the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light), with a Google Fonts family (regular to bold, and its licence) in its `fonts/` for titles and text |
+| `brand [--from-url] [--name] [--logo] [--accent] [--ground] [--font]` | the studio's brand (§8), given or read from its website (its robots.txt kept to): the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light), with a Google Fonts family (regular to bold, and its licence) in its `fonts/` for titles and text |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
 | `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel (with text under the safe box a warning), and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
@@ -199,9 +199,10 @@ prompt to their agent**.
      one table (`src/agents/tools.js`), so adding a tool is one row. `docs/agents/` has a page per tool.
   3. **Studio:** where it goes (`./<name>-films` by default), then `filmkit init`.
   4. **Brand:** `filmkit brand`. Give it a website URL and it pulls the brand from the site:
-     - the logo (SVG first, from the site's icons, `og:image` and header);
-     - `theme-color`, CSS custom properties and the dominant colours;
-     - the web fonts (only open-licence fonts are copied; others become a suggested open match).
+     - the logo: an SVG in the header, else the SVG icon, the touch icon or a PNG `og:image`;
+     - the accent from CSS custom properties, `theme-color`, the pinned-tab colour or the logo's colours, and the
+       ground from the page's background;
+     - the font from Google Fonts links or the CSS (only Google's open fonts are copied; others get a named open match).
 
      Or answer a few questions (name, logo file, accent, light or dark). It writes `brand/` and `filmkit.json`'s theme,
      then shows a still in the new theme for a yes or no.
