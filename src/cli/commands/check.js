@@ -7,7 +7,7 @@ import { buildSound } from "../../build/sound.js";
 import { themeContrast } from "../../contrast.js";
 import { describe } from "../../errors.js";
 import { translate } from "../../findings.js";
-import { hyperframesAsync } from "../../hyperframes.js";
+import { fetchHyperframes, hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
 import { progress } from "../../progress.js";
 import { safeZone } from "../../safe.js";
@@ -110,6 +110,8 @@ async function checkFormat(studio, film, format, live, force) {
     live.step(format, "checking");
     assemble(studio, film, format);
     const where = { film: film.name, format, dir, root: film.root.id ? `#${film.root.id}` : null, duration };
+    // Synchronous, so the formats that start alongside wait for it.
+    fetchHyperframes();
     const report = await hyperframesAsync(["check", "--json", "--caption-zone", safeZone(film.html, duration, format)], { cwd: dir });
     result = { format, dir, ...findings(report, where) };
     if (isLoop(film.root)) {

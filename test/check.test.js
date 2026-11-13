@@ -82,8 +82,9 @@ test("a rule without a catalogue entry keeps HyperFrames' message and fix hint, 
 
 // Without npx on the PATH, anything that runs HyperFrames exits 3: a 0 proves nothing ran.
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
-/** @param {string[]} args @param {string} cwd */
-const offline = (args, cwd) => spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, PATH: "/nonexistent" }, encoding: "utf8" });
+/** A machine offline that hasn't fetched HyperFrames yet. @param {string[]} args @param {string} cwd */
+const offline = (args, cwd) =>
+  spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, PATH: "/nonexistent", npm_config_cache: mkdtempSync(join(tmpdir(), "filmkit-npm-")) }, encoding: "utf8" });
 const warning = { code: "film_silent", message: "no sound" };
 
 /**
