@@ -5,10 +5,14 @@ import { join } from "node:path";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { isLoop } from "../build/seam.js";
+import * as captions from "../cli/commands/captions.js";
 import * as check from "../cli/commands/check.js";
+import * as contact from "../cli/commands/contact.js";
 import * as newFilm from "../cli/commands/new.js";
+import * as render from "../cli/commands/render.js";
 import * as scenes from "../cli/commands/scenes.js";
 import * as snapshot from "../cli/commands/snapshot.js";
+import * as stills from "../cli/commands/stills.js";
 import { templates } from "../create.js";
 import { ffmpegOutput } from "../ffmpeg.js";
 import { FORMATS, PACKAGE, filmNames, openFilm, openStudio, resolveFormats } from "../studio.js";
@@ -20,6 +24,7 @@ const MAX_TIMES = 12;
 /**
  * @typedef {import("@modelcontextprotocol/sdk/types.js").CallToolResult} CallToolResult
  * @typedef {{ type: "image", data: string, mimeType: string }} Image
+ * @typedef {import("@modelcontextprotocol/sdk/shared/protocol.js").RequestHandlerExtra<any, any>} Extra
  */
 
 /**
@@ -40,10 +45,12 @@ export function createServer({ studio } = {}) {
    * @param {{ run: (ctx: import("../cli/index.js").Context) => Promise<import("../cli/index.js").Result> }} command
    * @param {string[]} args
    * @param {Record<string, string | boolean | undefined>} [options]
+   * @param {Extra} [extra]  the request, for a long command to report its steps to as progress notifications
    * @returns {Promise<Record<string, unknown> & { ok: boolean }>}
    */
-  const run = async (command, args, options = {}) => {
-    const { exit, ...result } = await command.run({ args, options: { studio, ...options }, json: true, log: console.error });
+  const run = async (command, args, options = {}, extra) => {
+    const live = extra && notifier(extra);
+    const { exit, ...result } = await command.run({ args, options: { studio, ...options }, json: true, log: console.error, live });
     return result;
   };
 
@@ -83,7 +90,7 @@ export function createServer({ studio } = {}) {
     title: "Check film",
     description: "Builds the film's sound and checks each format (HyperFrames' lint, runtime, layout, motion and contrast passes, and a loop's seam), skipping formats unchanged since they passed. A failed check is a result, not an error: fix each finding, and look at its time with snapshot_film.",
     inputSchema: { film, formats: z.array(formats).optional().describe("the film's own formats when not given") },
-  }, async ({ film, formats = [] }) => json(await run(check, [film, ...formats])));
+  }, async ({ film, formats = [] }, extra) => json(await run(check, [film, ...formats], {}, extra)));
 
   server.registerTool("snapshot_film", {
     title: "Snapshot film",
@@ -99,7 +106,68 @@ export function createServer({ studio } = {}) {
     return { content: [text(result), ...frames.map((f) => image(f.path))], isError: !result.ok };
   });
 
+  server.registerTool("contact_sheet", {
+    title: "Contact sheet",
+    description: "One labelled sheet per format, as images: each scene just after it starts, or a frame every `every` seconds. The quickest look at a whole film.",
+    inputSchema: { film, formats: z.array(formats).optional().describe("the film's own formats when not given"), every: z.number().positive().optional().describe("seconds between frames") },
+  }, async ({ film, formats = [], every }) => {
+    const result = await run(contact, [film, ...formats], { every: every === undefined ? undefined : String(every) });
+    const sheets = /** @type {{ path: string }[]} */ (result.sheets);
+    return { content: [text(result), ...sheets.map((s) => image(s.path))], isError: !result.ok };
+  });
+
+  server.registerTool("render_film", {
+    title: "Render film",
+    description: "Checks the film, then renders an MP4 per format at delivery quality into the studio's renders folder, with its .srt and .vtt captions, keeping MP4s that are still current. Reports its steps as progress notifications. A failed check is a result: fix it and render again.",
+    inputSchema: { film, formats: z.array(formats).optional().describe("the film's own formats when not given") },
+  }, async ({ film, formats = [] }, extra) => {
+    const result = await run(render, [film, ...formats], {}, extra);
+    return { ...json(result), isError: Array.isArray(result.failed) };
+  });
+
+  server.registerTool("captions", {
+    title: "Captions",
+    description: "Writes the film's captions scene as .srt and .vtt in the renders folder, and returns its lines.",
+    inputSchema: { film },
+  }, async ({ film }) => json(await run(captions, [film])));
+
+  server.registerTool("stills", {
+    title: "Stills",
+    description: "Checks the film, then a poster PNG per format at one time, and a 1280×720 thumbnail from 16x9, in the renders folder.",
+    inputSchema: { film, at: z.number().nonnegative().describe("the time in seconds") },
+  }, async ({ film, at }, extra) => {
+    const result = await run(stills, [film, String(at)], {}, extra);
+    return { ...json(result), isError: Array.isArray(result.failed) };
+  });
+
   return server;
+}
+
+/** One notification a second at most while a step goes on: a render reports every frame. */
+const NOTIFY_MS = 1000;
+
+/**
+ * A long command's steps as the request's progress notifications, when its client asked for them (a progressToken).
+ * The count of steps is the progress, as it must only rise: a format's frames start again at each stage and format.
+ * @param {Extra} extra
+ * @returns {import("../progress.js").Progress}
+ */
+export function notifier({ _meta, sendNotification }, now = Date.now) {
+  const token = _meta?.progressToken;
+  let sent = 0;
+  let last = { step: "", at: 0 };
+  return {
+    step(name, step, { done, total } = {}) {
+      const at = now();
+      if (token === undefined || (last.step === `${name} ${step}` && at - last.at < NOTIFY_MS)) return;
+      last = { step: `${name} ${step}`, at };
+      const message = `${name} ${step}${total ? ` frame ${done ?? 0}/${total}` : ""}`;
+      sendNotification({ method: "notifications/progress", params: { progressToken: token, progress: ++sent, message } }).catch(() => {});
+    },
+    end() {},
+    log: (...lines) => console.error(...lines),
+    close() {},
+  };
 }
 
 /** @param {unknown} result @returns {CallToolResult} */

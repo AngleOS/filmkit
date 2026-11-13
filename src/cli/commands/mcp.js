@@ -2,7 +2,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { createServer } from "../../mcp/server.js";
 
 export const usage = "mcp";
-export const summary = "the MCP server over stdio: list_films, list_scenes, new_film, check_film and snapshot_film as tools, for any agent";
+export const summary = "the MCP server over stdio: the commands as tools any agent can call (docs/mcp.md)";
 
 /** @param {import("../index.js").Context} ctx */
 export async function run({ options }) {

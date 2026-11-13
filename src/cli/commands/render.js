@@ -11,12 +11,11 @@ export const summary = "check, then renders/<film>-<format>.mp4 at delivery qual
 export const options = { force: { type: /** @type {const} */ ("boolean") } };
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ args, options, log }) {
+export async function run({ args, options, log, live = progress(log) }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   // Read before the long renders, so a broken captions host fails first rather than after every MP4.
   const lines = readCaptions(film);
-  const live = progress(log);
   try {
     return await renderFilm(studio, film, resolveFormats(studio, film, args.slice(1)), lines, live, options.force === true);
   } finally {

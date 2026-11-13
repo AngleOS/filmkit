@@ -26,10 +26,9 @@ const PASSED = ".filmkit-hash";
  */
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ args, options, log }) {
+export async function run({ args, options, log, live = progress(log) }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
-  const live = progress(log);
   try {
     return await checkFilm(studio, film, resolveFormats(studio, film, args.slice(1)), live, options.force === true);
   } finally {
