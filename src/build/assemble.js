@@ -48,11 +48,18 @@ export function writeMaster(out, html, format) {
 }
 
 /**
- * What a format is assembled from, by name: a change in any of them changes the format.
+ * What a format is assembled from, by name: a change in any of them changes the format. The theme's compiled values
+ * aren't a file (filmkit.json can set them), so the hash adds them itself.
  * @param {import("../studio.js").Studio} studio
  * @param {import("../studio.js").Film} film
  */
-export const sources = (studio, film) => ({ kit: join(PACKAGE, "kit"), gsap: GSAP, theme: studio.themeDir, film: film.dir, project: PROJECT });
+export const sources = (studio, film) => ({
+  kit: join(PACKAGE, "kit"),
+  gsap: GSAP,
+  ...Object.fromEntries(studio.theme.dirs.map((dir, i) => [`theme${i}`, dir])),
+  film: film.dir,
+  project: PROJECT,
+});
 
 /**
  * @param {import("../studio.js").Studio} studio

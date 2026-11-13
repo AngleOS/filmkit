@@ -21,7 +21,7 @@ const QUIET_MS = 50;
 export const sources = (studio, film) => [
   { dir: film.dir, to: "" },
   { dir: join(PACKAGE, "kit"), to: "kit" },
-  { dir: studio.themeDir, to: join("kit", "theme") },
+  ...studio.theme.dirs.map((dir) => ({ dir, to: join("kit", "theme") })),
 ];
 
 /**
