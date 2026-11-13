@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { rootTag, setRootSize, startTags } from "../src/build/html.js";
+import { mountAudio, rootTag, setRootSize, startTags } from "../src/build/html.js";
 
 const hook = readFileSync(new URL("fixtures/studio/films/hook/index.html", import.meta.url), "utf8");
 
@@ -41,4 +41,13 @@ test("a malformed tag with many attributes is read in linear time", () => {
   const start = performance.now();
   startTags(tag);
   assert.ok(performance.now() - start < 200);
+});
+
+test("the sound is mounted as the root's first child, spanning the film on a lane of its own, once", () => {
+  const mounted = mountAudio(hook, "sound.m4a");
+  const tags = startTags(mounted);
+  const root = tags.findIndex((t) => t.attrs.id === "root");
+  assert.equal(tags[root + 1].name, "audio");
+  assert.deepEqual(tags[root + 1].attrs, { id: "sound", class: "clip", src: "sound.m4a", "data-start": "0", "data-duration": "6", "data-track-index": "1", "data-volume": "1" });
+  assert.equal(mountAudio(mounted, "sound.m4a"), mounted);
 });

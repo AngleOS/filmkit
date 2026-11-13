@@ -3,12 +3,13 @@ import { join } from "node:path";
 import { assemble, buildDir } from "../../build/assemble.js";
 import { formatHash } from "../../build/hash.js";
 import { isLoop, measureSeam } from "../../build/seam.js";
+import { buildSound } from "../../build/sound.js";
 import { hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "check <film> [formats…] [--force]";
-export const summary = "assemble each format and run `hyperframes check` on it, and a loop's seam gate, skipping formats unchanged since they passed (--force checks all); exits 1 when any format fails";
+export const summary = "build the sound, assemble each format and run `hyperframes check` on it, and a loop's seam gate, skipping formats unchanged since they passed (--force checks all); exits 1 when the sound or any format fails";
 export const options = { force: { type: /** @type {const} */ ("boolean") } };
 
 /** Where a format's last pass is kept: the hash of its inputs, and the warnings and seam it passed with. */
@@ -28,7 +29,8 @@ export async function run({ args, options, log }) {
 }
 
 /**
- * Every format checked, several at a time, each logged as it finishes; the result says which passed, and why not.
+ * The film's sound built, then every format checked, several at a time, each logged as it finishes; the result says
+ * which passed, and why not.
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
  * @param {string[]} formats
@@ -36,10 +38,13 @@ export async function run({ args, options, log }) {
  * @param {boolean} [force] check formats that are unchanged too
  */
 export async function checkFilm(studio, film, formats, log, force = false) {
+  // First: every format mounts the sound, and its hash counts it.
+  const sound = buildSound(studio, film);
+  if (sound) log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
   const checked = await pool(formats, slots(), (format) => checkFormat(studio, film, format, log, force));
-  const failed = checked.filter((c) => !c.ok).map((c) => c.format);
+  const failed = [...checked.filter((c) => !c.ok).map((c) => c.format), ...(sound && !sound.built ? ["sound"] : [])];
   log(failed.length ? `✗ ${film.name}: check failed in ${failed.join(", ")}` : `✓ ${film.name}: ${formats.join(", ")}`);
-  return { film: film.name, ok: !failed.length, formats: checked };
+  return { film: film.name, ok: !failed.length, formats: checked, sound };
 }
 
 /** @param {SeamCheck} seam */
