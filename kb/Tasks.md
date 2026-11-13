@@ -4,12 +4,8 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
-- [examples: a complete example studio with two films for a fictional brand](https://github.com/AngleOS/filmkit/issues/12) `filmkit#12` · High
 - [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
 - [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
-
-## In Progress
-
 - [ci: run test and types on ci-light; sub-minute jobs wait about 30 min for a full runner](https://github.com/AngleOS/filmkit/issues/125) `filmkit#125`
 
 ## Todo
@@ -30,4 +26,4 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 - [contact sheets: filmkit contact renders one review image per format](https://github.com/AngleOS/filmkit/issues/9) `filmkit#9` · High
 - [MCP server: filmkit mcp — tools that make, check, show and render films for any agent](https://github.com/AngleOS/filmkit/issues/10) `filmkit#10` · High
 - [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
-- [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
+- [examples: a complete example studio with two films for a fictional brand](https://github.com/AngleOS/filmkit/issues/12) `filmkit#12` · High
