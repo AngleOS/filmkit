@@ -1,7 +1,7 @@
 // HyperFrames renders every film, run through npx at one pinned version: the pin is what makes a re-render identical.
 // Move it only for a fix that matters, then check every example film in every format.
 import { spawn, spawnSync } from "node:child_process";
-import { RequirementError } from "./studio.js";
+import { fail } from "./errors.js";
 
 export const HYPERFRAMES = "hyperframes@0.8.186";
 
@@ -63,7 +63,7 @@ export function lastWords({ stdout, stderr }) {
 /** @param {Error} error */
 export function npxError(error) {
   const missing = /** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT";
-  return missing ? new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)") : error;
+  return missing ? fail("node_missing") : error;
 }
 
 /**

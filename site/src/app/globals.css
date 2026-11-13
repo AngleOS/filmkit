@@ -24,6 +24,7 @@
   }
   body {
     min-height: 100dvh;
+    background-color: var(--color-night);
     overflow-x: clip;
   }
   ::selection {
@@ -55,15 +56,18 @@
     text-wrap: balance;
   }
   /* The page's column: 1200 px wide, a 20 px gutter on a phone, 32 px from a tablet up. */
+  /* The page runs edge to edge (viewport-fit=cover), so the gutters also clear a landscape iPhone's notch. */
   .shell {
     width: 100%;
     max-width: 1200px;
     margin-inline: auto;
-    padding-inline: 1.25rem;
+    padding-left: max(1.25rem, env(safe-area-inset-left, 0px));
+    padding-right: max(1.25rem, env(safe-area-inset-right, 0px));
   }
   @media (min-width: 640px) {
     .shell {
-      padding-inline: 2rem;
+      padding-left: max(2rem, env(safe-area-inset-left, 0px));
+      padding-right: max(2rem, env(safe-area-inset-right, 0px));
     }
   }
   /* A slate: mono, tracked, small caps. */
@@ -147,13 +151,15 @@
     top: 1rem;
   }
 
+  /* Solid, and drawn up behind the status bar (viewport-fit=cover): iOS 26 Safari tints its status bar from a sticky
+     header's own background colour and ignores theme-color, so a translucent header left a see-through gap above it. */
   .site-header {
     position: sticky;
     top: 0;
     z-index: 50;
+    padding-top: env(safe-area-inset-top, 0px);
     border-bottom: 1px solid color-mix(in oklab, var(--color-line) 70%, transparent);
-    background: color-mix(in oklab, var(--color-night) 82%, transparent);
-    backdrop-filter: blur(12px);
+    background-color: var(--color-night);
   }
   .nav-link {
     transition: color 0.2s;

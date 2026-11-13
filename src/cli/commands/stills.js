@@ -2,8 +2,9 @@ import { copyFileSync, mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { ffmpeg } from "../../ffmpeg.js";
 import { hyperframes } from "../../hyperframes.js";
+import { fail } from "../../errors.js";
 import { progress } from "../../progress.js";
-import { FilmkitError, openFilm, openStudio, resolveFormats } from "../../studio.js";
+import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 import { checkFilm } from "./check.js";
 
 export const usage = "stills <film> <t> [formats…]";
@@ -14,7 +15,7 @@ export async function run({ args, options, json, log }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   const at = args[1];
-  if (!at || !(+at >= 0)) throw new FilmkitError("say when, in seconds: stills <film> <t> [formats…]");
+  if (!at || !(+at >= 0)) throw fail("no_time", { film: film.name });
   const live = progress(log);
   const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), live).finally(() => live.close());
   if (!checked.ok) return { ...checked, stills: [] };
