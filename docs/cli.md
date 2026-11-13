@@ -35,7 +35,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | `skills` | the filmkit skill and the skills the pinned HyperFrames ships (`hyperframes`, `hyperframes-cli`, `media-use`) into `.claude/skills/`, each replacing its older copy; the studio's other skills are left alone. The HyperFrames ones are git-ignored, since `skills` makes them again from the pin, and an `AGENTS.md` without a pointer to them gets one. Run it again after upgrading filmkit |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
 | `agents [tools…] [--remove] [--dry-run] [--mcp-command cmd]` | registers Filmkit's MCP server and skill in each agent tool it finds (Claude Code, Codex, Cursor, VS Code, …), with a backup of every file it edits: see [agents/](agents/README.md) |
-| `explain [code]` | why an error exists and how to fix it; with no code, every code |
+| `explain [code]` | why an error or check rule exists and how to fix it; with no code, every one of Filmkit's own. A HyperFrames rule is explained from the pinned HyperFrames' skill references |
 
 **Formats.** 16x9 (1920 × 1080), 9x16 (1080 × 1920), 1x1 (1080 × 1080) and 4x5 (1080 × 1350). With none named, a
 command works on the film's own (its root's `data-formats`, such as a vertical hook's `"9x16"`), else the studio's.
@@ -100,6 +100,14 @@ stderr. Global options (`--json`, `--studio`) may come before or after the comma
 **Errors.** Every error names the thing, says what's wrong and ends with the fix, as a command where there is one:
 `No film called "launch" in this studio. Films: hello, smoke. Make it with: filmkit new launch`. They come from one
 catalogue, `src/errors.js`, each with a code; `filmkit explain <code>` says why it exists and how to fix it.
+
+**Check findings** point at the frame: the format, the time, the element by its text, what it collides with, and the
+snapshot that shows it:
+`✗ content_overlap: 9x16 at 12.4 s: "Films are code" (#t) overlaps "Four frames" (#s). See it with: filmkit snapshot launch 9x16 --at 12.4`.
+The rules a film often breaks (overlap, overflow, occlusion, contrast, the type floor, unread lines, dead stretches, an
+empty first frame, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
+fix hint, at the film's own file and line. `filmkit explain` answers for those from the pinned HyperFrames' skill
+references once npx has fetched it, or else says which kind of check it is.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.
