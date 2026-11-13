@@ -5,8 +5,9 @@ name: ci
 # on /cache), so no setup-node `cache:`: it would tar the cache up and down on every job.
 # The runners follow angle-ai's ci.yml: what ships (agentd's landing candidates, `agentd/train/*`, and master pushes)
 # asks for `ci-priority`, a share of each pool held for it, so a landing can't queue behind PR CI; a PR's own runs
-# ask for `ci`. Never both: the priority runners don't carry `ci`, or they would take PR jobs too. Seconds of work
-# (`runners`, `ci-ok`) take the light pool, `ci-light`, and never wait behind another PR for a full runner.
+# ask for `ci`. Never both: the priority runners don't carry `ci`, or they would take PR jobs too. Work of seconds
+# (`runners`, `test`, `types`, `ci-ok`) takes the light pool, `ci-light` (0.5 CPU, 1 GiB), always up and mostly idle,
+# rather than waiting about 30 minutes behind angle-ai's e2e for a full runner (filmkit#125).
 on:
   pull_request:
   push:
@@ -21,7 +22,7 @@ permissions:
   contents: read
 
 jobs:
-  # The pool the jobs below ask for, and the guard that every job is in ci-ok's `needs`.
+  # The pool the full jobs below ask for, and the guard that every job is in ci-ok's `needs`.
   runners:
     runs-on: [self-hosted, ci-light, Linux]
     timeout-minutes: 5
@@ -48,8 +49,7 @@ jobs:
 
   # On the oldest Node the package supports (engines) and the current LTS.
   test:
-    needs: runners
-    runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux]
+    runs-on: [self-hosted, ci-light, Linux]
     timeout-minutes: 10
     strategy:
       fail-fast: false # each Node's verdict, not one cancelled by the other's failure
@@ -61,11 +61,12 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm ci
-      - run: npm test
+      # Two test files at a time (about 300 MB). By default `node --test` starts a process per CPU it sees, and in a
+      # runner's container it can see the host's: 9 of them took 800 MB, past the light runner's 1 GiB with its dockerd.
+      - run: npm test -- --test-concurrency=2
 
   types:
-    needs: runners
-    runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux]
+    runs-on: [self-hosted, ci-light, Linux]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
