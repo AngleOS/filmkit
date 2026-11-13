@@ -1,0 +1,10 @@
+:root {
+  --brand-orange: #ff5a1f;
+  --brand-primary: var(--brand-orange);
+  --gray-100: #f4f4f5;
+}
+html, body { margin: 0; }
+body { background-color: var(--gray-100); color: #14161a; font-family: "IBM Plex Sans", system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) {
+  :root { --gray-100: #111113; }
+}

@@ -2,7 +2,7 @@
 // (a theme.json over `default`, or `paper` on a light ground, with the brand's font in its fonts/), and filmkit.json's
 // name and theme. filmkit.json is edited in place, so its other keys, and their layout, stay as the studio wrote them
 // (D-008, Design §8).
-import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, extname, join, resolve } from "node:path";
 import { applyEdits, modify } from "jsonc-parser";
 import { fail } from "../errors.js";
@@ -18,8 +18,8 @@ const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 const PEAR = "#e3ef26";
 
 /**
- * @typedef {{ name?: string, logo?: string, accent?: string, ground?: string, font?: import("./fonts.js").Font }} Answers
- *   `logo` a file, from the cwd; `font` fetched
+ * @typedef {{ name?: string, logo?: string | import("./site.js").Logo, accent?: string, ground?: string,
+ *   font?: import("./fonts.js").Font }} Answers `logo` a file, from the cwd, or one read from the site; `font` fetched
  * @typedef {{ studio: string, name: string, files: string[], palette?: { accent: string, ground: string,
  *   adjusted: import("./palette.js").Adjusted[] } }} Written
  */
@@ -73,28 +73,29 @@ export function writeBrand(root, answers) {
 /**
  * What brand is given, checked before a font is fetched or a file written; and filmkit.json, read.
  * @param {string} root
- * @param {Omit<Answers, "font"> & { font?: unknown }} answers `font` the family, or fetched
+ * @param {Omit<Answers, "font"> & { font?: unknown, url?: string }} answers `font` the family, or fetched; `url` a site
+ *   to read the rest from
  */
-export function checkAnswers(root, { name, logo, accent, ground, font }) {
-  if (!name && !logo && !accent && !ground && !font) throw fail("brand_nothing");
+export function checkAnswers(root, { name, logo, accent, ground, font, url }) {
+  if (!name && !logo && !accent && !ground && !font && !url) throw fail("brand_nothing");
   if (accent && !HEX.test(accent)) throw fail("brand_option", { option: "--accent", value: accent, expected: 'a hex colour such as "#ff5a1f"' });
   if (ground && !GROUNDS.includes(ground)) throw fail("option_choice", { command: "brand", option: "--ground", value: ground, choices: GROUNDS });
-  if (logo && !existsSync(resolve(logo))) throw fail("logo_missing", { file: resolve(logo) });
+  if (typeof logo === "string" && !existsSync(resolve(logo))) throw fail("logo_missing", { file: resolve(logo) });
   return readJson(join(root, "filmkit.json"), "config_json");
 }
 
 /**
  * The logo as brand/logo.svg: an SVG kept as it is, a PNG embedded in one at its own size.
  * @param {string} root
- * @param {string} from
+ * @param {string | import("./site.js").Logo} logo
  */
-function writeLogo(root, from) {
-  const file = resolve(from);
+function writeLogo(root, logo) {
+  const file = typeof logo === "string" ? resolve(logo) : logo.from;
+  const bytes = typeof logo === "string" ? readFileSync(file) : Buffer.from(logo.data);
   const to = join(root, "brand", "logo.svg");
   mkdirSync(join(root, "brand"), { recursive: true });
-  const bytes = readFileSync(file);
-  if (extname(file).toLowerCase() === ".svg" && /<svg[\s>]/.test(bytes.toString("utf8"))) {
-    copyFileSync(file, to);
+  if ((typeof logo !== "string" || extname(file).toLowerCase() === ".svg") && /<svg[\s>]/.test(bytes.toString("utf8"))) {
+    writeFileSync(to, bytes);
     return to;
   }
   // A PNG's width and height are the first two fields of its IHDR chunk, 16 bytes in.
