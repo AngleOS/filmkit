@@ -61,3 +61,19 @@ export function setRootSize(html, width, height) {
   }
   return html.slice(0, root.index) + tag + html.slice(root.index + root.source.length);
 }
+
+/**
+ * The page with `src` mounted as the film's sound: an <audio> spanning the root, its first child, on a Studio lane of
+ * its own. A master that already mounts `src` is left as it is.
+ * @param {string} html
+ * @param {string} src
+ */
+export function mountAudio(html, src) {
+  const tags = startTags(html);
+  if (tags.some((t) => t.attrs.src === src)) return html;
+  const root = rootTag(html);
+  const lane = Math.max(0, ...tags.map((t) => +t.attrs["data-track-index"] || 0)) + 1;
+  const audio = `\n<audio id="sound" class="clip" src="${src}" data-start="0" data-duration="${root.attrs["data-duration"]}" data-track-index="${lane}" data-volume="1"></audio>`;
+  const at = root.index + root.source.length;
+  return html.slice(0, at) + audio + html.slice(at);
+}
