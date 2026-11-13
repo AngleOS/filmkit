@@ -56,7 +56,7 @@
       const block = (x, y, w, h, kind = "") => `<i class="${kind}" style="left:${x * fw}px;top:${y * fh}px;width:${w * fw}px;height:${h * fh}px"></i>`;
       const caption = block(0.12, 0.7, 0.76, 0.03, "cap") + block(0.2, 0.74, 0.6, 0.03, "cap");
       const title = (w) => block(0.08, 0.16, w, 0.035) + block(0.08, 0.205, w * 0.6, 0.035);
-      const bars = [0.18, 0.26, 0.34, 0.5].map((h, i) => block(0.12 + i * 0.2, 0.62 - h, 0.14, h, i === 3 ? "bar lit" : "bar")).join("");
+      const bars = [0.12, 0.18, 0.24, 0.32].map((h, i) => block(0.12 + i * 0.2, 0.62 - h, 0.14, h, i === 3 ? "bar lit" : "bar")).join("");
       frames[0].innerHTML = title(0.8) + caption;
       frames[1].innerHTML = title(0.7) + block(0.08, 0.32, 0.84, 0.2, "bar") + caption;
       frames[2].innerHTML = title(0.75) + bars + block(0.2, 0.715, 0.6, 0.016, "src") + caption;
