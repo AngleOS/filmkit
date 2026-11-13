@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { nodeSupported } from "../src/cli/commands/doctor.js";
 import { agentPrompt } from "../src/cli/commands/prompt.js";
 import { fromFlags } from "../src/cli/commands/setup.js";
-import { setup, studioDir } from "../src/setup.js";
+import { STEPS, setup, studioDir } from "../src/setup.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 const ok = (/** @type {string} */ name) => ({ name, ok: true, detail: "ok" });
@@ -107,6 +107,14 @@ test("a first film that fails its check fails setup, with no contact sheet", asy
   const { steps, calls } = stubs({ check: async () => ({ ok: false }) });
   const { result } = await setupYes({ name: "Acme", "no-brand": true }, steps);
   assert.deepEqual([result.ok, result.exit, calls.contact], [false, 1, []]);
+});
+
+test("setup's brand step writes the brand without brand's own next step: the first film comes next", async () => {
+  const { steps } = stubs({ brand: STEPS.brand });
+  const { home, result, lines } = await setupYes({ name: "Acme", agents: "none", "no-first-film": true }, steps);
+  assert.equal(result.brand.ok, true);
+  assert.ok(existsSync(join(home, "acme-films", "brand")));
+  assert.ok(!lines.some((l) => l.startsWith("Next:")), lines.join("\n"));
 });
 
 test("without filmkit brand in this version, the studio keeps the default theme", async () => {
