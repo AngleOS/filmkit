@@ -43,7 +43,7 @@ export const STEPS = {
   fetchChrome: () => hyperframes(["browser", "ensure"], { cwd: process.cwd(), toStderr: true }),
   agents: async (ctx) => (await command("agents")).run(ctx),
   // `filmkit brand` is its own command (Design §8, step 4); until this version has it, the studio keeps the default theme.
-  brand: async (ctx) => (existsSync(new URL("brand.js", COMMANDS)) ? (await command("brand")).run(ctx) : null),
+  brand: async (ctx) => (existsSync(new URL("brand.js", COMMANDS)) ? (await import(new URL("brand.js", COMMANDS).href)).brandStudio(ctx) : null),
   check: async (ctx) => (await command("check")).run(ctx),
   contact: async (ctx) => (await command("contact")).run(ctx),
   open: (path) => {

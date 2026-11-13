@@ -8,7 +8,17 @@ const text = { type: /** @type {const} */ ("string") };
 export const options = { name: text, logo: text, accent: text, ground: text };
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ options, log }) {
+export async function run(ctx) {
+  const result = await brandStudio(ctx);
+  ctx.log("Next: npx filmkit contact smoke, to see the brand in every scene");
+  return result;
+}
+
+/**
+ * The brand written, without the next step: inside setup, the first film comes next.
+ * @param {import("../index.js").Context} ctx
+ */
+export async function brandStudio({ options, log }) {
   const root = studioDir(/** @type {string | undefined} */ (options.studio));
   /** @param {string} key */
   const given = (key) => /** @type {string | undefined} */ (options[key]);
@@ -22,6 +32,5 @@ export async function run({ options, log }) {
     log(`  ${a.key} is ${a.used}: ${a.brand} is ${a.ratio}:1 on ${a.key === "accent" ? "the ground" : "paper"}, under the 4.5:1 text needs`);
   }
   log(`  wrote ${result.files.map((f) => relative(root, f)).join(", ")}`);
-  log("Next: npx filmkit contact smoke, to see the brand in every scene");
   return { ok: true, ...result };
 }
