@@ -6,9 +6,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [examples: a complete example studio with two films for a fictional brand](https://github.com/AngleOS/filmkit/issues/12) `filmkit#12` · High
 - [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
-
-## In Progress
-
 - [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
 
 ## Todo
