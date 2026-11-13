@@ -156,6 +156,19 @@ ca-server reboots), and GitHub-only deploys. Pages serves the site publicly whil
 **Consequences:** the build needs no base path (`SITE_BASE_PATH` stays for a build served under a path). Canonical,
 OG and sitemap URLs come from `SITE_URL` in `site/src/lib/content.ts`.
 
+## D-010 · 2026-11-13 · check warns of text under the safe box, through HyperFrames' caption band
+**Decision:** `check` gives `hyperframes check` the band under `AL.safe` as its `--caption-zone`, sampled once in each
+timed scene, two thirds in. Text it finds there is a `safe_zone` warning. The safe box is read from `kit/layout.js`
+itself (run in a Node vm), so the check and the scenes can't disagree.
+**Why:** HyperFrames 0.8.186 has no safe-box check, and Filmkit runs no browser of its own. The caption band measures
+one rectangle, and the foot is where a feed's caption, buttons and progress bar hide the most. It's sampled once a
+scene's words have arrived: words that rise in from below would otherwise be flagged on their way in. A warning, not a
+failure, because the feeds move their chrome when they redesign, and a lower third can belong there
+(`data-layout-allow-caption-zone`).
+**Consequences:** the top and sides of the safe box are left to the review of the frames
+(`skills/filmkit/references/review.md`). If HyperFrames gains a safe-box or several-band check, use it for all four
+edges.
+
 - **D-20261112-13-delegated** (AngleOS/filmkit#13, 2026-11-12 20:11 UTC): filmkit's npm release job (only on v* tags) runs on a GitHub-hosted ubuntu-latest runner so the package is published with npm provenance; all CI stays on the self-hosted runners and hosted use stays within the included minutes ($0 spending limit). *Why:* A — put only the release job on `ubuntu-latest` and publish with `npm publish --provenance`. `ci.yml` stays on `[self-hosted, ci, Linux]`. Why: - **Cost.** The release job runs about 2 minutes per `v*` tag. That fits in the plan's included Actions minutes, and the org's spending limit stays at $0, so it can never cost money. The rule is "included quota only, never overage", not "never hosted". Once the repo is public, the minutes are free. - **Provenance is worth it.** Provenance is the supply-chain proof users get for a CLI they run through `npx`. We would lose it on self-hosted runners and c *Reverse:* In .github/workflows/release.yml set runs-on back to [self-hosted, ci, Linux] and drop --provenance (and the id-token permission). (decided by the Expert)
 
 - **D-20261112-26-delegated** (AngleOS/filmkit#26, 2026-11-12 20:57 UTC): The Filmkit site launches with WebP posters in place of its five example videos. The MP4s follow in a separate slice, committed under a narrow site/public/media/*.mp4 gitignore exception. *Why:* B — Ship the posters only for now. Land #26 without video, and track the MP4s as a follow-up slice. What to do in this PR: - In `site/src/app/page.tsx` (lines ~112 and ~339), render the teaser and the four example slots as their `.webp` posters in a plain `<img>`, with the same label/alt and the same aspect box. Drop the `LoopVideo` use for now. Keep `loop-video.tsx` if the follow-up will reuse it as-is; otherwise remove it, because we don't keep dead code. - Change the tests so every example has a poster image with alt text. Drop the video assertions (preload/pause) for now, and keep axe and  *Reverse:* Merge the follow-up issue that adds the MP4s and restores LoopVideo in site/src/app/page.tsx. (decided by the Expert)

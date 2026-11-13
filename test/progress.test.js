@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, cpSync, mkdirSync, mkdtempSync, realpathSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { lastWords } from "../src/hyperframes.js";
+import { HYPERFRAMES, lastWords } from "../src/hyperframes.js";
 import { line, progress, renderStage } from "../src/progress.js";
 
 /** A clock the test moves, and the lines and terminal writes a progress makes. @param {boolean} isTTY */
@@ -84,10 +84,15 @@ test("a failed run's last words come from its stderr, else its stdout without th
   assert.deepEqual(lastWords({ stdout: "◆ Rendering\n  ███░░  12%  Capturing\n@hf-progress {}\n✗ Chrome crashed\n", stderr: "" }), ["◆ Rendering", "✗ Chrome crashed"]);
 });
 
-// A stand-in for `npx --yes hyperframes@… <command> …`: check passes; render reports two frames and writes its MP4,
-// unless FAKE_RENDER_FAILS is set; snapshot fails.
+// A stand-in for `npx --yes hyperframes@… <command> …`, which adds its arguments to FAKE_ARGS when set: --version
+// leaves the package in npm's cache, as npx does; check passes;
+// render reports two frames and writes its MP4, unless FAKE_RENDER_FAILS is set; snapshot fails.
 const NPX = `#!/bin/sh
+[ -n "$FAKE_ARGS" ] && echo "$@" >> "$FAKE_ARGS"
 case "$3" in
+  --version)
+    pkg="$npm_config_cache/_npx/fake/node_modules/hyperframes"
+    [ -n "$npm_config_cache" ] && mkdir -p "$pkg" && echo '{"version":"${HYPERFRAMES.split("@")[1]}"}' > "$pkg/package.json" ;;
   check) echo '{"ok":true}' ;;
   render)
     for out; do :; done
@@ -103,7 +108,12 @@ esac
 `;
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 
-/** Runs the CLI in a copy of the fixture studio, with the stand-in as npx. @param {string[]} args @param {object} [env] */
+/**
+ * Runs the CLI in a copy of the fixture studio, with the stand-in as npx, and an npm cache of its own: the stand-in leaves
+ * a package there that's only a package.json.
+ * @param {string[]} args
+ * @param {object} [env]
+ */
 function withFakeHyperframes(args, env = {}) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "filmkit-progress-")));
   cpSync(new URL("fixtures/studio", import.meta.url), dir, { recursive: true });
@@ -111,7 +121,7 @@ function withFakeHyperframes(args, env = {}) {
   writeFileSync(join(dir, "bin/npx"), NPX);
   chmodSync(join(dir, "bin/npx"), 0o755);
   const PATH = `${join(dir, "bin")}:${process.env.PATH}`;
-  return spawnSync(process.execPath, [CLI, ...args], { cwd: dir, env: { ...process.env, PATH, ...env }, encoding: "utf8" });
+  return spawnSync(process.execPath, [CLI, ...args], { cwd: dir, env: { ...process.env, PATH, npm_config_cache: join(dir, "npm"), ...env }, encoding: "utf8" });
 }
 
 test("off a terminal, render prints each step of the render as it starts", () => {
@@ -133,4 +143,22 @@ test("a seam whose frames didn't render says why, in HyperFrames' words", () => 
   assert.equal(status, 1, stderr);
   assert.deepEqual(JSON.parse(stdout).formats[0].seam, { ok: false, error: "the seam frames didn't render: Error: Chrome crashed" });
   assert.match(stderr, /^ {2}✗ seam_unmeasured: 9x16: the seam couldn't be measured: the seam frames didn't render: Error: Chrome crashed\. See what's missing with: filmkit doctor$/m);
+});
+
+test("check has HyperFrames flag text under the safe box, sampled two thirds into the film without scenes", () => {
+  const args = join(realpathSync(mkdtempSync(join(tmpdir(), "filmkit-args-"))), "args");
+  const { status, stderr } = withFakeHyperframes(["check", "plain", "16x9", "--force"], { FAKE_ARGS: args });
+  assert.equal(status, 0, stderr);
+  assert.match(readFileSync(args, "utf8"), / check --json --caption-zone x0=0;y0=0\.95;x1=1;y1=1;seek=0\.6667$/m);
+});
+
+test("before formats are checked together, HyperFrames is fetched once on its own, unless npx has it already", () => {
+  const args = join(realpathSync(mkdtempSync(join(tmpdir(), "filmkit-args-"))), "args");
+  const cache = realpathSync(mkdtempSync(join(tmpdir(), "filmkit-npm-")));
+  const calls = () => readFileSync(args, "utf8").trim().split("\n").map((l) => l.split(" ")[2]);
+  assert.equal(withFakeHyperframes(["check", "plain", "16x9", "1x1", "--force"], { FAKE_ARGS: args, npm_config_cache: cache }).status, 0);
+  assert.deepEqual(calls(), ["--version", "check", "check"]);
+  writeFileSync(args, "");
+  assert.equal(withFakeHyperframes(["check", "plain", "16x9", "1x1", "--force"], { FAKE_ARGS: args, npm_config_cache: cache }).status, 0);
+  assert.deepEqual(calls(), ["check", "check"]);
 });

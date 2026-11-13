@@ -185,6 +185,12 @@ function findings() {
   add("container_overflow", { other: "#card" }, '"Films are code" (#t) spills out of #card, which cuts it off.');
   add("clipped_text", {}, '"Films are code" (#t) is cut off by its own box.');
   add("text_occluded", { other: "#window" }, '"Films are code" (#t) is covered by #window.');
+  add(
+    "safe_zone",
+    { band: 420 },
+    '"Films are code" (#t) is under the safe box, in the bottom 420 px, where a feed\'s caption and buttons cover it.',
+    "Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with",
+  );
   add("contrast_aa_failure", { ratio: 2.1, required: 4.5, suggested: "rgb(140,140,140)" }, '"Films are code" (#t) is 2.1:1 against its ground, under WCAG AA\'s 4.5:1; rgb(140,140,140) would pass.');
   add("line_unread", { seconds: 0.5, floor: 1.05 }, '"Films are code" (#t) is on screen 0.5 s, under the 1.05 s it needs to be read.', "Hold it longer (about 0.5 s + 0.3 s a word). See it with");
   add("text_below_floor", { px: 18, floor: 28 }, '"Films are code" (#t) is 18 px, under the 28 px a phone can read.', "Set it to at least 28 px. See it with");

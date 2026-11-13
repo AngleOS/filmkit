@@ -20,7 +20,8 @@ every film so far. Do both, every time.
   - the title stack against the product shot in 9:16;
   - the cursor covering the label it presses.
 - **Outside the safe box:** any word or key action outside `AL.safe`, especially under the 9:16 buttons on the right
-  and the caption block at the bottom.
+  and the caption block at the bottom. `check` warns of text under the box (`safe_zone`); the top and sides are yours
+  to see.
 - **Too small:** any text under 28 px; a 9:16 statement under 110 px.
 - **Clipped or wrapped badly:** a line broken by the wrap instead of a written `\n`, an orphan word, text cut by its
   box.

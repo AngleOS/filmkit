@@ -337,6 +337,16 @@ export const CATALOGUE = {
       "(AL.safe): 5 % of 16x9, 64 px in 1x1 and 4x5, and clear of the feed's header, buttons and caption block in " +
       "9x16. Mark an entrance or exit that travels off the frame with data-layout-allow-overflow.",
   },
+  safe_zone: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is under the safe box, in the bottom ${p.band} px, where a feed's caption and buttons cover it.`,
+    fix: showing("Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with"),
+    why: "Feeds lay their own caption, buttons and progress bar over a film's foot, so words and the key action stay " +
+      "in the safe box, AL.safe: 5 % in from 16x9's edges; 64 px in 1x1 and 4x5, 96 px at 4x5's top and foot; in " +
+      "9x16, 270 px under the top, 120 px from the right and 420 px over the foot. check samples each scene once it " +
+      "has settled and warns of text in the band under the box: HyperFrames measures one band, and the foot hides " +
+      "the most. A lower third meant for the foot takes data-layout-allow-caption-zone.",
+  },
   container_overflow: {
     exit: 1,
     message: (p) => `${when(p)}: ${p.label} spills out of ${p.other}, which cuts it off.`,
