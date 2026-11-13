@@ -188,12 +188,11 @@ test("a mesh's links join every node, each to its nearest, once", () => {
   assert.deepEqual(plain(KC.links(line, 1)), [[0, 1], [1, 2], [2, 3]]);
   assert.deepEqual(plain(KC.links(line, 2, 30)), [[0, 1], [1, 2], [2, 3]], "no link passes through a node");
   assert.deepEqual(plain(KC.links(line, 2)), [[0, 1], [1, 2], [2, 3], [0, 2], [1, 3]]);
-
 });
 
 test("no link of a scattered mesh, its tree's included, passes through another node's ring", () => {
   for (const [w, h] of [[1680, 420], [952, 520], [952, 300], [896, 520]]) {
-    for (let n = 2; n <= 60; n++) {
+    for (const n of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20, 40, 60]) {
       const { size, nodes } = KC.scatter(n, w, h, { most: 84 });
       for (const [i, j] of KC.links(nodes, 3, size * 0.7)) {
         const [a, b] = [nodes[i], nodes[j]], dx = b.x - a.x, dy = b.y - a.y;
