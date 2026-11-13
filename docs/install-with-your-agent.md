@@ -17,8 +17,6 @@ Do this, step by step, and tell me what you did at each step:
 1. Install. Run the installer with --yes so it doesn't stop to ask:
    - macOS/Linux:  curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh -s -- --yes --agents auto --no-brand --no-first-film
    - Windows:      & ([scriptblock]::Create((irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1))) --yes --agents auto --no-brand --no-first-film
-   - If the repo is private and that URL 404s, I have access to it. Run instead:
-     gh repo clone AngleOS/filmkit /tmp/filmkit && sh /tmp/filmkit/install.sh --yes --agents auto --no-brand --no-first-film
    It installs Node 20.12+ and ffmpeg if they're missing, and registers the `filmkit` MCP server and skill in every agent
    tool it finds. Show me the list of tools it configured.
    Every `npx` command below uses the package spec github:AngleOS/filmkit. Never run an unscoped `npx filmkit`:
