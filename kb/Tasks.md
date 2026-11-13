@@ -4,12 +4,12 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
+- [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
-- [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
 
 ## In Progress
 
-- [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
+- [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
 
 ## Todo
 
