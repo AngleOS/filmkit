@@ -1,6 +1,7 @@
 import { FIRST_FILM } from "../../setup.js";
 import { openStudio } from "../../studio.js";
 import { next, tour } from "../../tour.js";
+import { pear } from "../banner.js";
 import { answer, asking as isAsking, p, start } from "../walkthrough.js";
 
 export const usage = "tour [film] [--yes] [--no-render]";
@@ -19,7 +20,7 @@ export async function run(ctx) {
   }
   const out = await start();
   /** @type {import("../../tour.js").Ask} */
-  const ask = async (_, stop) => answer(await p.confirm({ message: `Run ${stop.command}?` }), "tour");
+  const ask = async (_, stop) => answer(await p.confirm({ message: `Run ${pear(stop.command)}?` }), "tour");
   const result = await tour(studio, film, { ask, open: true }, { ...out, json });
   if (!result.ok) p.cancel("The tour stopped at the step above: fix it, then run filmkit tour again.");
   else {

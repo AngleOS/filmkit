@@ -24,11 +24,12 @@ Do this, step by step, and tell me what you did at each step:
    - my brand or product name;
    - my website (optional, to pull the logo, colours and fonts from);
    - a logo file (SVG best; optional if the website has one);
+   - my brand colour, as a hex such as #ff5a1f (optional);
    - whether my films should be dark or light;
    - where to keep the studio (default: ./<name>-films).
 
 3. Set up the brand. Run, with my answers:
-     npx -y filmkit setup --yes --studio <dir> --name "<name>" [--brand-url <url>] [--logo <file>] [--ground dark|light]
+     npx -y filmkit setup --yes --studio <dir> --name "<name>" [--brand-url <url>] [--logo <file>] [--accent <hex>] [--ground dark|light]
    This also makes a first film, films/hello, from the statement template. Run
    `npx -y filmkit stills hello 1` in the studio and show me the 16:9 still. Ask whether the colours and logo
    look right; change them with `npx -y filmkit brand --accent '<hex>'` (or `--ground`, `--logo`,

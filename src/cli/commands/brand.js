@@ -130,7 +130,7 @@ function write(root, answers, log) {
   if (font) log(`  ${font.family} for titles and text, in ${font.faces.map((f) => f.weight).join(", ")}`);
   // Google Fonts are all open, but where google/fonts keeps a family's licence can't always be guessed from its name.
   if (font && !font.licence) log(`· no licence for ${font.family} found in github.com/google/fonts: add it to brand/theme/fonts`);
-  log(`  wrote ${result.files.map((f) => relative(root, f)).join(", ")}`);
+  if (result.files.length) log(`  wrote ${result.files.map((f) => relative(root, f)).join(", ")}`);
   return result;
 }
 

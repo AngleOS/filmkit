@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { banner } from "../src/cli/banner.js";
+import { banner, pear } from "../src/cli/banner.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 
@@ -27,4 +27,10 @@ test("help on a pipe has no banner, even when an agent harness sets FORCE_COLOR"
   const { status, stdout } = spawnSync(process.execPath, [CLI, "--help"], { env: { ...process.env, FORCE_COLOR: "3" }, encoding: "utf8" });
   assert.equal(status, 0);
   assert.match(stdout, /^usage: filmkit /);
+});
+
+test("pear colours a walkthrough's text where the banner would show, and leaves it plain where it wouldn't", () => {
+  assert.equal(pear("filmkit check hello", tty(24), {}), "\x1b[38;2;227;239;38mfilmkit check hello\x1b[39m");
+  assert.equal(pear("filmkit check hello", tty(24), { NO_COLOR: "1" }), "filmkit check hello");
+  assert.equal(pear("filmkit check hello", { isTTY: false }, {}), "filmkit check hello");
 });

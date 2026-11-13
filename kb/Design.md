@@ -102,7 +102,7 @@ user's films.
 | `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt`; keeps MP4s still current (`--force` redoes all); a live line per format with its frames and the time left |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
-| `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
+| `doctor` | node, ffmpeg and ffprobe, Chrome for HyperFrames, and the HyperFrames pin |
 | `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
 | `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`), or for a HyperFrames rule from the pinned HyperFrames' skill references |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers); the HyperFrames ones are git-ignored, made again from the pin |
@@ -178,8 +178,8 @@ prompt to their agent**.
   2. checks ffmpeg the same way;
   3. runs `filmkit setup`.
 - **`filmkit setup`:** a guided walkthrough in a terminal; with `--yes` and flags (`--agents`, `--studio`, `--brand-url`,
-  `--name`), it runs unattended for agents. Its steps:
-  1. **Requirements:** Node, ffmpeg, and Chrome for HyperFrames (fetched once).
+  `--name`, `--logo`, `--accent`, `--ground`), it runs unattended for agents. Its steps:
+  1. **Requirements:** Node, ffmpeg and ffprobe, and Chrome for HyperFrames (fetched once).
   2. **Agents:** it detects the agent tools installed on the machine and offers to register the `filmkit` MCP server in
      each, idempotently, keeping a backup of every config it edits. `filmkit setup --remove` undoes it.
      - **Claude Code:** `claude mcp add -s user filmkit -- npx -y filmkit mcp`, plus the skill in `~/.claude/skills/filmkit`.

@@ -20,12 +20,13 @@ import { openStudio } from "./studio.js";
  *   firstFilm: () => Promise<boolean>,
  * }} Ask  each choice: the agent tools' ids ([] for every one installed, null for none); where the studio goes and
  *   the brand's name (null to stop before the studio); whether to make the first film
- * @typedef {{ url?: string, logo?: string, ground?: string, yes: boolean } | null} Brand  the brand flags, or null for --no-brand
+ * @typedef {{ url?: string, logo?: string, accent?: string, ground?: string, yes: boolean } | null} Brand  the brand
+ *   flags, or null for --no-brand
  * @typedef {{
  *   requirements: () => Check[],
  *   fetchChrome: () => void,
  *   agents: (ctx: Context) => Promise<StepResult>,
- *   brand: (ctx: Context) => Promise<StepResult | null>,
+ *   brand: (ctx: Context) => Promise<StepResult>,
  *   check: (ctx: Context) => Promise<StepResult>,
  *   contact: (ctx: Context) => Promise<StepResult>,
  *   open: (path: string) => void,
@@ -42,8 +43,8 @@ export const STEPS = {
   requirements,
   fetchChrome: () => hyperframes(["browser", "ensure"], { cwd: process.cwd(), toStderr: true }),
   agents: async (ctx) => (await command("agents")).run(ctx),
-  // `filmkit brand` is its own command (Design §8, step 4); until this version has it, the studio keeps the default theme.
-  brand: async (ctx) => (existsSync(new URL("brand.js", COMMANDS)) ? (await import(new URL("brand.js", COMMANDS).href)).brandStudio(ctx) : null),
+  // Imported when it runs: brand opens its still with setup's `open`.
+  brand: async (ctx) => (await import("./cli/commands/brand.js")).brandStudio(ctx),
   check: async (ctx) => (await command("check")).run(ctx),
   contact: async (ctx) => (await command("contact")).run(ctx),
   open: (path) => {
@@ -102,11 +103,14 @@ export async function setup({ ask, brand, open }, { log, heading, json }, steps 
   }
 
   heading("Brand");
-  if (brand) {
-    result.brand = await steps.brand(ctx([], { studio: dir, name: where.name, "from-url": brand.url, logo: brand.logo, ground: brand.ground, yes: brand.yes }));
-    if (!result.brand) log("· the default theme: filmkit brand isn't in this version yet");
-    else if (!result.brand.ok) return { ...result, ok: false };
-  } else log("· skipped: the studio keeps the default theme");
+  if (!brand) log("· skipped: the studio keeps the default theme");
+  // In a terminal, brand asks for what no flag gives; unattended, with nothing given, there's nothing to write.
+  else if (brand.yes && !(brand.url || brand.logo || brand.accent || brand.ground)) log("· the default theme: make it yours with filmkit brand");
+  else {
+    const { url, logo, accent, ground, yes } = brand;
+    result.brand = await steps.brand(ctx([], { studio: dir, name: where.name ?? result.studio.name, "from-url": url, logo, accent, ground, yes }));
+    if (!result.brand.ok) return { ...result, ok: false };
+  }
 
   heading("First film");
   if (!(await ask.firstFilm())) {

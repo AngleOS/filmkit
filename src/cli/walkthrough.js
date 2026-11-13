@@ -1,6 +1,6 @@
 // The walkthroughs of setup, tour and brand (D-008): the only commands that ask, and only a person at a terminal. Every
 // question has a flag, so with --yes, --json or on a pipe they run without one.
-import { banner } from "./banner.js";
+import { banner, pear } from "./banner.js";
 import { nodeSupported } from "./commands/doctor.js";
 
 /**
@@ -17,13 +17,13 @@ export let p;
 export const asking = ({ options, json }) => !options.yes && !json && Boolean(process.stdin.isTTY && process.stdout.isTTY) && nodeSupported();
 
 /**
- * Opens the walkthrough under the Angle banner; its lines and headings go in the prompts' gutter.
+ * Opens the walkthrough under the Angle banner; its lines and headings (in Pear) go in the prompts' gutter.
  * @returns {Promise<{ log: (...lines: unknown[]) => void, heading: (title: string) => void }>}
  */
 export async function start() {
   p = await import("@clack/prompts");
   p.intro(banner(false) || "ANGLE FILMKIT");
-  return { log: (...lines) => p.log.message(lines.join(" "), { spacing: 0 }), heading: (title) => p.log.step(title) };
+  return { log: (...lines) => p.log.message(lines.join(" "), { spacing: 0 }), heading: (title) => p.log.step(pear(title)) };
 }
 
 /**

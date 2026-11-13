@@ -2,8 +2,9 @@ import { mkdirSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
 import { MAX_FRAMES, contactTimes, tile } from "../../build/contact.js";
-import { hyperframes } from "../../hyperframes.js";
+import { fetchHyperframes, hyperframesAsync, lastWords } from "../../hyperframes.js";
 import { fail } from "../../errors.js";
+import { progress } from "../../progress.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "contact <film> [formats…] [--every 2s | --at t,t,…]";
@@ -11,7 +12,7 @@ export const summary = "a labelled contact sheet per format, build/<film>/contac
 export const options = { every: { type: /** @type {const} */ ("string") }, at: { type: /** @type {const} */ ("string") } };
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ args, options, json, log }) {
+export async function run({ args, options, log, live = progress(log) }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   const formats = resolveFormats(studio, film, args.slice(1));
@@ -23,15 +24,21 @@ export async function run({ args, options, json, log }) {
   if (times.length > MAX_FRAMES) throw fail("too_many_frames", { film: film.name, count: times.length, max: MAX_FRAMES, every: Math.ceil(duration / MAX_FRAMES) });
   const failed = [];
   const sheets = [];
-  for (const format of formats) {
-    const frames = snapshot(studio, film, format, times, json);
-    const path = join(studio.dir, "build", film.name, `contact-${format}.png`);
-    if (!frames.length || !tile(frames, format, join(studio.dir, "build", film.name, `contact-${format}`), path)) {
-      failed.push(format);
-      continue;
+  try {
+    for (const format of formats) {
+      live.step(format, "capturing");
+      const frames = await snapshot(studio, film, format, times, live);
+      live.end(format);
+      const path = join(studio.dir, "build", film.name, `contact-${format}.png`);
+      if (!frames.length || !tile(frames, format, join(studio.dir, "build", film.name, `contact-${format}`), path)) {
+        failed.push(format);
+        continue;
+      }
+      sheets.push({ format, path, times: frames.map((f) => f.t) });
+      live.log(path);
     }
-    sheets.push({ format, path, times: frames.map((f) => f.t) });
-    log(path);
+  } finally {
+    live.close();
   }
   if (failed.length) log(`✗ ${film.name}: contact sheet failed in ${failed.join(", ")}`);
   return { film: film.name, ok: !failed.length, sheets, ...(failed.length && { failed, exit: 4 }) };
@@ -59,20 +66,28 @@ function when(film, every, at) {
 }
 
 /**
- * One format's frames at `times`, in build/<film>/contact-<format>/; none when the snapshot failed.
+ * One format's frames at `times`, in build/<film>/contact-<format>/; none when the snapshot failed, with HyperFrames'
+ * last words. Its own output (a GPU probe, each frame, a newer version) is held back: the progress line says it's
+ * running, and inside setup's and tour's walkthroughs it would break their gutter.
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
  * @param {string} format
  * @param {number[]} times
- * @param {boolean} json
+ * @param {import("../../progress.js").Progress} live
  */
-function snapshot(studio, film, format, times, json) {
+async function snapshot(studio, film, format, times, live) {
   const out = join(studio.dir, "build", film.name, `contact-${format}`);
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
   // Only the asked times (no end frame), and no Gemini description when GEMINI_API_KEY happens to be set.
   const flags = [`--at=${times.join(",")}`, "--no-end", "--describe=false", "-o", out];
-  if (!hyperframes(["snapshot", ...flags], { cwd: assemble(studio, film, format), toStderr: json }).ok) return [];
+  const cwd = assemble(studio, film, format);
+  fetchHyperframes();
+  const run = await hyperframesAsync(["snapshot", ...flags], { cwd });
+  if (!run.ok) {
+    live.log([`${format} ✗ snapshot failed`, ...lastWords(run).map((line) => `  ${line}`)].join("\n"));
+    return [];
+  }
   // HyperFrames names each frame for its order and time: frame-03-at-6.5s.png
   return readdirSync(out)
     .sort()
