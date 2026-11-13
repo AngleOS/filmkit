@@ -94,7 +94,7 @@ user's films.
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
-| `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
+| `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
 | `preview <film> [format]` | HyperFrames Studio, live: reloads on save of the film, kit or theme; `f` switches format |

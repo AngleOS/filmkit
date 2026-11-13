@@ -24,7 +24,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 |---|---|
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
-| `check <film> [formats…] [--force]` | builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
+| `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
 | `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
@@ -110,6 +110,13 @@ The rules a film often breaks (overlap, overflow, occlusion, contrast, the type 
 empty first frame, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
 fix hint, at the film's own file and line. `filmkit explain` answers for those from the pinned HyperFrames' skill
 references once npx has fetched it, or else says which kind of check it is.
+
+**The theme's contrast** is checked once per film, before the formats: on each of the theme's grounds, its text and
+muted text against WCAG AA's 4.5:1 and its accent against 3:1 (the accent word is display type), with the colours that
+ground gets (on `paper`, `text.onPaper`, `text.mutedOnPaper` and `accentOn.paper`). It warns, and gives a colour that
+passes:
+`⚠ theme_contrast: The theme's accent #e3ef26 on the paper ground (#ffffff) is 1.26:1, under WCAG AA's 3:1 for display type. Set accentOn.paper in filmkit.json's "theme" to a colour that passes, such as: #949b19`.
+The rendered frames' contrast (`contrast_aa_failure`) fails the check: that's the text really on screen, at its size.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.

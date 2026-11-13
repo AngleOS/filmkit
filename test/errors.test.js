@@ -86,6 +86,11 @@ const CASES = {
     "9x16: the loop's last frame doesn't flow into frame 0 (a step of 0.9, over the limit of 0.4). See the seam with: filmkit snapshot hook 9x16 --at 7.96,0",
     "filmkit snapshot hook 9x16 --at 7.96,0",
   ],
+  theme_contrast: [
+    { role: "muted", key: "text.muted", colour: "#4a5a52", ground: "ink", on: "#07120f", ratio: 2.6, required: 4.5, suggested: "#727e78" },
+    'The theme\'s muted text #4a5a52 on the ink ground (#07120f) is 2.6:1, under WCAG AA\'s 4.5:1. Set text.muted in filmkit.json\'s "theme" to a colour that passes, such as: #727e78',
+    "#727e78",
+  ],
   unknown_code: [{ code: "nope" }, 'There\'s no error or rule called "nope". See them all with: filmkit explain', "filmkit explain"],
 };
 

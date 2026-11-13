@@ -4,6 +4,7 @@ import { assemble, buildDir } from "../../build/assemble.js";
 import { formatHash } from "../../build/hash.js";
 import { isLoop, measureSeam } from "../../build/seam.js";
 import { buildSound } from "../../build/sound.js";
+import { themeContrast } from "../../contrast.js";
 import { describe } from "../../errors.js";
 import { translate } from "../../findings.js";
 import { hyperframesAsync } from "../../hyperframes.js";
@@ -49,10 +50,26 @@ export async function checkFilm(studio, film, formats, live, force = false) {
   // First: every format mounts the sound, and its hash counts it.
   const sound = buildSound(studio, film);
   if (sound) live.log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
+  // The theme is the same in every format, so its contrast is checked once, and warned about rather than failed: a
+  // brand's colours are its own, and the rendered frames' contrast check fails the text that's really on screen.
+  const warnings = themeWarnings(studio.theme);
+  for (const w of warnings) live.log(`⚠ ${w.code}: ${w.message}`);
   const checked = await pool(formats, slots(), (format) => checkFormat(studio, film, format, live, force));
   const failed = [...checked.filter((c) => !c.ok).map((c) => c.format), ...(sound && !sound.built ? ["sound"] : [])];
   live.log(failed.length ? `✗ ${film.name}: check failed in ${failed.join(", ")}` : `✓ ${film.name}: ${formats.join(", ")}`);
-  return { film: film.name, ok: !failed.length, formats: checked, sound };
+  return { film: film.name, ok: !failed.length, warnings, formats: checked, sound };
+}
+
+/**
+ * The theme's text under WCAG AA on any of its grounds.
+ * @param {import("../../theme.js").Theme} theme
+ * @returns {Finding[]}
+ */
+export function themeWarnings({ values }) {
+  return themeContrast(values).map((shortfall) => {
+    const { code, message, fix } = describe("theme_contrast", shortfall);
+    return { code, message, fix };
+  });
 }
 
 /**

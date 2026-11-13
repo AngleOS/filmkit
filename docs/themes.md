@@ -33,7 +33,8 @@ command opens the studio. A mistake is a usage error (exit 2) that names the key
   - `accent`: one word per title, the motif, the mark. `accentOn.paper` is the accent on paper, when the accent doesn't
     read on it;
   - `text`: `ink` and `muted` on the dark grounds, `onPaper` and `mutedOnPaper` on paper, and `wordmark`, the
-    wordmark's colour on the dark grounds (`ink` when not given);
+    wordmark's colour on the dark grounds (`ink` when not given). `filmkit check` warns when one of these is under
+    WCAG AA on a ground it's read on (4.5:1 for `ink` and `muted`, 3:1 for the accent), and gives a colour that passes;
   - `code` and `codeOn.paper`: the `code` scene's syntax colours (`keyword`, `string`, `title`, `number`, `attr`).
     Without them, keywords take the accent and the rest the text colour. The product UI (`kit/film.css`'s `fk-`
     components, the `chat`, `composer`, `terminal` and `ui` scenes) works out its surfaces and borders from the ground
