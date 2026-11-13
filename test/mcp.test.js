@@ -70,7 +70,7 @@ const json = (result) => JSON.parse(/** @type {string} */ (result.content[0].tex
 test("the server is Angle Filmkit's, and lists its tools", async () => {
   assert.deepEqual([client.getServerVersion()?.name, client.getServerVersion()?.title], ["filmkit", "Angle Filmkit"]);
   const { tools } = await client.listTools();
-  const names = ["captions", "check_film", "contact_sheet", "list_films", "list_scenes", "new_film", "render_film", "snapshot_film", "stills"];
+  const names = ["add_claim", "captions", "check_film", "contact_sheet", "list_films", "list_scenes", "new_film", "read_claims", "render_film", "snapshot_film", "stills"];
   assert.deepEqual(tools.map((t) => t.name).sort(), names);
   const scenes = tools.find((t) => t.name === "list_scenes");
   assert.match(scenes?.description ?? "", /angle, default, paper/);
@@ -186,4 +186,38 @@ test("the notifier sends a step at once and its frames once a second, only to a 
   ]);
   const quiet = notifier(/** @type {any} */ ({ sendNotification: async () => assert.fail("no token, no notification") }));
   quiet.step("16x9", "checking");
+});
+
+test("add_claim appends a row to the film's claims, which read_claims gives back", async () => {
+  json(await call("new_film", { name: "claimed" }));
+  const placeholders = json(await call("read_claims", { film: "claimed" })).rows;
+  assert.ok(placeholders.length && placeholders.every((/** @type {{ flag: boolean }} */ r) => r.flag));
+  assert.deepEqual(json(await call("add_claim", { film: "claimed", line: "Films are code.", source: "README" })), { ok: true });
+  assert.deepEqual(json(await call("read_claims", { film: "claimed" })).rows.at(-1), { film: "claimed", line: "Films are code.", kind: "claim", source: "README", flag: false });
+  assert.match(readFileSync(join(studio, "CLAIMS.md"), "utf8"), /\| Films are code\. \| claim \| README \|\n$/);
+});
+
+test("add_claim for a film that isn't there is a tool error, and writes nothing", async () => {
+  const before = existsSync(join(studio, "CLAIMS.md")) ? readFileSync(join(studio, "CLAIMS.md"), "utf8") : null;
+  const result = await call("add_claim", { film: "nope", line: "Hi.", source: "README" });
+  assert.equal(result.isError, true);
+  assert.match(result.content[0].text ?? "", /^No film called "nope"/);
+  assert.equal(existsSync(join(studio, "CLAIMS.md")) ? readFileSync(join(studio, "CLAIMS.md"), "utf8") : null, before);
+});
+
+test("the guides are resources, read from the skill's references and the themes doc", async () => {
+  const { resources } = await client.listResources();
+  assert.deepEqual(resources.map((r) => r.uri).sort(), ["brief-template", "claims-format", "look-and-motion", "review-checklist", "themes"].map((n) => `filmkit://guide/${n}`));
+  const [look] = (await client.readResource({ uri: "filmkit://guide/look-and-motion" })).contents;
+  assert.equal(look.text, readFileSync(new URL("../skills/filmkit/references/look-and-motion.md", import.meta.url), "utf8"));
+  const [themes] = (await client.readResource({ uri: "filmkit://guide/themes" })).contents;
+  assert.match(String(themes.text), /"angle"/);
+  assert.match(String(themes.text), /"credit": false/);
+});
+
+test("make_film walks the workflow through the tools, with the brief", async () => {
+  const { messages } = await client.getPrompt({ name: "make_film", arguments: { brief: "A 10 s title film: Films are code." } });
+  const text = messages[0].content.type === "text" ? messages[0].content.text : "";
+  for (const tool of ["new_film", "read_claims", "add_claim", "list_scenes", "check_film", "snapshot_film", "contact_sheet", "render_film"]) assert.match(text, new RegExp(tool));
+  assert.ok(text.endsWith("A 10 s title film: Films are code.\n"));
 });

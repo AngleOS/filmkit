@@ -13,9 +13,11 @@ import * as render from "../cli/commands/render.js";
 import * as scenes from "../cli/commands/scenes.js";
 import * as snapshot from "../cli/commands/snapshot.js";
 import * as stills from "../cli/commands/stills.js";
+import { addClaim, readClaims } from "../claims.js";
 import { templates } from "../create.js";
 import { ffmpegOutput } from "../ffmpeg.js";
 import { FORMATS, PACKAGE, filmNames, openFilm, openStudio, resolveFormats } from "../studio.js";
+import { registerGuide } from "./guide.js";
 
 /** A model reads an image up to this long side without its client scaling it down. */
 const LONG_SIDE = 1568;
@@ -140,6 +142,30 @@ export function createServer({ studio } = {}) {
     return { ...json(result), isError: Array.isArray(result.failed) };
   });
 
+  server.registerTool("read_claims", {
+    title: "Read claims",
+    description: "The rows of the studio's CLAIMS.md: every word a film shows, its kind and its source. A flagged row (⚑) isn't true yet and holds back posting the film.",
+    inputSchema: { film: film.optional().describe("one film, for only its rows") },
+  }, async ({ film }) => json({ rows: readClaims(openStudio(studio), film) }));
+
+  server.registerTool("add_claim", {
+    title: "Add claim",
+    description: "Appends a row to the film's table in CLAIMS.md, for a line that will be on screen. Product and capability lines are word for word from the product's own claims (filmkit://guide/claims-format).",
+    inputSchema: {
+      film,
+      line: z.string().min(1).describe("the exact text on screen, with · between pieces shown together"),
+      kind: z.string().optional().describe("claim (when not given), number, chart, UI, example, brand, cta, source line or about other apps"),
+      source: z.string().min(1).describe("a file and line in the product's code, a URL with its date, or illustrative"),
+      flag: z.boolean().optional().describe("true for a line that isn't true yet: say in the source what it waits on"),
+    },
+  }, async ({ film, line, kind = "claim", source, flag }) => {
+    const open = openStudio(studio);
+    openFilm(open, film);
+    addClaim(open, { film, line, kind, source, flag });
+    return json({ ok: true });
+  });
+
+  registerGuide(server);
   return server;
 }
 
