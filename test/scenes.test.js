@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { startTags } from "../src/build/html.js";
-import { sceneCatalogue } from "../src/scenes.js";
+import { sceneCatalogue, scenesMarkdown } from "../src/scenes.js";
 import { FilmkitError } from "../src/studio.js";
 import { brandJs, loadTheme } from "../src/theme.js";
 
@@ -25,6 +25,20 @@ test("every kit scene declares its variables, each with a label and a default", 
       assert.ok(v.id && v.label && "default" in v, `${file}: ${JSON.stringify(v)}`);
     }
   }
+});
+
+test("docs/scenes.md is the catalogue as generated: run `npm run docs` after changing a scene", () => {
+  assert.equal(readFileSync(new URL("../docs/scenes.md", import.meta.url), "utf8"), scenesMarkdown());
+});
+
+test("docs/scenes.md documents every scene and each of its variables, a multi-line default in a block", () => {
+  const page = scenesMarkdown();
+  for (const scene of sceneCatalogue()) {
+    assert.match(page, new RegExp(`^## ${scene.name}$`, "m"));
+    for (const v of scene.variables) assert.ok(page.includes(`- \`${v.id}\` (${v.type}`), `${scene.name}.${v.id}`);
+  }
+  assert.match(page, /- `ticks` \(string\): .*\n\n  Default:\n  ```\n  2019 \| The first film\n/);
+  assert.ok(page.includes("renders/&lt;film>.srt"), "a bare <film> would read as an HTML tag");
 });
 
 test("the motif, mark and endcard scenes draw the brand through the theme's KB", () => {
