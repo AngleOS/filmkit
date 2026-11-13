@@ -2,7 +2,7 @@
 // smoke film reads in the new theme needs Chrome; the contrast maths here is what makes it pass `check`.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -106,10 +106,19 @@ test("switching the ground back and forth starts from the brand's own accent eac
   assert.deepEqual([back.palette?.accent, JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).accent], ["#ff5a1f", "#ff5a1f"]);
 });
 
-test("a first run with only the ground takes the accent filmkit.json set over its theme, else Pear", () => {
-  const dir = studio();
-  writeFileSync(join(dir, "filmkit.json"), JSON.stringify({ name: "Acme", theme: { extends: "default", accent: "#1a3cff" } }));
-  assert.equal(writeBrand(dir, { ground: "light" }).palette?.accent, "#1a3cff");
+test("a first run with only the ground takes the accent of the studio's theme, inline or a folder, else Pear", () => {
+  const inline = studio();
+  writeFileSync(join(inline, "filmkit.json"), JSON.stringify({ name: "Acme", theme: { extends: "default", accent: "#1a3cff" } }));
+  assert.equal(writeBrand(inline, { ground: "light" }).palette?.accent, "#1a3cff");
+  const folder = studio();
+  mkdirSync(join(folder, "themes", "acme"), { recursive: true });
+  writeFileSync(join(folder, "themes", "acme", "theme.json"), JSON.stringify({ extends: "default", accent: "#7c3aed" }));
+  writeFileSync(join(folder, "filmkit.json"), JSON.stringify({ name: "Acme", theme: "themes/acme" }));
+  assert.equal(writeBrand(folder, { ground: "light" }).palette?.accent, "#7c3aed");
+  // A theme that doesn't load, such as an accent that isn't a hex, says nothing about the brand.
+  const named = studio();
+  writeFileSync(join(named, "filmkit.json"), JSON.stringify({ name: "Acme", theme: { extends: "default", accent: "orange" } }));
+  assert.equal(writeBrand(named, { ground: "dark" }).palette?.accent, "#e3ef26");
   assert.equal(writeBrand(studio(), { ground: "dark" }).palette?.accent, "#e3ef26");
 });
 

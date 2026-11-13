@@ -6,6 +6,7 @@ import { basename, extname, join, resolve } from "node:path";
 import { applyEdits, modify } from "jsonc-parser";
 import { fail } from "../errors.js";
 import { readJson } from "../json.js";
+import { loadTheme } from "../theme.js";
 import { GROUNDS, palette, proposeGround } from "./palette.js";
 
 /** filmkit.json's "theme" once the brand is written: the folder brand/theme. */
@@ -44,7 +45,7 @@ export function writeBrand(root, { name, logo, accent, ground }) {
   /** @type {Written["palette"]} */
   let written;
   if (accent || ground || (name && stored)) {
-    const brandAccent = (accent ?? storedAccent(stored) ?? current.theme?.accent ?? PEAR).toLowerCase();
+    const brandAccent = (accent ?? [storedAccent(stored), themeAccent(root, current.theme)].find((a) => a && HEX.test(a)) ?? PEAR).toLowerCase();
     const on = ground ?? (stored ? (stored.extends === "paper" ? "light" : "dark") : proposeGround(brandAccent));
     const { values, adjusted } = palette(brandAccent, on);
     const theme = {
@@ -95,6 +96,21 @@ function writeLogo(root, from) {
  */
 function storedAccent(stored) {
   return stored?.description?.match(/the accent (#[0-9a-f]{3,6}) on a/)?.[1] ?? stored?.accent;
+}
+
+/**
+ * The accent of the theme filmkit.json names now, built-in, folder or single values; none when it doesn't load, as a
+ * theme that's broken can't say what the brand is.
+ * @param {string} root
+ * @param {string | Record<string, unknown> | undefined} theme
+ * @returns {string | undefined}
+ */
+function themeAccent(root, theme) {
+  try {
+    return loadTheme(root, theme).values.accent;
+  } catch {
+    return undefined;
+  }
 }
 
 /**
