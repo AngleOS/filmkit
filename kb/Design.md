@@ -55,8 +55,10 @@ user's films.
 - **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
   placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time; a grid's
   cells (the largest square that fits, filled a column at a time so a bracket spans the lit columns), ticks evenly or
-  to scale, labels spread clear of each other, and a line's wrap.
-- **icons.js (`KI`)**: a small lucide set (ISC) for `cards` and `grid`, stroked in the text colour.
+  to scale, labels spread clear of each other, and a line's wrap; a mesh's nodes (a jittered grid, clear of each
+  other), its links (a spanning tree and each node's nearest, none through a node) and a pulse's route (the shortest
+  way) at an even speed; a meter's share of its scale and a gauge's arc.
+- **icons.js (`KI`)**: a small lucide set (ISC) for `cards`, `grid` and `mesh`, stroked in the text colour.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;
@@ -73,7 +75,7 @@ user's films.
   - **product:** `chat`, `code`, `terminal`, `composer`, `ui` (a generic app frame for rebuilt product UI);
   - **infographics:** `bars` (proportional, rolling values, a cap or reference line), `counter`, `stat` (before and
     after, with the delta), `grid` (n of m lit, with a bracket), `cards` (flip-in cards with source lines),
-    `timeline` (ticks on a ruler), `mesh` (nodes connecting, with a pulse), `meter`;
+    `timeline` (ticks on a ruler), `mesh` (nodes connecting, with a pulse), `meter` (a gauge or a horizontal level);
   - **captions:** `captions`. It draws nothing; it is the source of the SRT/VTT, and `burn` puts them in the picture.
 - **sound**, from the film's `sound.json` (how to write it: `docs/sound.md`):
   - cues from the picture (impact, tick, whoosh, type…), each placed by a scene's `id` and seconds into it, resolved
@@ -101,6 +103,7 @@ user's films.
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
 | `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
+| `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`) |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers); the HyperFrames ones are git-ignored, made again from the pin |
 | `mcp` | the MCP server over stdio |
 

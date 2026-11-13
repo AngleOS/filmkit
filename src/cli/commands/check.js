@@ -4,6 +4,7 @@ import { assemble, buildDir } from "../../build/assemble.js";
 import { formatHash } from "../../build/hash.js";
 import { isLoop, measureSeam } from "../../build/seam.js";
 import { buildSound } from "../../build/sound.js";
+import { describe } from "../../errors.js";
 import { hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
@@ -116,7 +117,7 @@ export function findings({ ok, stdout, stderr = "" }) {
   } catch {
     // Its stderr is held back while formats run together, so its last line is the only word on what went wrong.
     const why = stderr.trim().split("\n").at(-1);
-    return { ok: false, errors: [{ code: "hyperframes", message: `hyperframes check gave no report${why ? `: ${why}` : ""}` }], warnings: [] };
+    return { ok: false, errors: [{ code: "no_report", message: describe("no_report", { why }).message }], warnings: [] };
   }
   /** @type {{ severity: string, code: string, message: string, selector?: string }[]} */
   const all = Object.values(report).flatMap((pass) => (Array.isArray(pass?.findings) ? pass.findings : []));

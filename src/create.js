@@ -4,8 +4,9 @@
 // CLAIMS.md, each placeholder row flagged ⚑, so a film can't be posted with a template's words.
 import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
+import { fail } from "./errors.js";
 import { HYPERFRAMES } from "./hyperframes.js";
-import { FilmkitError, FORMATS, PACKAGE, RequirementError } from "./studio.js";
+import { FORMATS, PACKAGE } from "./studio.js";
 
 const TEMPLATES = join(PACKAGE, "templates");
 /** The smoke film mounts every kit scene, so a new studio checks the kit in its own theme from the start. */
@@ -37,7 +38,7 @@ export function templates() {
  */
 export function initStudio(dir, name) {
   const root = resolve(dir);
-  if (existsSync(join(root, "filmkit.json"))) throw new FilmkitError(`${root} is already a studio. Make a film in it with: filmkit new <film>`);
+  if (existsSync(join(root, "filmkit.json"))) throw fail("studio_exists", { dir: root });
   const vars = { name: name || basename(root) };
   /** @type {string[]} */
   const files = [];
@@ -74,7 +75,7 @@ export function initStudio(dir, name) {
  */
 export function installSkills(studio, hyperframesSkills) {
   const hyperframes = readdirSync(hyperframesSkills).filter((n) => existsSync(join(hyperframesSkills, n, "SKILL.md"))).sort();
-  if (!hyperframes.length) throw new RequirementError(`${HYPERFRAMES} ships no skills in ${hyperframesSkills}: delete npx's cache (the _npx folder in npm config get cache) and run filmkit skills again`);
+  if (!hyperframes.length) throw fail("hyperframes_no_skills", { dir: hyperframesSkills });
   const sources = [{ name: "filmkit", from: "filmkit", dir: SKILL }, ...hyperframes.map((name) => ({ name, from: HYPERFRAMES, dir: join(hyperframesSkills, name) }))];
   const skills = sources.map(({ name, from, dir }) => {
     const path = join(studio.dir, ".claude", "skills", name);
@@ -115,12 +116,12 @@ function ignore(root, wanted) {
  * @returns {{ film: string, template: string, files: string[] }}
  */
 export function newFilm(studio, film, template) {
-  if (!film) throw new FilmkitError("name the film: filmkit new <film> [--template t]");
-  if (!FILM_NAME.test(film)) throw new FilmkitError(`"${film}" can't be a film's name: use lowercase letters, digits and dashes, like launch-teaser`);
+  if (!film) throw fail("new_unnamed");
+  if (!FILM_NAME.test(film)) throw fail("bad_film_name", { film });
   const names = templates();
-  if (!names.includes(template)) throw new FilmkitError(`no template "${template}" (templates: ${names.join(", ")})`);
+  if (!names.includes(template)) throw fail("unknown_template", { film, template, templates: names });
   const dir = join(studio.dir, "films", film);
-  if (existsSync(dir)) throw new FilmkitError(`films/${film} already exists: pick another name, or edit films/${film}/brief.md`);
+  if (existsSync(dir)) throw fail("film_exists", { film });
   const from = join(TEMPLATES, template);
   const vars = { name: studio.name, film };
   cpSync(from, dir, { recursive: true, filter: (path) => path !== join(from, "claims.md") });

@@ -3,7 +3,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { startTags } from "./build/html.js";
-import { FilmkitError, PACKAGE } from "./studio.js";
+import { fail } from "./errors.js";
+import { PACKAGE } from "./studio.js";
 
 const SCENES = join(PACKAGE, "kit", "scenes");
 
@@ -19,7 +20,7 @@ const SCENES = join(PACKAGE, "kit", "scenes");
  */
 export function sceneCatalogue(name) {
   const names = readdirSync(SCENES).filter((f) => f.endsWith(".html")).map((f) => f.slice(0, -5)).sort();
-  if (name !== undefined && !names.includes(name)) throw new FilmkitError(`no scene "${name}" (scenes: ${names.join(", ")})`);
+  if (name !== undefined && !names.includes(name)) throw fail("no_scene", { scene: name, scenes: names });
   return names.filter((n) => name === undefined || n === name).map(readScene);
 }
 

@@ -106,7 +106,7 @@ test("the scene catalogue: every kit scene with its comment as the description a
   assert.match(title.description, /^A title card, or a title over another scene/);
   const entrance = title.variables.find((v) => v.id === "entrance");
   assert.deepEqual(entrance?.options?.map((o) => o.value), ["blur", "rise", "ink", "none"]);
-  assert.throws(() => sceneCatalogue("nope"), (e) => e instanceof FilmkitError && /no scene "nope" \(scenes: bars, /.test(e.message));
+  assert.throws(() => sceneCatalogue("nope"), (e) => e instanceof FilmkitError && e.code === "no_scene" && /Scenes: bars, /.test(e.message));
 });
 
 test("filmkit scenes prints the catalogue, --json gives the scenes shape, and an unknown scene exits 2", () => {
