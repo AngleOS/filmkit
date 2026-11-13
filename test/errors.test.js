@@ -55,6 +55,7 @@ const CASES = {
     'films/launch/index.html uses kit/scenes/titel.html, and the kit has no scene "titel". Use one of: mark, title',
     "mark, title",
   ],
+  no_scene: [{ scene: "titel", scenes: ["mark", "title"] }, 'The kit has no scene called "titel". Scenes: mark, title', "mark, title"],
   no_time: [{ film: "hook" }, "Say when, in seconds. For example: filmkit stills hook 2.5", "filmkit stills hook 2.5"],
   node_missing: [
     { platform: "darwin" },
@@ -67,6 +68,11 @@ const CASES = {
     {},
     `npx couldn't fetch ${HYPERFRAMES}. It downloads once, on first use: connect to the network and run: filmkit doctor`,
     "filmkit doctor",
+  ],
+  hyperframes_no_skills: [
+    { dir: "/c/_npx/1/node_modules/hyperframes/dist/skills" },
+    `${HYPERFRAMES} has no skills in /c/_npx/1/node_modules/hyperframes/dist/skills. Delete npx's cache (the _npx folder in \`npm config get cache\`) and run: filmkit skills`,
+    "filmkit skills",
   ],
   chrome_missing: [
     {},
