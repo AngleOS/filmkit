@@ -1,8 +1,12 @@
 name: ci
 
-# One check for the ruleset to require: `ci-ok` (last job), green only when every other job succeeded. `types` fails
+# One check for the ruleset to require: `ci-ok` (last job), green only when every other job succeeded. `runners` fails
 # when a job is missing from ci-ok's `needs`. Self-hosted runners only (ephemeral Linux containers with shared caches
 # on /cache), so no setup-node `cache:`: it would tar the cache up and down on every job.
+# The runners follow angle-ai's ci.yml: what ships (agentd's landing candidates, `agentd/train/*`, and master pushes)
+# asks for `ci-priority`, a share of each pool held for it, so a landing can't queue behind PR CI; a PR's own runs
+# ask for `ci`. Never both: the priority runners don't carry `ci`, or they would take PR jobs too. Seconds of work
+# (`runners`, `ci-ok`) take the light pool, `ci-light`, and never wait behind another PR for a full runner.
 on:
   pull_request:
   push:
@@ -17,9 +21,35 @@ permissions:
   contents: read
 
 jobs:
+  # The pool the jobs below ask for, and the guard that every job is in ci-ok's `needs`.
+  runners:
+    runs-on: [self-hosted, ci-light, Linux]
+    timeout-minutes: 5
+    outputs:
+      pool: ${{ steps.pool.outputs.pool }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: ci-ok needs every job
+        run: |
+          jobs=$(awk '/^jobs:/ {in_jobs=1; next} in_jobs && /^  [A-Za-z0-9_-]+:/ {sub(/^  /, ""); sub(/:.*/, ""); print}' .github/workflows/ci.yml | grep -vx 'ci-ok' | sort)
+          needs=$(awk '/^  ci-ok:/ {f=1} f && /^    needs:/ {gsub(/.*\[|\].*|,/, " "); print; exit}' .github/workflows/ci.yml | tr -s ' ' '\n' | grep . | sort)
+          missing=$(comm -23 <(echo "$jobs") <(echo "$needs"))
+          [ -z "$missing" ] || { echo "::error file=.github/workflows/ci.yml::not in ci-ok's needs: ${missing//$'\n'/ }"; exit 1; }
+      - id: pool
+        env:
+          EVENT: ${{ github.event_name }}
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          case "$EVENT:$HEAD_REF" in
+            pull_request:agentd/train/* | push:*) pool=ci-priority ;;
+            *) pool=ci ;;
+          esac
+          echo "pool=$pool" >> "$GITHUB_OUTPUT"
+
   # On the oldest Node the package supports (engines) and the current LTS.
   test:
-    runs-on: [self-hosted, ci, Linux]
+    needs: runners
+    runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux]
     timeout-minutes: 10
     strategy:
       fail-fast: false # each Node's verdict, not one cancelled by the other's failure
@@ -34,16 +64,11 @@ jobs:
       - run: npm test
 
   types:
-    runs-on: [self-hosted, ci, Linux]
+    needs: runners
+    runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux]
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: ci-ok needs every job
-        run: |
-          jobs=$(awk '/^jobs:/ {in_jobs=1; next} in_jobs && /^  [A-Za-z0-9_-]+:/ {sub(/^  /, ""); sub(/:.*/, ""); print}' .github/workflows/ci.yml | grep -vx 'ci-ok' | sort)
-          needs=$(awk '/^  ci-ok:/ {f=1} f && /^    needs:/ {gsub(/.*\[|\].*|,/, " "); print; exit}' .github/workflows/ci.yml | tr -s ' ' '\n' | grep . | sort)
-          missing=$(comm -23 <(echo "$jobs") <(echo "$needs"))
-          [ -z "$missing" ] || { echo "::error file=.github/workflows/ci.yml::not in ci-ok's needs: ${missing//$'\n'/ }"; exit 1; }
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 26
@@ -54,7 +79,8 @@ jobs:
   # in Chrome), then a two-second film rendered end to end in a temp directory, not uploaded. X64: HyperFrames
   # downloads Chrome for Testing, which has no Linux ARM64 build.
   films:
-    runs-on: [self-hosted, ci, Linux, X64]
+    needs: runners
+    runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux, X64]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -84,8 +110,8 @@ jobs:
   # push), and `!cancelled()` rather than `always()`: a run superseded by a newer push needs no verdict.
   ci-ok:
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
-    needs: [test, types, films]
-    runs-on: [self-hosted, ci, Linux]
+    needs: [runners, test, types, films]
+    runs-on: [self-hosted, ci-light, Linux]
     timeout-minutes: 5
     steps:
       - env:
