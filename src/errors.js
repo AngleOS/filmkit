@@ -493,6 +493,34 @@ export const CATALOGUE = {
     why: "filmkit agents adds Filmkit's MCP server and skill to the agent tools it knows, each by its id. With no " +
       "ids it does every one that's installed, and leaves the others alone.",
   },
+  brand_nothing: {
+    exit: 2,
+    message: () => "Say what to set for the brand: its name, logo, accent or ground.",
+    fix: () => ["For example", "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'"],
+    why: "filmkit brand changes only what it's given: --name, --logo (an SVG, or a PNG it embeds), --accent (a hex " +
+      "colour) and --ground (dark or light). The accent and the ground make the palette, brand/theme/theme.json.",
+  },
+  brand_option: {
+    exit: 2,
+    message: ({ option, value, expected }) => `In filmkit brand, ${option} "${value}" should be ${expected}.`,
+    fix: ({ option }) => ["For example", option === "--ground" ? "filmkit brand --ground light" : "filmkit brand --accent '#ff5a1f'"],
+    why: "The accent is the brand's one colour, as a hex such as #ff5a1f; quote it in a shell, where # starts a " +
+      "comment. The ground is the brand's main background: dark (near-black, tinted with the accent) or light (white).",
+  },
+  logo_missing: {
+    exit: 2,
+    message: ({ file }) => `There's no logo at ${file}.`,
+    fix: () => ["Give the path to the logo, from this folder, as in", "filmkit brand --logo brand/acme.svg"],
+    why: "The --logo option takes the logo's file, an SVG or a PNG, from the current folder. filmkit brand copies it into the " +
+      "studio as brand/logo.svg, the mark the logo reveal and the end card draw.",
+  },
+  bad_logo: {
+    exit: 2,
+    message: ({ file }) => `${file} isn't an SVG or a PNG.`,
+    fix: () => ["Export the logo as an SVG, then", "filmkit brand --logo logo.svg"],
+    why: "The logo's mark is drawn as SVG: an SVG is kept as it is, a PNG is embedded in one at its own size. An SVG " +
+      "stays sharp at every size and can take the accent (draw it in currentColor).",
+  },
   unknown_code: {
     exit: 2,
     message: ({ code }) => `There's no error or rule called "${code}".`,

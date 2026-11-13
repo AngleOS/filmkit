@@ -23,6 +23,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | Command | What it does |
 |---|---|
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
+| `brand [--name n] [--logo file] [--accent hex] [--ground dark\|light]` | the studio's brand, changing only what it's given: `--logo` (an SVG kept as it is, or a PNG embedded in one) becomes `brand/logo.svg`; `--accent` and `--ground` make the palette, `brand/theme/theme.json`, each colour passing WCAG AA on its grounds, and point `filmkit.json`'s `theme` at it; `--name` sets the studio's name. See [themes](themes.md#your-brand-filmkit-brand) |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
 | `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, with the band under the safe box, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/`: with `--at`, the frames at those times and no others |
@@ -89,7 +90,7 @@ as `renders/<film>.srt` and `.vtt`: one pair serves every format, to upload as c
 scene gets no files. With `burn` the scene also draws them into the picture, in `AL.captions`.
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
-`kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`; `new` as `{ ok, film, template, files }`; `check`'s
+`kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`; `brand` as `{ ok, studio, name, files, palette? }`; `new` as `{ ok, film, template, files }`; `check`'s
 `sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same name; `doctor` as
 `{ ok, checks: [{ name, ok, detail, code?, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
