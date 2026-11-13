@@ -10,7 +10,7 @@ films/<name>/       brief.md, index.html (the master), compositions/ (the film's
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
 POSTING.md          where each render goes, with its copy per platform
 AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/
-build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change; never edit it
+build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change, and build/<film>/preview/; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
 
@@ -26,7 +26,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | `check <film> [formats…] [--force]` | builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
-| `preview <film> [format]` | HyperFrames Studio on one format |
+| `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
 | `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
@@ -43,6 +43,13 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
 `kit/motion.js`, `kit/chart.js` (for the infographic scenes), `kit/icons.js` (for `grid` icons and `cards`) and `kit/theme/brand.js`: see
 `examples/studio/films/infographics`.
+
+**Preview.** `preview` assembles `build/<film>/preview/` once and starts HyperFrames Studio on it, opening the browser
+when it runs in a terminal (`--open` or `--no-open` to choose). It then watches `films/<film>/`, the kit and the theme
+and copies each saved file into the build, where Studio sees it and reloads, within about 2 s of the save. It prints
+`Showing 9x16 · press f for the next format · q to quit`: `f` resizes the master for the film's next format in the
+same tab, and `q` (or Ctrl+C) stops Studio. Keys are read from stdin, so an agent can pipe them in. With `--json` it
+prints `{ film, format, ok, dir, url }` when it stops, `format` being the last one shown.
 
 **Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop. It
 builds the sound first, then hashes each format's inputs (the film's files, its built sound, the kit, GSAP, the theme,

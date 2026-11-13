@@ -14,16 +14,15 @@ import { soundPath } from "./sound.js";
 const GSAP = createRequire(import.meta.url).resolve("gsap/dist/gsap.min.js");
 const PROJECT = fileURLToPath(new URL("hyperframes.json", import.meta.url));
 /** What stays in the film's folder: the master is written sized, and sound is built from sound.json, not copied. */
-const OWN = new Set(["index.html", "sound.json"]);
+export const OWN = new Set(["index.html", "sound.json"]);
 
 /**
- * Assembles one format of a film and returns its directory.
+ * Assembles one format of a film and returns its directory: build/<film>/<format>/ unless `out` names another.
  * @param {import("../studio.js").Studio} studio
  * @param {import("../studio.js").Film} film
  * @param {string} format
  */
-export function assemble(studio, film, format) {
-  const out = buildDir(studio, film, format);
+export function assemble(studio, film, format, out = buildDir(studio, film, format)) {
   rmSync(out, { recursive: true, force: true });
   mkdirSync(out, { recursive: true });
   // kit/sound/ makes the sound in Node; the page only plays the result.
@@ -34,16 +33,24 @@ export function assemble(studio, film, format) {
   for (const entry of readdirSync(film.dir)) {
     if (!OWN.has(entry)) cpSync(join(film.dir, entry), join(out, entry), { recursive: true });
   }
-  const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
-  let html = setRootSize(film.html, width, height);
-  if (existsSync(soundPath(studio, film))) {
-    cpSync(soundPath(studio, film), join(out, "sound.m4a"));
-    html = mountAudio(html, "sound.m4a");
-  }
-  writeFileSync(join(out, "index.html"), html);
+  if (existsSync(soundPath(studio, film))) cpSync(soundPath(studio, film), join(out, "sound.m4a"));
+  writeMaster(out, film.html, format);
   writeFileSync(join(out, "meta.json"), JSON.stringify({ id: `${film.name}-${format}`, name: `${film.name} ${format}` }) + "\n");
   cpSync(PROJECT, join(out, "hyperframes.json"));
   return out;
+}
+
+/**
+ * Writes the film's master into `out`, its root composition sized for the format, with the film's sound mounted when
+ * the build has it.
+ * @param {string} out
+ * @param {string} html
+ * @param {string} format
+ */
+export function writeMaster(out, html, format) {
+  const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
+  const sized = setRootSize(html, width, height);
+  writeFileSync(join(out, "index.html"), existsSync(join(out, "sound.m4a")) ? mountAudio(sized, "sound.m4a") : sized);
 }
 
 /**
