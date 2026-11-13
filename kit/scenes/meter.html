@@ -1,0 +1,122 @@
+<template>
+  <!-- One value on its scale: a gauge (a half circle filling in the accent, its number in the bowl) or a horizontal
+       level (a track filling in the accent, its number over the end). The fill runs from `from`, so a level can rise
+       or fall, and the number rolls with it. What it measures and the scale's ends are labelled. Sits in AL.chart,
+       under a title placed at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #mt-box { position: absolute; }
+    #mt-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    #mt-track, #mt-fill { fill: none; stroke-linecap: butt; }
+    #mt-track { stroke: color-mix(in srgb, var(--foreground) 9%, transparent); }
+    #mt-fill { stroke: var(--accent); }
+    #mt-bar, #mt-level { position: absolute; border-radius: 10px; }
+    #mt-level { background: var(--accent); transform-origin: 0 50%; }
+    #mt-num, #mt-label, #mt-lo, #mt-hi { position: absolute; }
+    #mt-num { line-height: 1.1; }
+    #mt-label { color: var(--foreground); }
+  </style>
+  <div id="root" data-composition-id="meter" data-composition-variables='[
+    {"id":"value","type":"number","label":"The value it fills to","default":72},
+    {"id":"from","type":"number","label":"The value it fills from (above the value, it falls)","default":0},
+    {"id":"min","type":"number","label":"The scale’s low end","default":0},
+    {"id":"max","type":"number","label":"The scale’s high end","default":100},
+    {"id":"style","type":"enum","label":"Style","default":"gauge","options":[{"value":"gauge","label":"Gauge: a half circle"},{"value":"level","label":"Level: a horizontal track"}]},
+    {"id":"label","type":"string","label":"What it measures","default":"GPU in use"},
+    {"id":"prefix","type":"string","label":"Before the number, such as $","default":""},
+    {"id":"suffix","type":"string","label":"After the number, such as %","default":"%"},
+    {"id":"decimals","type":"number","label":"Decimal places","default":0},
+    {"id":"format","type":"enum","label":"Number format","default":"grouped","options":[{"value":"grouped","label":"Grouped: 12,345"},{"value":"plain","label":"Plain: 2026"},{"value":"compact","label":"Compact: 12.3K, 4.5M"}]},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <div id="mt-box">
+      <svg id="mt-svg"><path id="mt-track" /><path id="mt-fill" pathLength="1" /></svg>
+      <div id="mt-bar" class="chart-track"><i id="mt-level"></i></div>
+      <div id="mt-num" class="chart-num"></div>
+      <div id="mt-label" class="chart-label"></div>
+      <div id="mt-lo" class="chart-label"></div>
+      <div id="mt-hi" class="chart-label"></div>
+    </div>
+    <div id="mt-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { pick, mode, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      const fmt = (x) => KC.format(x, v);
+      const room = AL.source($("mt-source"), v.source);
+      const height = chart.height - room;
+      const small = pick({ L: 30, S: 28, V: 32 }), smallH = R(small * 1.3), labelSize = pick({ L: 36, S: 32, V: 38 });
+      const [start, end] = [KC.share(v.from, v.min, v.max), KC.share(v.value, v.min, v.max)];
+      $("mt-label").textContent = v.label;
+      $("mt-lo").textContent = fmt(v.min);
+      $("mt-hi").textContent = fmt(v.max);
+      $("mt-num").textContent = fmt(v.from);
+      gsap.set([$("mt-lo"), $("mt-hi")], { fontSize: small });
+      gsap.set($("mt-label"), { fontSize: labelSize, whiteSpace: "nowrap" });
+      // Text centred on x, kept inside the box's width.
+      const centre = (el, text, size, x, top, width) => {
+        const w = Math.min(width, KC.textWidth(text, size));
+        gsap.set(el, { left: Math.max(0, Math.min(R(x - w / 2), width - w)), top, width: w, textAlign: "center" });
+      };
+
+      let box, fill;
+      if (v.style === "gauge") {
+        // The half circle as large as fits over its end labels and what it measures; 16:9 sets it left under its
+        // left-aligned title, the narrow frames centre it.
+        const under = 12 + smallH + 16 + R(labelSize * 1.3);
+        const r = Math.floor(Math.min(pick({ L: 380, S: 400, V: 460 }), chart.width / 2.3, (height - under) / 1.12));
+        const stroke = R(r * 0.22), width = 2 * r + stroke, cx = R(width / 2), cy = R(r + stroke / 2);
+        box = { width, height: cy + under };
+        $("mt-svg").setAttribute("viewBox", `0 0 ${box.width} ${box.height}`);
+        for (const id of ["mt-track", "mt-fill"]) {
+          $(id).setAttribute("d", KC.arc(cx, cy, r));
+          $(id).setAttribute("stroke-width", stroke);
+        }
+        // The number sits in the bowl, as large as its widest frame fits between the arc's inner edges.
+        const numSize = KC.fit([fmt(v.value), fmt(v.from), fmt(v.max)], 2 * (r - stroke / 2) * 0.8, R(r * 0.5));
+        gsap.set($("mt-num"), { left: 0, width, top: cy - R(numSize * 1.1), fontSize: numSize, textAlign: "center" });
+        centre($("mt-lo"), $("mt-lo").textContent, small, cx - r, cy + 12, width);
+        centre($("mt-hi"), $("mt-hi").textContent, small, cx + r, cy + 12, width);
+        centre($("mt-label"), v.label, labelSize, cx, cy + 12 + smallH + 16, width);
+        gsap.set($("mt-bar"), { display: "none" });
+        // With pathLength 1 and a dash of 1, an offset of 1 − f shows the arc's first f.
+        gsap.set($("mt-fill"), { strokeDasharray: "1 2" });
+        fill = (tween, t) => tl.fromTo($("mt-fill"), { strokeDashoffset: 1 - start }, { strokeDashoffset: 1 - end, ...tween }, t);
+      } else {
+        // What it measures on the left and the number on the right, the track under them and its ends under it.
+        const width = Math.min(chart.width, pick({ L: 1300, S: chart.width, V: chart.width }));
+        const numSize = pick({ L: 96, S: 80, V: 104 }), track = pick({ L: 56, S: 48, V: 56 }), headH = R(numSize * 1.1);
+        box = { width, height: headH + 16 + track + 12 + smallH };
+        gsap.set($("mt-svg"), { display: "none" });
+        gsap.set($("mt-num"), { right: 0, top: 0, fontSize: numSize });
+        // What it measures sets smaller, down to 28 px, to fit beside the number at its widest.
+        const numW = Math.max(...[v.value, v.from, v.max].map((x) => KC.textWidth(fmt(x), numSize)));
+        const size = KC.fit([v.label], width - numW - 32, labelSize);
+        gsap.set($("mt-label"), { left: 0, top: headH - R(size * 1.3) - 6, fontSize: size });
+        gsap.set($("mt-bar"), { left: 0, top: headH + 16, width, height: track });
+        gsap.set($("mt-level"), { left: 0, top: 0, width, height: track });
+        gsap.set($("mt-lo"), { left: 0, top: headH + 16 + track + 12 });
+        gsap.set($("mt-hi"), { right: 0, top: headH + 16 + track + 12 });
+        fill = (tween, t) => tl.fromTo($("mt-level"), { scaleX: start }, { scaleX: end, ...tween }, t);
+      }
+      const left = mode === "L" ? chart.left : R(chart.left + (chart.width - box.width) / 2);
+      gsap.set($("mt-box"), { left, top: chart.top + Math.max(0, R((height - box.height) / 2)), width: box.width, height: box.height });
+
+      // The meter arrives, then fills as its number rolls, on one ease so the number reads what the fill shows.
+      KM.arrive(tl, $("mt-box"), 0.1);
+      fill({ duration: 1.2, ease: "expo.out" }, 0.6);
+      KC.roll(tl, $("mt-num"), v.from, v.value, 0.6, 1.2, fmt, "expo.out");
+      tl.fromTo($("mt-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [$("mt-box"), $("mt-source")], v.out);
+      window.__timelines["meter"] = tl;
+    })();
+  </script>
+</template>
