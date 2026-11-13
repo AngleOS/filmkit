@@ -70,6 +70,9 @@ export const stops = (film, made) => ({
   },
 });
 
+/** films/<film>/index.html: a film is there when its page is, not just its folder. @param {import("./studio.js").Studio} studio @param {string} film */
+const page = (studio, film) => join(studio.dir, "films", film, "index.html");
+
 /**
  * Runs the tour's steps on `film` in `studio`, stopping at the first the person declines or that fails; the result has
  * each step's own, null when it didn't run.
@@ -83,7 +86,7 @@ export async function tour(studio, film, { ask, open }, { log, heading, json }, 
   /** @param {string[]} args @returns {Context} */
   const ctx = (args) => ({ args, options: { studio: studio.dir }, json, log });
   plainName(film);
-  const made = !existsSync(join(studio.dir, "films", film));
+  const made = !existsSync(page(studio, film));
   const stop = stops(film, made);
   /** @type {Record<string, any>} */
   const result = { ok: true, film, new: null, check: null, contact: null, render: null };
@@ -125,10 +128,9 @@ export async function tour(studio, film, { ask, open }, { log, heading, json }, 
  * @param {string} film
  */
 export function next(studio, film) {
-  const page = join(studio.dir, "films", film, "index.html");
-  if (!existsSync(page)) return [`Run filmkit tour again when you're ready.`];
+  if (!existsSync(page(studio, film))) return [`Run filmkit tour ${film === FIRST_FILM.name ? "" : `${film} `}again when you're ready.`];
   return [
-    readFileSync(page, "utf8").includes('id="promise"')
+    readFileSync(page(studio, film), "utf8").includes('id="promise"')
       ? `Change the line: it's the promise scene's "text" in films/${film}/index.html.`
       : `Change the words: they're each scene's data-variable-values in films/${film}/index.html.`,
     `Watch the film as you edit it with filmkit preview ${film}.`,

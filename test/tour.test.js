@@ -90,6 +90,18 @@ test("a no to the first step makes no film, and the closing lines only say how t
   assert.equal(calls.check.length, 0);
   assert.ok(lines.some((l) => l.includes("skipped: run filmkit new hello --template statement")));
   assert.deepEqual(next(s, "hello"), ["Run filmkit tour again when you're ready."]);
+  assert.deepEqual(next(s, "launch"), ["Run filmkit tour launch again when you're ready."]);
+});
+
+test("a films/<film> folder without its index.html isn't a film: the tour offers to make it, and new says the folder is in the way", async () => {
+  const s = studio();
+  mkdirSync(join(s.dir, "films/hello"), { recursive: true });
+  const { steps, calls } = stubs();
+  /** @type {string[]} */
+  const asked = [];
+  await assert.rejects(run(s, async (step) => (asked.push(step), true), steps), { code: "film_exists" });
+  assert.deepEqual(asked, ["new"]);
+  assert.equal(calls.check.length, 0);
 });
 
 test("the tour uses a film that's already there without asking to make it, or naming a template it didn't use", async () => {
