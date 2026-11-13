@@ -1,0 +1,121 @@
+<template>
+  <!-- Nodes lighting and connecting: a field of nodes (plain, or each an icon) arrives and lights in a wave from one
+       corner, each link drawing as its ends light; then a pulse in the accent runs the shortest way along the links
+       from the bottom-left node to the top-right one, which lights in the accent. Give it 4.5 s at least: the wave
+       takes 1.6 s, the pulse up to 1.6 s more, and the end node's label lands by 4.4 s. Sits in AL.chart, under a
+       title placed at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #me-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .me-link { stroke: color-mix(in srgb, var(--foreground) 30%, transparent); stroke-width: 3; stroke-linecap: round; }
+    .me-path { stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+    .me-node, .me-on, .me-hit { position: absolute; display: grid; place-items: center; border-radius: 50%; border: 3px solid color-mix(in srgb, var(--foreground) 22%, transparent); color: var(--muted-foreground); }
+    .me-on { border-color: color-mix(in srgb, var(--foreground) 70%, transparent); color: var(--foreground); }
+    .me-on.plain { background: color-mix(in srgb, var(--foreground) 28%, transparent); }
+    .me-hit { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 18%, transparent); }
+    .me-node svg, .me-on svg, .me-hit svg { width: 55%; height: 55%; }
+    #me-pulse { position: absolute; left: 0; top: 0; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 6px color-mix(in srgb, var(--accent) 30%, transparent); }
+    #me-from, #me-to { position: absolute; font-family: var(--font-ui); font-weight: 500; color: var(--foreground); white-space: nowrap; line-height: 1.3; }
+    #me-to { color: var(--accent); }
+  </style>
+  <div id="root" data-composition-id="mesh" data-composition-variables='[
+    {"id":"nodes","type":"number","label":"Nodes (2 to 60)","default":18},
+    {"id":"icon","type":"string","label":"An icon in each node, such as cpu or server (empty for plain nodes); kit/icons.js lists them","default":""},
+    {"id":"from","type":"string","label":"The label of the node the pulse leaves, bottom left","default":"You"},
+    {"id":"to","type":"string","label":"The label of the node it reaches, top right, in the accent","default":"A free node"},
+    {"id":"source","type":"string","label":"Source line","default":""},
+    {"id":"ground","type":"enum","label":"Ground","default":"ink","options":[{"value":"ink","label":"Ink"},{"value":"accent-dark","label":"Accent, dark"},{"value":"paper","label":"Paper"},{"value":"none","label":"None (overlay)"}]},
+    {"id":"out","type":"number","label":"Clears at (s, 0 = holds to the cut)","default":0}
+  ]'>
+    <svg id="me-svg"></svg>
+    <div id="me-field"></div>
+    <i id="me-pulse"></i>
+    <div id="me-from"></div>
+    <div id="me-to"></div>
+    <div id="me-source"></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const v = AL.vars(document.getElementById("root"), window.__hyperframes);
+      const { W, H, pick, chart } = AL;
+      const R = Math.round;
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), v.ground);
+
+      // The field takes the chart box, less the source and a label's height over and under it for the end labels.
+      const room = AL.source($("me-source"), v.source);
+      const labelSize = pick({ L: 32, S: 30, V: 34 }), labelH = R(labelSize * 1.3) + 14;
+      const field = { left: chart.left, top: chart.top + labelH, width: chart.width, height: chart.height - room - 2 * labelH };
+      const n = Math.max(2, Math.min(60, R(v.nodes)));
+      const { size, nodes: local } = KC.scatter(n, field.width, field.height, { most: pick({ L: 84, S: 76, V: 84 }) });
+      const nodes = local.map((p) => ({ x: field.left + p.x, y: field.top + p.y }));
+      const edges = KC.links(nodes, 3, size * 0.7);
+      const nearest = (x, y) => nodes.reduce((best, p, i) => (Math.hypot(p.x - x, p.y - y) < Math.hypot(nodes[best].x - x, nodes[best].y - y) ? i : best), 0);
+      const from = nearest(field.left, field.top + field.height), to = nearest(field.left + field.width, field.top);
+      const path = KC.route(nodes, edges, from, to);
+
+      // Each node lights as a wave from the start reaches it.
+      const reach = nodes.map((p) => Math.hypot(p.x - nodes[from].x, p.y - nodes[from].y));
+      const far = Math.max(1, ...reach);
+      const lit = reach.map((d) => 0.6 + (1.0 * d) / far);
+
+      const icon = v.icon ? KI.svg(v.icon) : "";
+      const make = (cls, p) => {
+        const el = document.createElement("div");
+        el.className = cls;
+        el.innerHTML = icon;
+        gsap.set(el, { left: p.x - size / 2, top: p.y - size / 2, width: size, height: size });
+        $("me-field").appendChild(el);
+        return el;
+      };
+      const els = nodes.map((p) => ({ base: make("me-node", p), on: make(icon ? "me-on" : "me-on plain", p) }));
+      const hit = make("me-hit", nodes[to]);
+
+      // A link draws from the end that lit first; the route's links redraw in the accent behind the pulse.
+      const svg = $("me-svg");
+      svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+      const line = (cls, a, b) => {
+        const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        for (const [k, val] of Object.entries({ class: cls, pathLength: 1, ...KC.trim(nodes[a], nodes[b], size / 2 + 6) })) l.setAttribute(k, val);
+        svg.appendChild(l);
+        return l;
+      };
+      const links = edges.map(([i, j]) => (lit[i] <= lit[j] ? [i, j] : [j, i])).map(([a, b]) => ({ l: line("me-link", a, b), t: lit[a] }));
+      const legs = path.slice(1).map((b, k) => line("me-path", path[k], b));
+
+      // The end labels: the start's under it, the end's over it, centred on their nodes but kept in the chart box.
+      const label = (el, text, p, top) => {
+        const w = Math.min(chart.width, KC.textWidth(text, labelSize));
+        el.textContent = text;
+        gsap.set(el, { left: Math.max(chart.left, Math.min(R(p.x - w / 2), chart.left + chart.width - w)), top, width: w, fontSize: labelSize, textAlign: "center" });
+      };
+      label($("me-from"), v.from, nodes[from], nodes[from].y + size / 2 + 12);
+      label($("me-to"), v.to, nodes[to], nodes[to].y - size / 2 - 12 - R(labelSize * 1.3));
+      const pulse = R(size * 0.28);
+      gsap.set($("me-pulse"), { width: pulse, height: pulse, marginLeft: -pulse / 2, marginTop: -pulse / 2, x: nodes[from].x, y: nodes[from].y, opacity: 0 });
+
+      // The nodes arrive dim with the wave, light, and link up; then the pulse runs the route at an even speed.
+      els.forEach((e, i) => {
+        tl.fromTo(e.base, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 0.1 + (0.5 * reach[i]) / far);
+        tl.fromTo(e.on, { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, lit[i]);
+      });
+      links.forEach((k) => tl.fromTo(k.l, { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: 0.5, ease: "expo.out" }, k.t + 0.05));
+      if (v.from) KM.arrive(tl, $("me-from"), 0.6);
+      const go = Math.max(...lit) + 0.6, stops = KC.legs(nodes, path, Math.min(1.6, 0.4 + 0.25 * path.length));
+      tl.fromTo($("me-pulse"), { opacity: 0 }, { opacity: 1, duration: 0.15, ease: "none" }, go - 0.15);
+      stops.slice(1).forEach((s, k) => {
+        const dur = s.t - stops[k].t;
+        tl.to($("me-pulse"), { x: s.x, y: s.y, duration: dur, ease: "none" }, go + stops[k].t);
+        tl.fromTo(legs[k], { strokeDasharray: 1, strokeDashoffset: 1 }, { strokeDashoffset: 0, duration: dur, ease: "none" }, go + stops[k].t);
+      });
+      const there = go + stops.at(-1).t;
+      tl.to($("me-pulse"), { opacity: 0, duration: 0.2, ease: "none" }, there);
+      tl.fromTo(hit, { opacity: 0, scale: 1.25 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, there);
+      if (v.to) KM.arrive(tl, $("me-to"), there + 0.1);
+      tl.fromTo($("me-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
+      if (v.out > 0) KM.out(tl, [svg, $("me-field"), $("me-pulse"), $("me-from"), $("me-to"), $("me-source")], v.out);
+      window.__timelines["mesh"] = tl;
+    })();
+  </script>
+</template>
