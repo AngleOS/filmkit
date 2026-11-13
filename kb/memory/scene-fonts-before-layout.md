@@ -15,4 +15,4 @@ async callback as long as `window.__timelines[id]` is registered at the end of i
 the same reason.
 
 **How to apply:** measure text only after `document.fonts.load(face, text)` resolves; the mark and endcard scenes build
-inside `KB.ready()`, which a theme's brand.js may define. Related: [[gsap-shorthand-px]].
+inside `KB.ready()`, which a theme's brand.js may define. Related: [[projects/filmkit/memory/gsap-shorthand-px]].
