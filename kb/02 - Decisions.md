@@ -179,9 +179,6 @@ edges.
 
 - **D-20261113-8-delegated** (AngleOS/filmkit#8, 2026-11-13 05:55 UTC): The explainer and product-demo templates run to their scenes' own motion, about 31 s and about 26 s instead of 40 s and 30 s, so they pass check with no dead_stretch warnings and no data-hold padding. *Why:* A — Tighten the beats to the kit scenes' own motion: explainer about 31 s and product-demo about 26 s. That makes both templates pass `check` in all four formats with no dead_stretch warnings. In the same PR, update the lengths and beat times in kb/Templates.md and in each template's brief.md beats table. Why: - Templates teach. A starting film that comes with five warnings per format teaches users to ignore `check`, so C is out. - B misuses `data-hold`. It's meant for stillness that is the point, like the statement held over its motif (Templates.md). Here the holds are just padding, and the d *Reverse:* Set explainer back to 40 s and product-demo back to 30 s in templates/ and kb/Templates.md, and add real motion or data-hold to fill the stretched beats. (decided by the Expert)
 
-## Related
-- [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
-
 ## D-010 · 2026-11-13 · The repo is public, closed to outside interaction
 
 **Decision:** AngleOS/filmkit went public on 2026-11-13, history and issues as they were, after a leak review (no
@@ -194,3 +191,6 @@ ids, the owner's commit emails). Only the owner pushes or opens PRs, so the repo
 - fork PR workflows need approval from every outside contributor, and the default workflow token is read-only;
 - CI stays on the self-hosted runners, so the `Default` runner group must allow public repositories.
 **Why:** "peace of mind, not perfect": no secrets leak, and nobody outside can drive the fleet or the runners.
+
+## Related
+- [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
