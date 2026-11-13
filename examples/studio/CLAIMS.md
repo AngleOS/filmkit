@@ -53,3 +53,14 @@ server; nothing on screen is a flag or a tool that doesn't exist.
 | Brief in. Film out. | claim | README.md, "Write a brief. The agent … renders." |
 | Pre-alpha · MIT · filmkit.anglehq.net | cta | README.md "Status: pre-alpha"; LICENSE (MIT); D-009, "The site lives at filmkit.anglehq.net" (site/public/CNAME) |
 | ANGLE · Made with Angle Filmkit | brand | the `angle` theme's lockup and credit (themes/angle/theme.json) |
+
+## the-four-frames
+
+The 9:16 hook. Its two lines are the README's and the product demo's; the frames carry no claim of their own.
+
+| On screen | Kind | Source |
+|---|---|---|
+| ANGLE FILMKIT | brand | the `angle` theme's lockup (themes/angle/theme.json), with FILMKIT beside it as on the README hero |
+| Your agent makes the film. | claim | README.md, "Your AI agent makes the film." |
+| Your agent makes the film. · 16:9 · 1:1 · 4:5 · 9:16 | example | the same line, re-laid in each frame and not cropped (README.md, "laid out for its own frame, never cropped") |
+| Brief in. Film out. | claim | README.md, "Write a brief. The agent … renders." |
