@@ -154,6 +154,86 @@ test("a line wraps a word at a time to the lines it sets in", () => {
   assert.equal(KC.lines("", 400, 40), 0);
 });
 
+test("noise is the same for the same seed, in 0..1", () => {
+  const a = [1, 2, 3].map(KC.noise), b = [1, 2, 3].map(KC.noise);
+  assert.deepEqual(a, b);
+  assert.ok(a.every((x) => x >= 0 && x < 1) && new Set(a).size === 3);
+});
+
+test("a mesh's nodes scatter over their box, a node's width in from its edges and clear of each other", () => {
+  for (const [n, w, h] of [[16, 1600, 500], [16, 800, 1000], [7, 900, 300], [1, 400, 400]]) {
+    const { size, nodes } = KC.scatter(n, w, h, { most: 80 });
+    assert.equal(nodes.length, n);
+    assert.ok(size > 0 && size <= 80);
+    for (const p of nodes) assert.ok(p.x >= size / 2 && p.x <= w - size / 2 && p.y >= size / 2 && p.y <= h - size / 2, `${n} in ${w}×${h}`);
+    for (const [i, p] of nodes.entries()) for (const q of nodes.slice(i + 1)) assert.ok(Math.hypot(p.x - q.x, p.y - q.y) >= size * 1.5, `${n} in ${w}×${h}: nodes overlap`);
+  }
+  assert.ok(KC.scatter(40, 900, 300, { most: 80 }).size < 80, "many nodes take smaller ones");
+  assert.deepEqual(plain(KC.scatter(16, 1600, 500, { most: 80 })), plain(KC.scatter(16, 1600, 500, { most: 80 })));
+});
+
+test("a mesh's links join every node, each to its nearest, once", () => {
+  const { nodes } = KC.scatter(16, 1600, 500, { most: 80 });
+  const edges = KC.links(nodes);
+  assert.equal(new Set(edges.map((e) => e.join())).size, edges.length);
+  assert.ok(edges.every(([i, j]) => i < j));
+  // Every node reaches node 0.
+  const reached = new Set([0]);
+  for (let grew = true; grew; ) {
+    grew = false;
+    for (const [i, j] of edges) if (reached.has(i) !== reached.has(j)) reached.add(i).add(j), (grew = true);
+  }
+  assert.equal(reached.size, nodes.length);
+  const line = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 200, y: 0 }, { x: 900, y: 0 }];
+  assert.deepEqual(plain(KC.links(line, 1)), [[0, 1], [1, 2], [2, 3]]);
+  assert.deepEqual(plain(KC.links(line, 2, 30)), [[0, 1], [1, 2], [2, 3]], "no link passes through a node");
+  assert.deepEqual(plain(KC.links(line, 2)), [[0, 1], [1, 2], [2, 3], [0, 2], [1, 3]]);
+});
+
+test("no link of a scattered mesh, its tree's included, passes through another node's ring", () => {
+  for (const [w, h] of [[1680, 420], [952, 520], [952, 300], [896, 520]]) {
+    for (const n of [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 20, 40, 60]) {
+      const { size, nodes } = KC.scatter(n, w, h, { most: 84 });
+      for (const [i, j] of KC.links(nodes, 3, size * 0.7)) {
+        const [a, b] = [nodes[i], nodes[j]], dx = b.x - a.x, dy = b.y - a.y;
+        for (const [k, p] of nodes.entries()) {
+          if (k === i || k === j) continue;
+          const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy)));
+          assert.ok(Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy) >= size * 0.7, `${n} in ${w}×${h}: ${i}–${j} crosses ${k}`);
+        }
+      }
+    }
+  }
+});
+
+test("a route takes the shortest way along the links", () => {
+  const pts = [{ x: 0, y: 0 }, { x: 100, y: 0 }, { x: 200, y: 0 }, { x: 100, y: 300 }];
+  assert.deepEqual(plain(KC.route(pts, [[0, 1], [1, 2], [0, 3], [2, 3]], 0, 2)), [0, 1, 2]);
+  assert.deepEqual(plain(KC.route(pts, [[0, 1], [1, 2], [0, 3], [2, 3]], 3, 3)), [3]);
+});
+
+test("a pulse spends time on each leg by its length", () => {
+  const pts = [{ x: 0, y: 0 }, { x: 300, y: 0 }, { x: 300, y: 100 }];
+  assert.deepEqual(plain(KC.legs(pts, [0, 1, 2], 2)), [{ x: 0, y: 0, t: 0 }, { x: 300, y: 0, t: 1.5 }, { x: 300, y: 100, t: 2 }]);
+});
+
+test("a link stops short of the nodes at its ends", () => {
+  assert.deepEqual(plain(KC.trim({ x: 0, y: 0 }, { x: 100, y: 0 }, 20)), { x1: 20, y1: 0, x2: 80, y2: 0 });
+  assert.deepEqual(plain(KC.trim({ x: 0, y: 0 }, { x: 30, y: 40 }, 10)), { x1: 6, y1: 8, x2: 24, y2: 32 });
+});
+
+test("a meter's share of its scale is clamped to 0..1", () => {
+  assert.equal(KC.share(72, 0, 100), 0.72);
+  assert.equal(KC.share(15, 10, 20), 0.5);
+  assert.equal(KC.share(140, 0, 100), 1);
+  assert.equal(KC.share(-5, 0, 100), 0);
+  assert.equal(KC.share(5, 5, 5), 0, "an empty scale reads empty");
+});
+
+test("a gauge's arc runs over the top from its left end to its right", () => {
+  assert.equal(KC.arc(500, 400, 300), "M 200 400 A 300 300 0 0 1 800 400");
+});
+
 const FRAMES = { "16x9": [1920, 1080, 2], "1x1": [1080, 1080, 2], "4x5": [1080, 1350, 2], "9x16": [1080, 1920, 3] };
 
 test("the chart box and its source line stop above the caption block in every frame (two lines, three in 9:16)", () => {
@@ -182,6 +262,8 @@ test("KI draws every icon the cards default and the smoke film name, and nothing
   const film = readFileSync(new URL("../examples/studio/films/infographics/index.html", import.meta.url), "utf8");
   // A card's icon starts a value or a line in one: `"cards":"search | …\nshield | …"`.
   const named = [kit("scenes/cards.html"), film].flatMap((html) => [...html.matchAll(/(?:\\n|":")([a-z-]+) \|/g)].map((m) => m[1]));
+  // A grid's or mesh's icon is its own variable: `"icon":"server"`.
+  named.push(...[...film.matchAll(/"icon":"([a-z-]+)"/g)].map((m) => m[1]));
   assert.ok(named.length >= 6, named.join());
   for (const name of named) assert.match(window.KI.svg(name), /<(path|circle|rect)/, name);
   assert.doesNotMatch(window.KI.svg("no-such-icon"), /<(path|circle|rect)/);
