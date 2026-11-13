@@ -55,7 +55,7 @@ Their sources are in [`brand/films/`](brand/films). The header animation is a fi
 ```sh
 curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh     # macOS, Linux
 irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1 | iex           # Windows
-npx -y github:AngleOS/filmkit setup                                                      # anywhere with Node 20+
+npx -y github:AngleOS/filmkit setup                                                      # anywhere with Node 20.12+
 ```
 It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you through:
 - **connecting Filmkit to your agent tools:** it detects Claude Code, Claude Desktop, Codex, Cursor, VS Code (Copilot),
@@ -80,7 +80,7 @@ npx -y github:AngleOS/filmkit check launch                       # every format;
 npx -y github:AngleOS/filmkit contact launch                     # contact sheets to review
 npx -y github:AngleOS/filmkit render launch                      # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
 ```
-Requirements: Node ≥ 20 and ffmpeg. The installer handles both.
+Requirements: Node ≥ 20.12 and ffmpeg. The installer handles both.
 
 ## Licence
 The code is MIT. Third-party pieces keep their own licences (`THIRD_PARTY.md`). The Angle name and logo are trademarks

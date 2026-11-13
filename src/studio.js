@@ -65,11 +65,9 @@ function findStudio(from) {
  * @returns {Film}
  */
 export function openFilm(studio, name) {
-  const films = join(studio.dir, "films");
-  const names = () => (existsSync(films) ? readdirSync(films).filter((f) => existsSync(join(films, f, "index.html"))) : []);
-  if (!name) throw fail("film_unnamed", { films: names() });
-  const dir = join(films, name);
-  if (!existsSync(join(dir, "index.html"))) throw fail("no_film", { film: name, films: names() });
+  if (!name) throw fail("film_unnamed", { films: filmNames(studio) });
+  const dir = join(studio.dir, "films", name);
+  if (!existsSync(join(dir, "index.html"))) throw fail("no_film", { film: name, films: filmNames(studio) });
   const html = readFileSync(join(dir, "index.html"), "utf8");
   const tags = startTags(html);
   const root = tags.find((t) => t.attrs["data-composition-id"] === "main");
@@ -85,6 +83,12 @@ export function openFilm(studio, name) {
     if (scene && !scenes.includes(scene)) throw fail("unknown_scene", { film: name, scene, scenes });
   }
   return { name, dir, html, root: root.attrs };
+}
+
+/** The studio's films: each folder of films/ with an index.html. @param {Studio} studio */
+export function filmNames(studio) {
+  const films = join(studio.dir, "films");
+  return existsSync(films) ? readdirSync(films).filter((f) => existsSync(join(films, f, "index.html"))).sort() : [];
 }
 
 /**

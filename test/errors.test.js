@@ -59,10 +59,10 @@ const CASES = {
   no_time: [{ film: "hook" }, "Say when, in seconds. For example: filmkit stills hook 2.5", "filmkit stills hook 2.5"],
   node_missing: [
     { platform: "darwin" },
-    "npx isn't on the PATH, so HyperFrames can't run. Install Node ≥ 20 (it brings npx) with: brew install node",
+    "npx isn't on the PATH, so HyperFrames can't run. Install Node ≥ 20.12 (it brings npx) with: brew install node",
     "brew install node",
   ],
-  node_old: [{ version: "v18.19.0", platform: "linux" }, "Node v18.19.0 is older than 20. Install Node ≥ 20 with: https://nodejs.org/en/download", "https://nodejs.org/en/download"],
+  node_old: [{ version: "v18.19.0", platform: "linux" }, "Node v18.19.0 is older than 20.12. Install Node ≥ 20.12 with: https://nodejs.org/en/download", "https://nodejs.org/en/download"],
   ffmpeg_missing: [{ platform: "win32" }, "ffmpeg isn't on the PATH. Install it with: winget install --id Gyan.FFmpeg -e", "winget install --id Gyan.FFmpeg -e"],
   hyperframes_offline: [
     {},
@@ -174,9 +174,9 @@ const CASES = {
     "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
   ],
   brand_option: [
-    { option: "--ground", value: "grey", expected: "dark or light" },
-    'In filmkit brand, --ground "grey" should be dark or light. For example: filmkit brand --ground light',
-    "filmkit brand --ground light",
+    { option: "--accent", value: "orange", expected: 'a hex colour such as "#ff5a1f"' },
+    'In filmkit brand, --accent "orange" should be a hex colour such as "#ff5a1f". For example: filmkit brand --accent \'#ff5a1f\'',
+    "filmkit brand --accent '#ff5a1f'",
   ],
   logo_missing: [
     { file: "/s/acme.svg" },
@@ -184,6 +184,16 @@ const CASES = {
     "filmkit brand --logo brand/acme.svg",
   ],
   bad_logo: [{ file: "/s/acme.jpg" }, "/s/acme.jpg isn't an SVG or a PNG. Export the logo as an SVG, then: filmkit brand --logo logo.svg", "filmkit brand --logo logo.svg"],
+  option_choice: [
+    { command: "setup", option: "--ground", value: "grey", choices: ["dark", "light"] },
+    'In filmkit setup, --ground is dark or light, not "grey". For example: --ground dark',
+    "--ground dark",
+  ],
+  prompt_missing: [
+    { page: "/p/docs/install-with-your-agent.md" },
+    "/p/docs/install-with-your-agent.md has no ````text block, so there's no prompt to print. Copy it from: https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md",
+    "https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md",
+  ],
   unknown_code: [{ code: "nope" }, 'There\'s no error or rule called "nope". See them all with: filmkit explain', "filmkit explain"],
 };
 
@@ -201,6 +211,12 @@ function findings() {
   add("container_overflow", { other: "#card" }, '"Films are code" (#t) spills out of #card, which cuts it off.');
   add("clipped_text", {}, '"Films are code" (#t) is cut off by its own box.');
   add("text_occluded", { other: "#window" }, '"Films are code" (#t) is covered by #window.');
+  add(
+    "safe_zone",
+    { band: 420 },
+    '"Films are code" (#t) is under the safe box, in the bottom 420 px, where a feed\'s caption and buttons cover it.',
+    "Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with",
+  );
   add("contrast_aa_failure", { ratio: 2.1, required: 4.5, suggested: "rgb(140,140,140)" }, '"Films are code" (#t) is 2.1:1 against its ground, under WCAG AA\'s 4.5:1; rgb(140,140,140) would pass.');
   add("line_unread", { seconds: 0.5, floor: 1.05 }, '"Films are code" (#t) is on screen 0.5 s, under the 1.05 s it needs to be read.', "Hold it longer (about 0.5 s + 0.3 s a word). See it with");
   add("text_below_floor", { px: 18, floor: 28 }, '"Films are code" (#t) is 18 px, under the 28 px a phone can read.', "Set it to at least 28 px. See it with");

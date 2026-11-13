@@ -21,7 +21,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
   - `2` usage error;
   - `3` missing requirement (Node, ffmpeg, Chrome);
   - `4` render failed.
-- **Never prompts.** Paths in output are absolute.
+- **Never prompts**, but `setup` at a terminal without `--yes` (D-008). Paths in output are absolute.
 - **Errors:** when there's no result to give, `--json` prints `{ "ok": false, "error": "<the sentence>", "code":
   "no_film", "fix": "filmkit new launch" }`. `code` is from the error catalogue (`filmkit explain <code>`); `fix` is the
   next step on its own, a command where there is one.
@@ -70,6 +70,13 @@ the MCP server share one implementation: MCP tools call the same functions the C
 { "ok": true, "skills": [{ "name": "filmkit", "from": "filmkit", "path": "/abs/.claude/skills/filmkit" },
   { "name": "hyperframes", "from": "hyperframes@0.8.186", "path": "/abs/.claude/skills/hyperframes" }], "files": ["/abs/.gitignore"] }
 
+// setup  (`filmkit setup --yes --json`): each step's own result, null when it was skipped; stops at the first that
+// fails (exit 3 for a requirement); `requirements` is doctor's checks, `agents` the agents result, `studio` init's
+{ "ok": true, "requirements": [{ "name": "Chrome", "ok": true, "detail": "…" }], "agents": { "ok": true, "tools": [] },
+  "studio": { "studio": "/abs/acme-films", "name": "Acme", "files": ["…"], "kept": [] }, "brand": null,
+  "film": { "name": "hello", "ok": true, "check": { "…": "check's result" }, "contact": { "…": "contact's result" } } }
+// setup --remove: the agents result. prompt: { "ok": true, "prompt": "Install Angle Filmkit for me…" }
+
 // agents  (`filmkit agents [tools…] [--remove] [--dry-run] --json`); exits 1 when a tool failed
 { "ok": true, "dryRun": false, "command": { "command": "npx", "args": ["-y", "filmkit", "mcp"] },
   "tools": [
@@ -83,7 +90,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
 ## MCP tools (`filmkit mcp`, server name `filmkit`, title "Angle Filmkit")
 | Tool | Input | Returns |
 |---|---|---|
-| `list_films` | none | `{ films: [{ name, formats, loop, duration }] }` |
+| `list_films` | none | `{ films: [{ name, formats, loop, duration }] }`; a film that doesn't open has `{ name, error }` |
 | `list_scenes` | `{ name? }` | the `scenes` shape |
 | `new_film` | `{ name, template?: "statement" \| "explainer" \| "product-demo" \| "hook-loop" \| "poster" }` | `{ film, files: [paths] }` |
 | `check_film` | `{ film, formats?: [..] }` | the `check` shape; `isError` stays false for a failed check (the failure is data) |

@@ -150,7 +150,7 @@ test("brand says what's wrong with what it's given, and writes nothing", () => {
   const before = readFileSync(join(dir, "filmkit.json"), "utf8");
   assert.throws(() => writeBrand(dir, {}), { code: "brand_nothing" });
   assert.throws(() => writeBrand(dir, { accent: "orange" }), { code: "brand_option", message: /--accent "orange" should be a hex colour/ });
-  assert.throws(() => writeBrand(dir, { ground: "grey" }), { code: "brand_option", message: /--ground "grey" should be dark or light/ });
+  assert.throws(() => writeBrand(dir, { ground: "grey" }), { code: "option_choice", message: /--ground is dark or light, not "grey"/ });
   assert.throws(() => writeBrand(dir, { logo: join(dir, "nope.svg") }), { code: "logo_missing" });
   assert.throws(() => writeBrand(dir, { logo: join(dir, "AGENTS.md") }), { code: "bad_logo" });
   assert.equal(readFileSync(join(dir, "filmkit.json"), "utf8"), before);

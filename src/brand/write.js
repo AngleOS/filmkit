@@ -31,7 +31,7 @@ const PEAR = "#e3ef26";
 export function writeBrand(root, { name, logo, accent, ground }) {
   if (!name && !logo && !accent && !ground) throw fail("brand_nothing");
   if (accent && !HEX.test(accent)) throw fail("brand_option", { option: "--accent", value: accent, expected: 'a hex colour such as "#ff5a1f"' });
-  if (ground && !GROUNDS.includes(ground)) throw fail("brand_option", { option: "--ground", value: ground, expected: GROUNDS.join(" or ") });
+  if (ground && !GROUNDS.includes(ground)) throw fail("option_choice", { command: "brand", option: "--ground", value: ground, choices: GROUNDS });
   const config = join(root, "filmkit.json");
   const current = readJson(config, "config_json");
   const label = name ?? current.name ?? basename(root);

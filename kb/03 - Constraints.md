@@ -17,4 +17,4 @@ updated: 2026-11-12
   temporary directory only.
 - **Text is never under 28 px at 1080 width, and every key word stays inside `AL.safe`.**
 - **Captions are sidecar files by default.** Burning them in is opt-in (`burn`).
-- **Requirements: Node ≥ 20 and ffmpeg.** HyperFrames brings its own Chrome. No Python and no global installs.
+- **Requirements: Node ≥ 20.12 and ffmpeg.** HyperFrames brings its own Chrome. No Python and no global installs.

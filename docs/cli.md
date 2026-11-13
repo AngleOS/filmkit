@@ -22,11 +22,13 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 
 | Command | What it does |
 |---|---|
+| `setup [--yes] [--agents auto\|none\|ids] [--studio dir] [--name brand] [--brand-url url] [--logo file] [--ground dark\|light] [--no-brand] [--no-first-film]` | from nothing to a first film, in five steps: the requirements (fetching HyperFrames' Chrome once when it's missing), the agent tools (`agents`, every one installed with `auto`), a studio (`init`, in `./<brand>-films` by default), the brand (`filmkit brand`, once this version has it; until then the default theme) and a first film (`new hello --template statement`, `check`, and its 16:9 contact sheet, opened in the browser). In a terminal it asks each choice its flag doesn't make; with `--yes`, `--json` or on a pipe it asks nothing, and without `--studio` or `--name` it stops after the agent tools, so an agent can ask for the brand first. Run again, it keeps the studio and the film. `--remove` takes Filmkit out of every agent tool and leaves the studio alone |
+| `prompt` | prints the prompt that has your agent install Filmkit and set it up with your brand, from [install-with-your-agent](install-with-your-agent.md), to paste into it |
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `brand [--name n] [--logo file] [--accent hex] [--ground dark\|light]` | the studio's brand, changing only what it's given: `--logo` (an SVG kept as it is, or a PNG embedded in one) becomes `brand/logo.svg`; `--accent` and `--ground` make the palette, `brand/theme/theme.json`, each colour passing WCAG AA on its grounds, and point `filmkit.json`'s `theme` at it; `--name` sets the studio's name. See [themes](themes.md#your-brand-filmkit-brand) |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
-| `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
-| `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
+| `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, with the band under the safe box, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
+| `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/`: with `--at`, the frames at those times and no others |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
 | `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
 | `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
@@ -34,7 +36,8 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
 | `scenes [name]` | the kit's scenes, each with the first line of what it does; with a name, all of it and its variables: type, default, label and an enum's options. Read from the scenes themselves: each one's comment and `data-composition-variables` |
 | `skills` | the filmkit skill and the skills the pinned HyperFrames ships (`hyperframes`, `hyperframes-cli`, `media-use`) into `.claude/skills/`, each replacing its older copy; the studio's other skills are left alone. The HyperFrames ones are git-ignored, since `skills` makes them again from the pin, and an `AGENTS.md` without a pointer to them gets one. Run it again after upgrading filmkit |
-| `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
+| `doctor` | Node ≥ 20.12, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
+| `mcp` | the MCP server over stdio, with the commands as tools for any agent: see [mcp](mcp.md) |
 | `agents [tools…] [--remove] [--dry-run] [--mcp-command cmd]` | registers Filmkit's MCP server and skill in each agent tool it finds (Claude Code, Codex, Cursor, VS Code, …), with a backup of every file it edits: see [agents/](agents/README.md) |
 | `explain [code]` | why an error or check rule exists and how to fix it; with no code, every one of Filmkit's own. A HyperFrames rule is explained from the pinned HyperFrames' skill references |
 
@@ -91,8 +94,10 @@ scene gets no files. With `burn` the scene also draws them into the picture, in 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
 `kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`; `brand` as `{ ok, studio, name, files, palette? }`; `new` as `{ ok, film, template, files }`; `check`'s
 `sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same name; `doctor` as
-`{ ok, checks: [{ name, ok, detail, code?, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
-stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
+`{ ok, checks: [{ name, ok, detail, code?, hint? }] }`; `setup` as `{ ok, requirements, agents, studio, brand, film }`,
+each step's own result or `null` when it was skipped), with absolute paths; progress and HyperFrames' own output go to
+stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts but `setup`, and
+only a person at a terminal (D-008): every question it asks has a flag.
 `--help` and `doctor` open with the Angle banner, `╱◣ ANGLE FILMKIT` in Pear, but only in a colour terminal: never with
 `--json`, on a pipe (even with `FORCE_COLOR` set, as agent harnesses do), or when `NO_COLOR` or `FORCE_COLOR=0` is set.
 
@@ -109,7 +114,7 @@ error in `filmkit.json`, a `theme.json` or a film's `sound.json` points at its l
 snapshot that shows it:
 `✗ content_overlap: 9x16 at 12.4 s: "Films are code" (#t) overlaps "Four frames" (#s). See it with: filmkit snapshot launch 9x16 --at 12.4`.
 The rules a film often breaks (overlap, overflow, occlusion, contrast, the type floor, unread lines, dead stretches, an
-empty first frame, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
+empty first frame, the safe box, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
 fix hint, at the film's own file and line. `filmkit explain` answers for those from the pinned HyperFrames' skill
 references once npx has fetched it, or else says which kind of check it is.
 
@@ -119,6 +124,12 @@ ground gets (on `paper`, `text.onPaper`, `text.mutedOnPaper` and `accentOn.paper
 passes:
 `⚠ theme_contrast: The theme's accent #e3ef26 on the paper ground (#ffffff) is 1.26:1, under WCAG AA's 3:1 for display type. Set accentOn.paper in filmkit.json's "theme" to a colour that passes, such as: #949b19`.
 The rendered frames' contrast (`contrast_aa_failure`) fails the check: that's the text really on screen, at its size.
+
+**The safe box.** Words and the key action stay in `AL.safe`, clear of a feed's header, caption and buttons. Check
+samples each scene two thirds in, once its words have arrived, and warns of text in the band under the safe box, where
+the feed hides the most (HyperFrames measures one band):
+`⚠ safe_zone: 9x16 at 1.67 s: "Shop now" (#cta) is under the safe box, in the bottom 420 px, where a feed's caption and buttons cover it. Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with: filmkit snapshot launch 9x16 --at 1.67`.
+The top and sides are left to the review of the frames.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.

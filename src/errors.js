@@ -72,6 +72,19 @@ export const CATALOGUE = {
     fix: () => ["See each command's options with", "filmkit --help"],
     why: "An option that takes a value has it next, as --every 2s or --every=2s; a flag such as --force stands alone.",
   },
+  option_choice: {
+    exit: 2,
+    message: ({ command, option, value, choices }) => `In filmkit ${command}, ${option} is ${choices.join(" or ")}, not "${value}".`,
+    fix: ({ option, choices }) => ["For example", `${option} ${choices[0]}`],
+    why: "Some options take one of a few words, such as setup's --ground dark or light; `filmkit --help` names them.",
+  },
+  prompt_missing: {
+    exit: 2,
+    message: ({ page }) => `${page} has no \`\`\`\`text block, so there's no prompt to print.`,
+    fix: () => ["Copy it from", "https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md"],
+    why: "filmkit prompt prints the fenced block of docs/install-with-your-agent.md, which ships in the package. A " +
+      "page without it was edited or damaged: the copy on GitHub has the prompt.",
+  },
   no_studio: {
     exit: 2,
     message: ({ dir, walked }) => `No filmkit.json in ${dir}${walked ? " or above" : ""}, so there's no studio here.`,
@@ -264,15 +277,15 @@ export const CATALOGUE = {
   node_missing: {
     exit: 3,
     message: () => "npx isn't on the PATH, so HyperFrames can't run.",
-    fix: ({ platform }) => ["Install Node ≥ 20 (it brings npx) with", install("node", platform)],
+    fix: ({ platform }) => ["Install Node ≥ 20.12 (it brings npx) with", install("node", platform)],
     why: "HyperFrames renders every film, and runs through npx at the version Filmkit pins. npx comes with Node: " +
-      "install Node ≥ 20 (https://nodejs.org), then `filmkit doctor` checks it.",
+      "install Node ≥ 20.12 (https://nodejs.org), then `filmkit doctor` checks it.",
   },
   node_old: {
     exit: 3,
-    message: ({ version }) => `Node ${version} is older than 20.`,
-    fix: ({ platform }) => ["Install Node ≥ 20 with", install("node", platform)],
-    why: "Filmkit and HyperFrames use Node 20's built-in APIs. Install Node ≥ 20 (https://nodejs.org), then " +
+    message: ({ version }) => `Node ${version} is older than 20.12.`,
+    fix: ({ platform }) => ["Install Node ≥ 20.12 with", install("node", platform)],
+    why: "Filmkit and HyperFrames use Node 20.12's built-in APIs. Install Node ≥ 20.12 (https://nodejs.org), then " +
       "`filmkit doctor` checks it.",
   },
   ffmpeg_missing: {
@@ -336,6 +349,16 @@ export const CATALOGUE = {
     why: "Words outside the frame aren't in the film. Keep words and the key action inside the format's safe zone " +
       "(AL.safe): 5 % of 16x9, 64 px in 1x1 and 4x5, and clear of the feed's header, buttons and caption block in " +
       "9x16. Mark an entrance or exit that travels off the frame with data-layout-allow-overflow.",
+  },
+  safe_zone: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is under the safe box, in the bottom ${p.band} px, where a feed's caption and buttons cover it.`,
+    fix: showing("Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with"),
+    why: "Feeds lay their own caption, buttons and progress bar over a film's foot, so words and the key action stay " +
+      "in the safe box, AL.safe: 5 % in from 16x9's edges; 64 px in 1x1 and 4x5, 96 px at 4x5's top and foot; in " +
+      "9x16, 270 px under the top, 120 px from the right and 420 px over the foot. check samples each scene once it " +
+      "has settled and warns of text in the band under the box: HyperFrames measures one band, and the foot hides " +
+      "the most. A lower third meant for the foot takes data-layout-allow-caption-zone.",
   },
   container_overflow: {
     exit: 1,
@@ -493,9 +516,9 @@ export const CATALOGUE = {
   brand_option: {
     exit: 2,
     message: ({ option, value, expected }) => `In filmkit brand, ${option} "${value}" should be ${expected}.`,
-    fix: ({ option }) => ["For example", option === "--ground" ? "filmkit brand --ground light" : "filmkit brand --accent '#ff5a1f'"],
+    fix: () => ["For example", "filmkit brand --accent '#ff5a1f'"],
     why: "The accent is the brand's one colour, as a hex such as #ff5a1f; quote it in a shell, where # starts a " +
-      "comment. The ground is the brand's main background: dark (near-black, tinted with the accent) or light (white).",
+      "comment.",
   },
   logo_missing: {
     exit: 2,

@@ -4,6 +4,7 @@
 |---|---|---|---|
 | HyperFrames | renderer, run through `npx` at a pinned version | Apache-2.0 | https://github.com/heygen-com/hyperframes |
 | GSAP | npm dependency `gsap` (3.14.2), copied into each build as `kit/vendor/gsap.min.js` | GSAP Standard "no charge" licence | https://gsap.com/standard-license |
+| Clack prompts | npm dependency `@clack/prompts` (1.9.0), the questions `filmkit setup` asks in a terminal | MIT | https://github.com/bombshell-dev/clack |
 | sound-sheet.mjs | `kit/sound/vendor/sound-sheet.mjs`, with its `LICENSE` | MIT | https://github.com/AgentsORG/design-engineering |
 | Launch-video research notes | `skills/filmkit/references/research/` | MIT | AgentsORG/design-engineering |
 | Geist, Geist Mono | `themes/angle/fonts/` (with `OFL.txt`), which `default` and `paper` use | SIL OFL 1.1 | https://github.com/vercel/geist-font |

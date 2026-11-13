@@ -89,13 +89,13 @@ user's films.
 - **seam**: the loop gate for hooks. It fails when the last frame doesn't flow into frame 0.
 - **captions**: the captions scene's lines become `<film>.srt` and `.vtt`.
 
-### 3. The CLI (`filmkit`, Node ≥ 20 and ffmpeg)
+### 3. The CLI (`filmkit`, Node ≥ 20.12 and ffmpeg)
 | Command | What it does |
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
 | `brand [--name] [--logo] [--accent] [--ground]` | the studio's brand (§8): the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light) |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
-| `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
+| `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel (with text under the safe box a warning), and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
 | `preview <film> [format]` | HyperFrames Studio, live: reloads on save of the film, kit or theme; `f` switches format |
@@ -175,7 +175,7 @@ prompt to their agent**.
     with their git credentials.
 
   The script:
-  1. checks Node ≥ 20 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
+  1. checks Node ≥ 20.12 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
   2. checks ffmpeg the same way;
   3. runs `filmkit setup`.
 - **`filmkit setup`:** a guided walkthrough in a terminal; with `--yes` and flags (`--agents`, `--studio`, `--brand-url`,
