@@ -1,0 +1,7 @@
+:root {
+  --oklch-ink: 0.1891 0.0191 235.5;
+  --oklch-canvas: var(--oklch-ink);
+  --oklch-white: 1 0 0;
+  --color-canvas: oklch(var(--oklch-canvas));
+  --color-text: oklch(var(--oklch-white));
+}

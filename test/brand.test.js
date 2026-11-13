@@ -190,15 +190,6 @@ test("filmkit brand --json prints what it wrote and the palette", () => {
   assert.deepEqual(result.files, [join(dir, "brand", "theme", "theme.json"), join(dir, "filmkit.json")]);
 });
 
-test("a site URL from setup is said to be unused, not dropped quietly", async () => {
-  const dir = studio();
-  /** @type {string[]} */
-  const lines = [];
-  const result = await brand({ args: [], options: { studio: dir, name: "Acme", "from-url": "https://acme.test" }, json: false, log: (line) => lines.push(String(line)) });
-  assert.equal(result.ok, true);
-  assert.equal(lines[0], "· https://acme.test isn't read yet: this version of filmkit brand takes the name, logo, accent, ground and font");
-});
-
 test("a Google Fonts family comes as one whole file per weight, asked for as filmkit, with its licence", async () => {
   const { get, requests } = googleFonts({ [INTER]: css2("Inter", [400, 500, 600, 700]), ...INTER_FILES, "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt": "SIL Open Font License" });
   const font = await googleFont("Inter", get);
