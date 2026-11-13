@@ -22,7 +22,8 @@
       const tl = gsap.timeline({ paused: true });
       const { pick, safe, column } = AL;
       const $ = (id) => document.getElementById(id);
-      // The chat scene's reply top, and the room its one line (two in the narrower frames) takes.
+      // The chat scene's reply top, copied from kit/scenes/chat.html, and the room its one line (two in the narrower
+      // frames) takes.
       const reply = pick({ L: 220, V: safe.top + 40 }) + pick({ L: 150, S: 170, V: 210 });
       const top = reply + pick({ L: 49, V: 98 }) + 48;
       gsap.set($("st-new"), { left: column.left, top, maxWidth: `${column.width}px` });
