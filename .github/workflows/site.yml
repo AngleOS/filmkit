@@ -52,7 +52,9 @@ jobs:
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
     needs: check
-    runs-on: [self-hosted, ci, Linux, X64]
+    # A build and an upload, no Chrome: the light pool, so a deploy never waits behind the agents' PR CI on `ci`
+    # (2026-11-13: #119's deploy sat queued an hour on a full `ci` pool while every `ci-light` runner was idle).
+    runs-on: [self-hosted, ci-light, Linux]
     permissions:
       contents: read
       pages: write

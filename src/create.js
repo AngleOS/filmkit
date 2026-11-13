@@ -24,6 +24,11 @@ const IGNORED = ["build/", "renders/"];
 const FILM_NAME = /^[a-z0-9][a-z0-9-]*$/;
 const TEXT = new Set([".html", ".md", ".json"]);
 
+/** Throws unless `film` is a plain film name: it becomes a path under films/. @param {string} film */
+export function plainName(film) {
+  if (!FILM_NAME.test(film)) throw fail("bad_film_name", { film });
+}
+
 /** The film templates: each folder of templates/ with an index.html. */
 export function templates() {
   return readdirSync(TEMPLATES).filter((t) => existsSync(join(TEMPLATES, t, "index.html"))).sort();
@@ -117,7 +122,7 @@ function ignore(root, wanted) {
  */
 export function newFilm(studio, film, template) {
   if (!film) throw fail("new_unnamed");
-  if (!FILM_NAME.test(film)) throw fail("bad_film_name", { film });
+  plainName(film);
   const names = templates();
   if (!names.includes(template)) throw fail("unknown_template", { film, template, templates: names });
   const dir = join(studio.dir, "films", film);

@@ -212,7 +212,8 @@ prompt to their agent**.
 - **Walkthroughs:**
   - `docs/getting-started.md`: one page per path (one line, `npx`, with your agent);
   - `docs/agents/<tool>.md`: per tool, what setup wrote and how to do it by hand;
-  - `filmkit tour`: an in-terminal tour that builds the first film step by step, explaining each command.
+  - `filmkit tour`: an in-terminal tour that builds the first film step by step (`new`, `check`, `contact`, `render`),
+    explaining each command and asking before it runs it.
 
 ## What stays in Angle
 Angle's *product* films, their claims, and the rebuilt Angle app UI (`picker`, the Angle composer) stay in
