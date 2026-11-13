@@ -7,6 +7,10 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 - [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
 - [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
 
+## In Progress
+
+- [fix master: publish](https://github.com/AngleOS/filmkit/issues/132) `filmkit#132`
+
 ## Todo
 
 - [Weekly dependency / CVE review (2026-W46)](https://github.com/AngleOS/filmkit/issues/1) `filmkit#1`
