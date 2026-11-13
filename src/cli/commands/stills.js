@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { ffmpeg } from "../../ffmpeg.js";
 import { hyperframes } from "../../hyperframes.js";
 import { fail } from "../../errors.js";
+import { progress } from "../../progress.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 import { checkFilm } from "./check.js";
 
@@ -15,7 +16,8 @@ export async function run({ args, options, json, log }) {
   const film = openFilm(studio, args[0]);
   const at = args[1];
   if (!at || !(+at >= 0)) throw fail("no_time", { film: film.name });
-  const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), log);
+  const live = progress(log);
+  const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), live).finally(() => live.close());
   if (!checked.ok) return { ...checked, stills: [] };
   const renders = studio.renders;
   mkdirSync(renders, { recursive: true });
