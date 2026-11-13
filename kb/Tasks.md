@@ -6,7 +6,6 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
 - [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
-- [speed: parallel formats, skip unchanged formats, resumable renders, one live progress line](https://github.com/AngleOS/filmkit/issues/23) `filmkit#23` · High
 - [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
 
 ## Todo
@@ -30,5 +29,5 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 - [contact sheets: filmkit contact renders one review image per format](https://github.com/AngleOS/filmkit/issues/9) `filmkit#9` · High
 - [skill: the filmkit agent workflow — brief, research, claims, build, check, look, render, post](https://github.com/AngleOS/filmkit/issues/11) `filmkit#11` · High
 - [setup: register the filmkit MCP server and skill in every detected agent tool](https://github.com/AngleOS/filmkit/issues/20) `filmkit#20` · High
+- [speed: parallel formats, skip unchanged formats, resumable renders, one live progress line](https://github.com/AngleOS/filmkit/issues/23) `filmkit#23` · High
 - [preview: live reload on save, a format switcher, and the film's scenes as a timeline](https://github.com/AngleOS/filmkit/issues/25) `filmkit#25` · Medium
-- [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
