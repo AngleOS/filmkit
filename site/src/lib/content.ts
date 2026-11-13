@@ -162,7 +162,8 @@ export function installPaths(prompt: string): InstallPath[] {
     {
       id: "unix",
       tab: "macOS & Linux",
-      command: "curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh",
+      command:
+        "curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh",
       notes: [
         "Installs Node and ffmpeg with Homebrew, apt, dnf or pacman if they're missing. It asks first.",
         "Then runs the guided setup.",
