@@ -6,7 +6,11 @@ A theme is the brand as data. The kit reads only its custom properties and its `
 ## Choosing one
 `filmkit.json`'s `theme` is one of:
 
-- **a built-in theme:** `"angle"` (Angle's own brand) or `"default"`;
+- **a built-in theme:**
+  - `"default"`: Angle's look (the Night, Castleton and Paper grounds, the Pear accent, Geist and the lines motif) with
+    the studio's own logo, `brand/logo.svg`, beside the studio's `name`;
+  - `"paper"`: the same on a white ground, with Night type, a Pear second ground and a Castleton accent;
+  - `"angle"`: Angle's own brand and lockup, for Angle's films;
 - **a theme folder in the studio:** `"brand/theme"`, a folder with a `theme.json` (a name with a slash or a dot is a
   folder, from the studio);
 - **single values over either:** `{ "extends": "angle", "accent": "#ff5a1f" }`. Without `extends`, the values go over
@@ -37,9 +41,16 @@ command opens the studio. A mistake is a usage error (exit 2) that names the key
   - `fonts`: `display` (`family`, `weight`, `tracking`, `leading`: the title type), `ui` and `mono` (`family`), and
     `faces`, the font files in `fonts.dir` (`fonts` by default). Each folder's faces add to its base's, so a brand
     folder can bring its display face and keep the base's UI and mono;
-  - `logo`, `brand`, `tokens`, `motif` (`lines`, `grid`, `dots` or `none`), `credit`: the theme's other files and
+  - `logo.mark`: the logo's mark, an SVG. The studio's own `brand/logo.svg` takes its place when there is one;
+  - `credit`: the small line at the foot of every end card, "Made with Angle Filmkit" unless it's a line of the
+    theme's own, or `false` for none. Turn it off in `filmkit.json`:
+    `"theme": { "extends": "default", "credit": false }`;
+  - `brand`, `tokens`, `motif` (`lines`, `grid`, `dots` or `none`), `logo`'s other files: the theme's other files and
     settings, for its `brand.js`.
-- **`brand.js`**: sets `window.KB`, which draws the motif and the logo into a scene's own `<svg>`:
+- **`brand.js`**: adds to `window.KB` what draws the motif and the logo into a scene's own `<svg>`. Each folder's
+  `brand.js` runs in turn, base first, so a folder can replace only the lockup and keep its base's motif, as `default`
+  does over `angle`: `window.KB = { ...window.KB, lockup, lockupBox }`. The build starts `KB` with the studio's
+  `name`, the `mark`'s SVG and the `credit`.
   - `motif(svg)` draws the motif across the frame (`AL.W` × `AL.H`) and returns its strokes in named groups, such as
     `{ rows, cols }`. Every stroke has `pathLength="1"`: the kit draws each group in, 0.1 s after the last.
   - `lockup(svg)` draws the logo and returns `{ mark, para, tri, word, wipe }`. `mark` holds the mark's two pieces:
@@ -72,5 +83,13 @@ the merged `theme.json`: an `@font-face` per face, then
 The values on paper are under `.on-paper`, the class a scene's paper ground sets. Never write a `theme.css` by hand:
 the build replaces it.
 
-The `motif`, `mark` and `endcard` scenes call `KB`, and a film loads it with `<script src="kit/theme/brand.js">`
-after `kit/motion.js`. The `default` theme draws a corner grid and a placeholder logo, "Your brand", in its accent.
+It also writes `kit/theme/brand.js`: `window.KB` with the studio's name, the mark and the credit, then each folder's
+`brand.js`, base first. The `motif`, `mark` and `endcard` scenes call `KB`, and a film loads it with
+`<script src="kit/theme/brand.js">` after `kit/motion.js`.
+
+## The studio's logo
+In `default` and `paper`, the logo reveal is the studio's own: `brand/logo.svg` (which `filmkit init` writes as a
+placeholder square) is the mark, and the studio's `name` from `filmkit.json` is set beside it in the display face. The
+mark is cut on its diagonal and its two halves meet, as Angle's do. Draw the mark in `currentColor` to have it take the
+accent (and the accent on paper), or in its own colours to keep them. Keep it square-ish: it fills a square the height
+of the name.

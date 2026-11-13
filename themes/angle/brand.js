@@ -1,7 +1,7 @@
 // Angle's theme brand: the lines motif and the ANGLE lockup, drawn into a scene's own <svg> so no scene repeats their
 // paths. The mark is split into its two pieces so they can meet. Paths are from angle-logo-on-night.svg (AngleOS/angle-ai
 // apps/web/public/brand). Gradient and clip ids get a counter: a gradient in a scene the runtime hides paints nothing,
-// so two mounts must never share one. A theme's brand.js sets window.KB = { motif, lockup, lockupBox }; the kit's
+// so two mounts must never share one. A theme's brand.js adds { motif, lockup, lockupBox } to window.KB; the kit's
 // motif, mark and endcard scenes call those, so the kit itself carries no brand (D-003, D-007). Colours come from
 // theme.css's --brand-mark, --brand-word and --brand-line, so they follow the ground (.on-paper) instead of being drawn
 // in Pear and white on every one.
@@ -88,5 +88,6 @@
     return { w, h, left: R((al().W - w) / 2), top: R(cy - h / 2), markCx: R(15.65 * ppu), shift: R(31.17 * ppu) };
   };
 
-  /** @type {any} */ (window).KB = { motif: lines, lines, lockup, lockupBox };
+  const w = /** @type {any} */ (window);
+  w.KB = { ...w.KB, motif: lines, lines, lockup, lockupBox };
 })();

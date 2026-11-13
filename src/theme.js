@@ -2,7 +2,9 @@
 // theme folder in the studio, or an object of single values over one of those ("extends"). A theme.json can extend
 // another the same way, so a brand's folder holds only what differs. The build copies each folder of the chain into
 // kit/theme/, base first, and writes kit/theme/theme.css compiled from the merged values: the custom properties the
-// kit and the theme's brand.js read (D-007).
+// kit and the theme's brand.js read (D-007). Each folder's brand.js is joined into one, base first, after the KB data
+// the build compiles (the studio's name, its logo's mark and the credit), so a folder's brand.js can replace the
+// lockup and keep its base's motif.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -13,6 +15,8 @@ import { FilmkitError, fail } from "./errors.js";
 const THEMES = fileURLToPath(new URL("../themes", import.meta.url));
 /** A built-in theme is named plainly; anything with a slash or a dot is a folder. */
 const BUILT_IN = /^[a-z0-9-]+$/;
+/** The end card's credit when a theme says only `"credit": true` (D-007). */
+const CREDIT = "Made with Angle Filmkit";
 
 /**
  * @typedef {{ family: string, weight?: number, tracking?: string, leading?: number }} Font
@@ -21,9 +25,10 @@ const BUILT_IN = /^[a-z0-9-]+$/;
  *   code?: Record<string, string>, codeOn?: { paper?: Record<string, string> },
  *   fonts: { dir?: string, display: Font, ui: Font, mono: Font, faces?: { family: string, weight: number, style?: string, file: string }[] },
  *   label?: string } & Record<string, unknown>} ThemeValues
- * @typedef {{ name: string, dirs: string[], values: ThemeValues }} Theme
+ * @typedef {{ name: string, dirs: string[], values: ThemeValues, mark?: string }} Theme
  *   `dirs` are the theme's folders, base first; `values` its theme.json merged down the chain, with every layer's font
- *   faces and each face's file from the folder
+ *   faces and each face's file from the folder; `mark` the logo's mark: the studio's brand/logo.svg, else the theme's
+ *   `logo.mark`
  * @typedef {{ dir: string, values: Partial<ThemeValues> }} Layer one theme.json, or filmkit.json's values (no dir)
  */
 
@@ -47,7 +52,9 @@ export function loadTheme(studio, ref = "default") {
   const dirs = layers.map((l) => l.dir).filter(Boolean);
   const problems = [...validate(values, "complete"), ...missingFaces(values, dirs)];
   if (problems.length) throw new FilmkitError(`theme "${name}": ${problems.join("; ")}`);
-  return { name, dirs, values };
+  const logo = /** @type {{ mark?: string } | undefined} */ (values.logo);
+  const marks = [join(studio, "brand", "logo.svg"), ...(logo?.mark ? dirs.map((d) => join(d, /** @type {string} */ (logo.mark))).reverse() : [])];
+  return { name, dirs, values, mark: marks.find((f) => existsSync(f)) };
 }
 
 /**
@@ -141,3 +148,16 @@ export function themeCss({ label, grounds, accent, accentOn, text, code, codeOn,
 
 /** The code scene's syntax colours, as --code-keyword… @param {Record<string, string>} [code] */
 const codeProps = (code = {}) => Object.fromEntries(Object.entries(code).map(([k, v]) => [`code-${k}`, v]));
+
+/**
+ * brand.js: window.KB with the studio's name, its logo's mark (SVG markup) and the end card's credit ("" for none), then
+ * each of the theme's brand.js files, base first, each adding to KB.
+ * @param {Theme} theme
+ * @param {string} name the studio's name, for a lockup that sets it beside the mark
+ */
+export function brandJs({ dirs, values, mark }, name) {
+  const credit = values.credit === false ? "" : typeof values.credit === "string" ? values.credit : CREDIT;
+  const data = { name, mark: mark ? readFileSync(mark, "utf8") : "", credit };
+  const scripts = dirs.map((d) => join(d, "brand.js")).filter((f) => existsSync(f)).map((f) => readFileSync(f, "utf8"));
+  return [`window.KB = ${JSON.stringify(data)};\n`, ...scripts].join("\n");
+}

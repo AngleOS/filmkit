@@ -1,6 +1,7 @@
 <template>
   <!-- The end card: an optional claim, then the motif and the mark (contact at 2.7 s after a claim, 1.0 s without:
-       the sting), the wordmark, and the status line with the URL slot, then a still hold. -->
+       the sting), the wordmark, and the status line with the URL slot, then a still hold. The theme's credit ("Made
+       with Angle Filmkit" unless its "credit" is false) sits small on the safe box's floor. -->
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; background: var(--ink); }
     #ec-motif { position: absolute; inset: 0; width: 100%; height: 100%; }
@@ -8,6 +9,7 @@
     #ec-lockup { position: absolute; }
     #ec-cta { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; letter-spacing: 0.02em; color: var(--muted-foreground); }
     #ec-url { color: var(--foreground); }
+    #ec-credit { position: absolute; left: 0; right: 0; text-align: center; font-weight: 500; color: var(--muted-foreground); }
   </style>
   <div id="root" data-composition-id="endcard" data-composition-variables='[
     {"id":"claim","type":"string","label":"Claim before the logo (empty for the sting)","default":""},
@@ -18,6 +20,7 @@
     <div id="ec-claim" class="display"></div>
     <svg id="ec-lockup" data-layout-allow-overflow></svg>
     <div id="ec-cta"><span id="ec-line"></span><span id="ec-url"></span></div>
+    <div id="ec-credit"></div>
   </div>
   <script>
     (function () {
@@ -25,7 +28,7 @@
       const v = AL.vars(document.getElementById("root"), window.__hyperframes);
       const { W, H, pick, safe } = AL;
       const R = Math.round;
-      const motif = document.getElementById("ec-motif"), claim = document.getElementById("ec-claim"), svg = document.getElementById("ec-lockup"), cta = document.getElementById("ec-cta");
+      const motif = document.getElementById("ec-motif"), claim = document.getElementById("ec-claim"), svg = document.getElementById("ec-lockup"), cta = document.getElementById("ec-cta"), credit = document.getElementById("ec-credit");
       const L = KB.lockupBox(pick({ L: 760, S: 600, V: 600 }), pick({ L: 520, S: R(H * 0.47), V: R(H * 0.46) }));
       gsap.set(svg, { left: L.left, top: L.top, width: L.w, height: L.h });
       gsap.set(cta, { top: L.top + L.h + pick({ L: 74, S: 64, V: 80 }), fontSize: pick({ L: 40, S: 40, V: 46 }) });
@@ -33,6 +36,9 @@
       claim.innerHTML = KM.wordSpans(v.claim);
       document.getElementById("ec-line").textContent = v.line;
       document.getElementById("ec-url").textContent = v.cta ? ` · ${v.cta}` : "";
+      const creditSize = pick({ L: 28, S: 28, V: 32 });
+      gsap.set(credit, { top: H - safe.bottom - R(creditSize * 1.3), fontSize: creditSize });
+      credit.textContent = KB.credit ?? "";
 
       // the claim, then it clears for the mark
       const contact = v.claim ? 2.7 : 1.0;
@@ -43,7 +49,7 @@
       KM.drawMotif(tl, KB.motif(motif), contact - 0.65);
       tl.to(motif, { opacity: 0.18, duration: 0.6, ease: "power2.out" }, contact);
       KM.assemble(tl, svg, KB.lockup(svg), L, contact);
-      tl.fromTo(cta, { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "none" }, contact + 0.75);
+      tl.fromTo([cta, credit], { opacity: 0, filter: "blur(6px)" }, { opacity: 1, filter: "blur(0px)", duration: 0.25, ease: "none" }, contact + 0.75);
       window.__timelines["endcard"] = tl;
     })();
   </script>

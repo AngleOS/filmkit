@@ -1,0 +1,15 @@
+{
+  "extends": "default",
+  "name": "paper",
+  "label": "Paper",
+  "description": "The light variant of the default theme: a white ground with Night type, a Pear ground for the second, a Castleton accent, Geist, the lines motif and the studio's own logo.",
+  "grounds": {
+    "ink": "#ffffff",
+    "accent-dark": "#e3ef26",
+    "jet": "#eef3ec",
+    "paper": "#eef3ec"
+  },
+  "accent": "#145237",
+  "text": { "ink": "#07120f", "muted": "#56665e", "onPaper": "#07120f", "mutedOnPaper": "#56665e", "wordmark": "#07120f" },
+  "code": { "keyword": "#9a0d22", "string": "#0a3069", "title": "#5a2fa8", "number": "#034090", "attr": "#7a2e00" }
+}

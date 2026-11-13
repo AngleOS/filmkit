@@ -25,16 +25,19 @@ test("each format has its own hash", () => {
   assert.notEqual(formatHash(studio, film, "16x9"), formatHash(studio, film, "9x16"));
 });
 
-test("a changed theme invalidates: a file in one of its folders, or one of its values", () => {
+test("a changed theme invalidates: a file in one of its folders, one of its values, the logo or the studio's name", () => {
   const { studio, film } = hook();
   const dir = mkdtempSync(join(tmpdir(), "filmkit-theme-"));
-  cpSync(studio.theme.dirs[0], dir, { recursive: true });
-  const theme = { ...studio.theme, dirs: [dir] };
+  cpSync(studio.theme.dirs[1], dir, { recursive: true });
+  const theme = { ...studio.theme, dirs: [studio.theme.dirs[0], dir] };
   const before = formatHash({ ...studio, theme }, film, "16x9");
   writeFileSync(join(dir, "brand.js"), "// the studio's own\n", { flag: "a" });
   const edited = formatHash({ ...studio, theme }, film, "16x9");
   const recoloured = formatHash({ ...studio, theme: { ...theme, values: { ...theme.values, accent: "#ff0000" } } }, film, "16x9");
-  assert.equal(new Set([before, edited, recoloured]).size, 3);
+  writeFileSync(join(studio.dir, "logo.svg"), "<svg/>");
+  const relogoed = formatHash({ ...studio, theme: { ...theme, mark: join(studio.dir, "logo.svg") } }, film, "16x9");
+  const renamed = formatHash({ ...studio, theme, name: "Other" }, film, "16x9");
+  assert.equal(new Set([before, edited, recoloured, relogoed, renamed]).size, 5);
 });
 
 test("a changed, added or renamed film file invalidates, sound.json included", () => {

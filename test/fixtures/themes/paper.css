@@ -1,0 +1,45 @@
+/* The Paper theme, compiled by filmkit from theme.json: change that, not this file. */
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Regular.woff2"); font-weight: 400; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Medium.woff2"); font-weight: 500; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-SemiBold.woff2"); font-weight: 600; }
+@font-face { font-family: "Geist"; src: url("fonts/Geist-Bold.woff2"); font-weight: 700; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Regular.woff2"); font-weight: 400; }
+@font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Medium.woff2"); font-weight: 500; }
+
+:root {
+  --ink: #ffffff;
+  --accent-dark: #e3ef26;
+  --jet: #eef3ec;
+  --paper: #eef3ec;
+  --accent: #145237;
+  --foreground: #07120f;
+  --muted-foreground: #56665e;
+  --font-display: "Geist", sans-serif;
+  --font-ui: "Geist", sans-serif;
+  --font-mono: "Geist Mono", monospace;
+  --title-weight: 600;
+  --title-tracking: -0.035em;
+  --title-leading: 1.02;
+  --brand-mark: #145237;
+  --brand-word: #07120f;
+  --brand-line: #145237;
+  --code-keyword: #9a0d22;
+  --code-string: #0a3069;
+  --code-title: #5a2fa8;
+  --code-number: #034090;
+  --code-attr: #7a2e00;
+}
+
+.on-paper {
+  --foreground: #07120f;
+  --muted-foreground: #56665e;
+  --accent: #145237;
+  --brand-mark: #145237;
+  --brand-word: #07120f;
+  --brand-line: #145237;
+  --code-keyword: #9a0d22;
+  --code-string: #0a3069;
+  --code-title: #5a2fa8;
+  --code-number: #034090;
+  --code-attr: #7a2e00;
+}

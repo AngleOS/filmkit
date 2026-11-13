@@ -5,7 +5,7 @@ the one `--studio <dir>` names.
 
 ```
 filmkit.json        { "name": "Acme", "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default", "renders": "renders" }
-brand/              the logo and the brand's own files
+brand/              the logo (logo.svg, the mark the default themes reveal) and the brand's own files
 films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), sound.json, assets
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
 POSTING.md          where each render goes, with its copy per platform
