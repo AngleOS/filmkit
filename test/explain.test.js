@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
@@ -34,6 +34,23 @@ test("a rule the references don't name says it's HyperFrames', that its finding 
     source: "hyperframes",
   });
   assert.match(hyperframesWhy("motion_frozen", PACKAGE)?.why ?? "", /one of the motion checks/);
+});
+
+test("a code is HyperFrames' however its package writes it: minified, or passed to a helper", () => {
+  assert.match(hyperframesWhy("runtime_script_error", PACKAGE)?.why ?? "", /one of the runtime checks/);
+  assert.match(hyperframesWhy("motion_spec_invalid", PACKAGE)?.why ?? "", /one of the motion checks/);
+});
+
+test("a passing mention in the references isn't taken for the why", () => {
+  assert.deepEqual(hyperframesWhy("caption_zone_collision", PACKAGE)?.source, "hyperframes");
+});
+
+test("the codes the pinned HyperFrames' check emits all explain, once it's fetched", { skip: !pinnedPackage() && "HyperFrames isn't fetched here" }, () => {
+  for (const code of ["motion_spec_invalid", "runtime_script_error", "check_runtime_failure", "content_overlap", "css_transition_used"]) {
+    const { status, stdout } = filmkit(["explain", code, "--json"], process.env.npm_config_cache ?? join(homedir(), ".npm"));
+    assert.equal(status, 0, code);
+    assert.equal(JSON.parse(stdout).code, code);
+  }
 });
 
 test("a code HyperFrames doesn't have is no rule", () => {

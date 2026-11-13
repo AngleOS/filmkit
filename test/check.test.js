@@ -136,3 +136,12 @@ test("a long text is cut at a word to a label", () => {
   const [error] = findings({ ok: false, stdout: JSON.stringify({ layout: { findings: [long] } }) }, where).errors;
   assert.match(error.message, /^16x9 at 1 s: "A paragraph far too long to name a…" \(#p\) is cut off by its own box\./);
 });
+
+test("covered text says how much: the word most hidden behind a video's matte, or the share of it", () => {
+  const matte = { code: "text_occluded", severity: "error", time: 2, selector: "#cap", text: "Say hello", containerSelector: "#cutout", coveredFraction: 0.62,
+    message: 'Text sits partly behind a transparent video\'s matte; its most covered word "hello" is 62% hidden.' };
+  const opaque = { ...matte, selector: "#t", containerSelector: "#card", coveredFraction: 0.4, message: "Text is hidden beneath an opaque element." };
+  const [a, b] = findings({ ok: false, stdout: JSON.stringify({ layout: { findings: [matte, opaque] } }) }, where).errors;
+  assert.match(a.message, /^16x9 at 2 s: "Say hello" \(#cap\) is covered by #cutout, its word "hello" 62 % hidden\. See it with/);
+  assert.match(b.message, /^16x9 at 2 s: "Say hello" \(#t\) is covered by #card, 40 % of it\. See it with/);
+});

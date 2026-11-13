@@ -66,7 +66,18 @@ function params(raw) {
     seconds: round(raw.seconds ?? 0),
     floor: raw.floorPx ?? round(raw.floorSeconds ?? 0),
     px: raw.fontPx,
+    covered: covered(raw),
   };
+}
+
+/**
+ * How much of a text is covered: behind a transparent video's matte, HyperFrames names the word most hidden.
+ * @param {Raw} raw
+ */
+function covered(raw) {
+  if (typeof raw.coveredFraction !== "number") return "";
+  const word = String(raw.message).match(/most covered word "(.+?)" is (\d+)%/);
+  return word ? `, its word "${word[1]}" ${word[2]} % hidden` : `, ${Math.round(raw.coveredFraction * 100)} % of it`;
 }
 
 /**

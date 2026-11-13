@@ -24,51 +24,66 @@ export async function run({ args, log }) {
 /** What each family of HyperFrames' codes checks, for a code its references don't name. */
 const FAMILIES = [
   [/^motion_/, "It's one of the motion checks, which hold the film to the assertions in its *.motion.json."],
-  [/^(console_error|page_error|request_failed|http_error|runtime_)/, "It's one of the runtime checks, which play the film in Chrome and catch script errors and failed requests."],
+  [/^(console_error|page_error|request_failed|http_error|runtime_|check_runtime_)/, "It's one of the runtime checks, which play the film in Chrome and catch script errors and failed requests."],
   [/(overflow|overlap|occlu|canvas|container|frame|connector|pivot|caption_zone|painted|escapes)/, "It's one of the layout checks, which measure each element's box at sampled times."],
 ];
 const LINT = "It's one of the lint checks, which read the film's HTML before it plays and flag markup, timing and GSAP mistakes.";
 
 /**
- * A HyperFrames rule's why: the paragraph of the pinned version's skill references that names it, else what its
- * family checks. Null when the code isn't one of HyperFrames', or doesn't look like one while HyperFrames isn't
- * fetched yet.
+ * A HyperFrames rule's why: what the pinned version's skill references say about it, else what its family checks.
+ * Null when the code isn't one of HyperFrames', or doesn't look like one while HyperFrames isn't fetched yet.
  * @param {string} code
  * @param {string | null} pkg the pinned HyperFrames package
  * @returns {{ why: string, source: "hyperframes-reference" | "hyperframes" } | null}
  */
 export function hyperframesWhy(code, pkg) {
-  const files = pkg ? readdirSync(join(pkg, "dist"), { recursive: true }).map(String) : [];
-  const read = (/** @type {string} */ f) => readFileSync(join(pkg ?? "", "dist", f), "utf8");
-  const known = pkg ? files.some((f) => f.endsWith(".js") && read(f).includes(`code: "${code}"`)) : /^[a-z]+(_[a-z0-9]+)+$/.test(code);
-  if (!known) return null;
+  if (!pkg) return /^[a-z]+(_[a-z0-9]+)+$/.test(code) ? family(code) : null;
+  const files = readdirSync(join(pkg, "dist"), { recursive: true }).map(String);
+  const read = (/** @type {string} */ f) => readFileSync(join(pkg, "dist", f), "utf8");
+  // The references are small, so they're read first; the 24 MB of code only for a code they don't explain.
   const said = reference(code, files.filter((f) => f.startsWith("skills") && f.endsWith(".md")), read);
   if (said) return { why: said, source: "hyperframes-reference" };
-  const family = FAMILIES.find(([pattern]) => /** @type {RegExp} */ (pattern).test(code))?.[1] ?? LINT;
-  return { why: `A ${HYPERFRAMES} rule. Its finding in \`filmkit check\` carries the fix. ${family}`, source: "hyperframes" };
+  // HyperFrames writes a code as a finding's `code: "x"`, minified as `code:"x"`, or as a helper's argument: quoted, always.
+  const quoted = `"${code}"`;
+  return files.some((f) => f.endsWith(".js") && read(f).includes(quoted)) ? family(code) : null;
+}
+
+/** @param {string} code */
+function family(code) {
+  const checks = FAMILIES.find(([pattern]) => /** @type {RegExp} */ (pattern).test(code))?.[1] ?? LINT;
+  return { why: `A ${HYPERFRAMES} rule. Its finding in \`filmkit check\` carries the fix. ${checks}`, source: /** @type {const} */ ("hyperframes") };
 }
 
 /**
- * What the pinned skill references say about a code: the line that defines it (a table row or list item that starts
- * with it) where there is one, else a table row or the first sentence that names it, with the file it's from.
+ * What the pinned skill references say about a code, with the file it's from: the line that defines it (a table row
+ * or list item that starts with it), else a table row that names it, else a sentence about it, where it's what fails
+ * or warns, or what a colon explains. A passing mention (an opt-out that silences it) doesn't explain it.
  * @param {string} code
  * @param {string[]} files
  * @param {(file: string) => string} read
  */
 function reference(code, files, read) {
   const named = `\`${code}\``;
-  /** @type {{ text: string, file: string, defines: boolean }[]} */
+  const about = new RegExp(`\\b(fails|warns|flags|reports)( with)? ${named}|${named}:`);
+  /** @type {{ text: string, file: string, defines: boolean, row: boolean }[]} */
   const found = files.flatMap((file) =>
     read(file).split("\n").filter((l) => l.includes(named)).map((l) => {
-      const line = l.trim();
-      return { text: line, file, defines: line.replace(/^[|*-]\s*/, "").startsWith(named) };
+      const text = l.trim();
+      return { text, file, defines: text.replace(/^[|*-]\s*/, "").startsWith(named), row: text.startsWith("|") };
     }),
   );
-  const best = found.find((f) => f.defines) ?? found.find((f) => f.text.startsWith("|")) ?? found[0];
-  if (!best) return null;
-  const cells = best.text.startsWith("|") ? best.text.split("|").map((c) => c.trim()).filter(Boolean) : null;
-  const text = cells
-    ? (best.defines ? cells.slice(1) : cells).join(": ")
-    : best.text.replace(/^[-*]\s+/, "").split(/(?<=\.)\s+(?=[A-Z])/).find((sentence) => sentence.includes(named)) ?? best.text;
-  return `${text.replace(/([^.])$/, "$1.")} (HyperFrames' ${best.file.replace(/^skills\//, "")})`;
+  const best = found.find((f) => f.defines) ?? found.find((f) => f.row);
+  if (best?.row) {
+    const cells = best.text.split("|").map((c) => c.trim()).filter(Boolean);
+    return cite((best.defines ? cells.slice(1) : cells).join(": "), best.file);
+  }
+  if (best) return cite(best.text.replace(/^[-*]\s+/, ""), best.file);
+  for (const { text, file } of found) {
+    const sentence = text.replace(/^[-*]\s+/, "").split(/(?<=\.)\s+(?=[A-Z])/).find((s) => about.test(s));
+    if (sentence) return cite(sentence, file);
+  }
+  return null;
 }
+
+/** @param {string} text @param {string} file */
+const cite = (text, file) => `${text.replace(/([^.])$/, "$1.")} (HyperFrames' ${file.replace(/^skills\//, "")})`;
