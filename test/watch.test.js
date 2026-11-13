@@ -41,6 +41,15 @@ test("a saved master is written sized for the format shown", () => {
   assert.equal(size(out), "1080x1350");
 });
 
+test("a saved master keeps the film's built sound mounted", () => {
+  const { studio, film, source } = preview();
+  mkdirSync(join(studio.dir, "build", "hook"), { recursive: true });
+  writeFileSync(join(studio.dir, "build", "hook", "sound.m4a"), "aac");
+  const out = assemble(studio, film, "9x16", join(studio.dir, "build", "hook", "preview"));
+  assert.equal(syncChange(out, "4x5", source, "index.html"), "index.html");
+  assert.match(readFileSync(join(out, "index.html"), "utf8"), /<audio id="sound" class="clip" src="sound\.m4a"/);
+});
+
 test("a film's own file is copied in, and removed when it's gone", () => {
   const { film, out, source } = preview();
   mkdirSync(join(film.dir, "assets"));

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { cpSync, mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, renameSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -25,17 +25,16 @@ test("each format has its own hash", () => {
   assert.notEqual(formatHash(studio, film, "16x9"), formatHash(studio, film, "9x16"));
 });
 
-test("a changed theme invalidates: a file in one of its folders, or a value", () => {
+test("a changed theme invalidates: a file in one of its folders, or one of its values", () => {
   const { studio, film } = hook();
   const dir = mkdtempSync(join(tmpdir(), "filmkit-theme-"));
   cpSync(studio.theme.dirs[0], dir, { recursive: true });
   const theme = { ...studio.theme, dirs: [dir] };
   const before = formatHash({ ...studio, theme }, film, "16x9");
-  writeFileSync(join(dir, "brand.js"), "// changed\n", { flag: "a" });
+  writeFileSync(join(dir, "brand.js"), "// the studio's own\n", { flag: "a" });
   const edited = formatHash({ ...studio, theme }, film, "16x9");
-  assert.notEqual(edited, before);
-  const accent = { ...theme, values: { ...theme.values, accent: "oklch(0.6 0.2 30)" } };
-  assert.notEqual(formatHash({ ...studio, theme: accent }, film, "16x9"), edited);
+  const recoloured = formatHash({ ...studio, theme: { ...theme, values: { ...theme.values, accent: "#ff0000" } } }, film, "16x9");
+  assert.equal(new Set([before, edited, recoloured]).size, 3);
 });
 
 test("a changed, added or renamed film file invalidates, sound.json included", () => {
@@ -83,4 +82,14 @@ test("a film folder that is itself a link hashes its contents", () => {
   const before = formatHash(studio, film, "16x9");
   writeFileSync(join(elsewhere, "sound.json"), "{}");
   assert.notEqual(formatHash(studio, film, "16x9"), before);
+});
+
+test("the built sound counts, as every format mounts it", () => {
+  const { studio, film } = hook();
+  const before = formatHash(studio, film, "16x9");
+  mkdirSync(join(studio.dir, "build", "hook"), { recursive: true });
+  writeFileSync(join(studio.dir, "build", "hook", "sound.m4a"), "a");
+  const built = formatHash(studio, film, "16x9");
+  writeFileSync(join(studio.dir, "build", "hook", "sound.m4a"), "b");
+  assert.equal(new Set([before, built, formatHash(studio, film, "16x9")]).size, 3);
 });

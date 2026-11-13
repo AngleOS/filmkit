@@ -1,6 +1,7 @@
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
+import { buildSound } from "../../build/sound.js";
 import { watchSources } from "../../build/watch.js";
 import { npxError, startHyperframes } from "../../hyperframes.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
@@ -21,6 +22,7 @@ export async function run({ args, options, json, log }) {
   const formats = [first, ...resolveFormats(studio, film).filter((f) => f !== first)];
   // One directory for every format: switching resizes the master in place, so Studio's server and tab stay.
   const dir = join(studio.dir, "build", film.name, "preview");
+  buildSound(studio, film);
   assemble(studio, film, first, dir);
   // Not one format's id: the directory shows each in turn.
   writeFileSync(join(dir, "meta.json"), JSON.stringify({ id: `${film.name}-preview`, name: `${film.name} preview` }) + "\n");

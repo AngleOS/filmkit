@@ -17,5 +17,7 @@
     // gsap's own declarations don't pass a check (file names that differ only in case)
     "skipLibCheck": true
   },
-  "include": ["src", "kit"]
+  "include": ["src", "kit"],
+  // Vendored code keeps its upstream form (THIRD_PARTY.md).
+  "exclude": ["kit/**/vendor"]
 }
