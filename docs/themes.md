@@ -25,11 +25,13 @@ command opens the studio. A mistake is a usage error (exit 2) that names the key
 `filmkit.json: theme.accent: "pear" should be a hex colour such as "#e3ef26"`.
 
 ## Your brand: `filmkit brand`
-`filmkit brand` sets the studio's brand from its accent, its ground and its logo, and changes only what it's given:
+`filmkit brand` sets the studio's brand from its accent, its ground, its logo and its font, and changes only what
+it's given:
 
 ```sh
 npx filmkit brand --name Acme --logo ~/Downloads/acme.svg --accent '#ff5a1f'
 npx filmkit brand --ground light   # the same accent, on white
+npx filmkit brand --font 'IBM Plex Sans'
 ```
 
 - `--logo`: an SVG is copied as it is to `brand/logo.svg`, the mark the logo reveal and the end card draw (see
@@ -39,6 +41,16 @@ npx filmkit brand --ground light   # the same accent, on white
   Given one of the two, the other comes from the brand already written: its ground, and the brand's own accent, not
   one adjusted for text, so switching the ground back and forth never drifts the colour. On a first run, the accent is
   the studio's theme's, built-in, a folder or set in `filmkit.json`, else Pear.
+- `--font`: a family from [Google Fonts](https://fonts.google.com), named as it spells it, for titles and text; code
+  stays in Geist Mono. Google's fonts are all under open licences (OFL, Apache 2.0 or the Ubuntu Font Licence), so
+  `brand` downloads the family's regular, medium, semibold and bold (those it has) into `brand/theme/fonts`, as
+  `Inter-600.ttf` and so on, with its licence from [google/fonts](https://github.com/google/fonts) as `Inter-OFL.txt`,
+  and writes them into the theme's `fonts`. Titles take the semibold, or the heaviest weight there is. The files are
+  whole TrueType fonts, not subsets, so text in any script the family covers renders, and films never fetch a font
+  while they render. The font stays when `brand` runs again without `--font`; another `--font` deletes the files the
+  last one downloaded and replaces the theme's `fonts`. For a font that isn't on Google Fonts, put its files in
+  `brand/theme/fonts` and name them in the theme's `fonts` yourself (see [a theme folder](#a-theme-folder)), keeping
+  to fonts whose licence lets them ship: `--font` leaves those files alone, but a later `--font` rewrites `fonts`.
 - `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
 
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
