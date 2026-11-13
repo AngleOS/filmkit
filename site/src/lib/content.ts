@@ -162,18 +162,18 @@ export function installPaths(prompt: string): InstallPath[] {
     {
       id: "unix",
       tab: "macOS & Linux",
-      command: "gh repo clone AngleOS/filmkit && sh filmkit/install.sh",
+      command: "curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh",
       notes: [
         "Installs Node and ffmpeg with Homebrew, apt, dnf or pacman if they're missing. It asks first.",
         "Then runs the guided setup.",
-        "After launch, this becomes one curl line.",
+        "Add -s -- --yes to run it unattended.",
         "Undo it any time with npx -y github:AngleOS/filmkit setup --remove.",
       ],
     },
     {
       id: "windows",
       tab: "Windows",
-      command: "gh repo clone AngleOS/filmkit; .\\filmkit\\install.ps1",
+      command: "irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1 | iex",
       notes: [
         "Installs Node and ffmpeg with winget if they're missing. It asks first.",
         "Then runs the guided setup.",

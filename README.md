@@ -71,8 +71,7 @@ It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you t
 
 `--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it.
 
-> While the repo is private, collaborators run `install.sh` from a clone; the curl URLs work once it's public. Filmkit
-> isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
+> Filmkit isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
 
 ### Or let your agent do it
 Paste [this prompt](docs/install-with-your-agent.md) into your agent (or run `npx -y github:AngleOS/filmkit prompt`). It installs and

@@ -47,6 +47,8 @@ test("a film is named, and must have an index.html", () => {
   assert.throws(() => openFilm(studio, undefined), { code: "film_unnamed", message: /^Name a film\. Films: hook, plain\./ });
   assert.throws(() => openFilm(studio, "missing"), { code: "no_film", fix: "filmkit new missing" });
   assert.equal(openFilm(studio, "hook").root["data-duration"], "6");
+  // a name is a folder in films/, never a path (it reaches here from MCP clients)
+  for (const name of ["../films/hook", "hook/", ".", ".."]) assert.throws(() => openFilm(studio, name), { code: "no_film" });
 });
 
 test("formats: the named ones, else the film's data-formats, else the studio's", () => {

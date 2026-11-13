@@ -5,7 +5,7 @@
 #
 # It checks Node >= 20.12 and ffmpeg, installs what's missing with winget (it asks first, unless --yes), then runs
 # `filmkit setup` with the same arguments. Like install.sh, FILMKIT_PKG picks what npx runs: `github:AngleOS/filmkit`
-# while the repo is private, `filmkit` once it's on npm.
+# until Filmkit is on npm, then `filmkit`.
 # Everything runs in its own scope: under `irm | iex` an `exit` would close the user's PowerShell window, and its
 # variables, functions and ErrorActionPreference would leak into their session.
 & {
