@@ -11,12 +11,11 @@ export const usage = "stills <film> <t> [formats…]";
 export const summary = "check, then a poster per format at <t> s, renders/<film>-<format>.png, and a 1280×720 thumbnail from 16x9";
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ args, options, json, log }) {
+export async function run({ args, options, json, log, live = progress(log) }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   const at = args[1];
   if (!at || !(+at >= 0)) throw fail("no_time", { film: film.name });
-  const live = progress(log);
   const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(2)), live).finally(() => live.close());
   if (!checked.ok) return { ...checked, stills: [] };
   const renders = studio.renders;

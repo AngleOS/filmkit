@@ -9,7 +9,8 @@ import { banner } from "./banner.js";
 
 /**
  * @typedef {{ args: string[], options: Record<string, string | boolean | undefined>, json: boolean,
- *   log: (...lines: unknown[]) => void }} Context
+ *   log: (...lines: unknown[]) => void, live?: import("../progress.js").Progress }} Context  `live` reports a long
+ *   command's steps somewhere other than the terminal (the MCP server's progress notifications)
  * @typedef {{ ok: boolean, exit?: number }} Result  `exit` is the code for a failure (1 when absent); it isn't printed
  * @typedef {{ usage: string, summary: string, options?: import("node:util").ParseArgsConfig["options"],
  *   run: (ctx: Context) => Promise<Result> }} Command
