@@ -4,14 +4,14 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
+- [MCP server: filmkit mcp — tools that make, check, show and render films for any agent](https://github.com/AngleOS/filmkit/issues/10) `filmkit#10` · High
+- [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
 - [errors: every failure says what to do next; `filmkit explain <code>`; a contrast check](https://github.com/AngleOS/filmkit/issues/24) `filmkit#24` · Medium
 
 ## In Progress
 
-- [MCP server: filmkit mcp — tools that make, check, show and render films for any agent](https://github.com/AngleOS/filmkit/issues/10) `filmkit#10` · High
 - [examples: a complete example studio with two films for a fictional brand](https://github.com/AngleOS/filmkit/issues/12) `filmkit#12` · High
 - [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
-- [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
 
 ## Todo
 
