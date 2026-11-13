@@ -28,19 +28,23 @@ describe("the one page", () => {
     }
   });
 
-  it("shows every film as a described poster, and ships each one", () => {
-    render(<Home />);
+  it("plays every film as a described loop over its poster, and ships both", () => {
+    const { container } = render(<Home />);
     const base = process.env.SITE_BASE_PATH ?? "";
-    const stills = screen
-      .getAllByRole("img")
-      .filter((i) => i.getAttribute("src")?.includes("/media/"));
-    expect(stills).toHaveLength(examples.length + 1);
-    for (const still of stills) {
-      expect(still.getAttribute("alt")).toBeTruthy();
-      const src = still.getAttribute("src") ?? "";
-      expect(src).toMatch(/\.webp$/);
-      const file = join(process.cwd(), "public", src.slice(base.length));
-      expect(existsSync(file), file).toBe(true);
+    const shipped = (path: string) => join(process.cwd(), "public", path.slice(base.length));
+    const films = [...container.querySelectorAll("video")];
+    expect(films).toHaveLength(examples.length + 1);
+    for (const film of films) {
+      expect(film.getAttribute("aria-label")).toBeTruthy();
+      expect(film.muted).toBe(true);
+      expect(film.getAttribute("preload")).toBe("none");
+      const poster = film.getAttribute("poster") ?? "";
+      const loop = film.getAttribute("src") ?? "";
+      expect(poster).toMatch(/\.webp$/);
+      // a root .gitignore rule once kept every .mp4 out of the deploy
+      expect(loop).toMatch(/\.mp4$/);
+      for (const file of [shipped(poster), shipped(loop)])
+        expect(existsSync(file), file).toBe(true);
     }
   });
 

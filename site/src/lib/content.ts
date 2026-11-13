@@ -12,7 +12,7 @@ export const examples = [
     title: "Infographic",
     note: "Bars drawn to scale, values rolling up, on the light Paper theme.",
     label:
-      "Still from an example film: 'Signups tripled this quarter.' Four bars rise in turn as their values roll up to 3.7k.",
+      "An example film: 'Signups tripled this quarter.' Four bars rise in turn as their values roll up to 3.7k.",
     ratio: "16 / 9",
   },
   {
@@ -20,7 +20,7 @@ export const examples = [
     title: "Developer promo",
     note: "A terminal typed at reading speed, output line by line.",
     label:
-      "Still from an example film: 'One command. Every format.' A terminal runs npx filmkit render and lists four renders and the captions.",
+      "An example film: 'One command. Every format.' A terminal runs npx filmkit render and lists four renders and the captions.",
     ratio: "16 / 9",
   },
   {
@@ -28,7 +28,7 @@ export const examples = [
     title: "Product promo",
     note: "Product UI rebuilt from its own tokens, never screen-recorded.",
     label:
-      "Still from an example film: 'Your product, rebuilt.' A prompt is typed, sent, and the reply streams in.",
+      "An example film: 'Your product, rebuilt.' A prompt is typed, sent, and the reply streams in.",
     ratio: "16 / 9",
   },
   {
@@ -36,7 +36,7 @@ export const examples = [
     title: "9:16 hook",
     note: "Laid out for the vertical frame, not cropped from 16:9.",
     label:
-      "Still from a vertical example film: 'Make it read on mute.' A counter ticks to 7 as seven of ten dots light up.",
+      "A vertical example film: 'Make it read on mute.' A counter ticks to 7 as seven of ten dots light up.",
     ratio: "9 / 16",
   },
 ] as const;

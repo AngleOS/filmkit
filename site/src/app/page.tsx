@@ -109,9 +109,10 @@ export default function Home() {
         >
           <Viewfinder label="Teaser · 16:9 · 7 s" className="mb-14 sm:mb-16">
             <FilmStill
-              src={asset("/media/teaser.webp")}
+              poster={asset("/media/teaser.webp")}
+              loop={asset("/media/teaser.mp4")}
               ratio="16 / 9"
-              label="Still from Angle Filmkit's teaser: the Angle Filmkit lockup, 'Your agent makes the film.', and four format frames, 16:9, 1:1, 4:5 and 9:16, over the brand lines."
+              label="Angle Filmkit's teaser: the Angle Filmkit lockup, 'Your agent makes the film.', and four format frames, 16:9, 1:1, 4:5 and 9:16, over the brand lines."
             />
           </Viewfinder>
           <div className="examples-grid">
@@ -329,7 +330,12 @@ function ExampleFilm({
   return (
     <figure className="flex flex-col gap-4">
       <Viewfinder>
-        <FilmStill src={asset(`/media/${id}.webp`)} ratio={ratio} label={label} />
+        <FilmStill
+          poster={asset(`/media/${id}.webp`)}
+          loop={asset(`/media/${id}.mp4`)}
+          ratio={ratio}
+          label={label}
+        />
       </Viewfinder>
       <figcaption className="text-[15px] leading-relaxed">
         <span className="font-semibold text-ink">{title}</span>
