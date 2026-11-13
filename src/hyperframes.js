@@ -53,6 +53,17 @@ export function hyperframesAsync(args, { cwd, onLine }) {
   });
 }
 
+/**
+ * Fetches the pinned HyperFrames on its own, before several run at once. npx installs a package into one folder, and an
+ * npx that starts while another is unpacking there runs the half-unpacked package ("Cannot find module …/dist/…").
+ * When it can't be fetched, the runs that follow say so.
+ */
+export function fetchHyperframes() {
+  if (pinnedPackage()) return;
+  const { error } = spawnSync("npx", ["--yes", HYPERFRAMES, "--version"], { stdio: "ignore" });
+  if (error) throw npxError(error);
+}
+
 /** The one-liner's exit when it found the package but no dist/skills in it. */
 const NO_SKILLS = 9;
 
