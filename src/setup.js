@@ -94,7 +94,7 @@ export async function setup({ ask, brand, open }, { log, heading, json }, steps 
   }
   const dir = resolve(where.dir);
   if (existsSync(join(dir, "filmkit.json"))) {
-    result.studio = { studio: dir, name: openStudio(dir).name, files: [], kept: [join(dir, "filmkit.json")] };
+    result.studio = { ok: true, studio: dir, name: openStudio(dir).name, files: [], kept: [join(dir, "filmkit.json")] };
     log(`✓ the studio in ${dir}, already there`);
   } else {
     result.studio = initStudio(dir, where.name);

@@ -6,7 +6,7 @@
   "type": "module",
   "bin": { "filmkit": "src/cli/index.js" },
   "files": ["src/", "kit/", "themes/", "schema/", "templates/", "skills/", "examples/studio/films/smoke/", "docs/install-with-your-agent.md", "THIRD_PARTY.md"],
-  "engines": { "node": ">=20" },
+  "engines": { "node": ">=20.12" },
   "scripts": { "test": "node --test", "typecheck": "tsc -p ." },
   "dependencies": { "@clack/prompts": "1.9.0", "gsap": "3.15.1", "jsonc-parser": "3.3.1" },
   "devDependencies": { "@types/node": "20.19.43", "typescript": "7.0.2" },

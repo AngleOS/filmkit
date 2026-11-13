@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { nodeSupported } from "../src/cli/commands/doctor.js";
 import { agentPrompt } from "../src/cli/commands/prompt.js";
 import { fromFlags } from "../src/cli/commands/setup.js";
 import { setup, studioDir } from "../src/setup.js";
@@ -84,7 +85,7 @@ test("run again, setup keeps the studio and the film; --agents none and --no-bra
   const studio = join(home, "films-here");
   const { result } = await setupYes({ studio, agents: "none", "no-brand": true }, steps);
   assert.equal(result.ok, true);
-  assert.deepEqual([result.studio.files, result.studio.name], [[], "Acme"]);
+  assert.deepEqual([result.studio.ok, result.studio.files, result.studio.name], [true, [], "Acme"]);
   assert.deepEqual([calls.agents, calls.brand, calls.check], [[], [], [["hello"]]]);
 });
 
@@ -141,9 +142,22 @@ test("setup --remove takes Filmkit out of the agent tools and leaves the studio 
 test("filmkit prompt prints the guide's prompt, only the fenced block", () => {
   const page = "# Title\n\nIntro.\n\n````text\nInstall it.\n\n```sh\nnpx x\n```\n````\n\n## After\n";
   assert.equal(agentPrompt(page), "Install it.\n\n```sh\nnpx x\n```");
+  assert.equal(agentPrompt(page.replaceAll("\n", "\r\n")), "Install it.\n\n```sh\nnpx x\n```", "a page with Windows line endings");
+  assert.throws(() => agentPrompt("# Title\n", "/p/guide.md"), { code: "prompt_missing", message: /^\/p\/guide\.md has no ````text block/ });
   const { status, stdout } = spawnSync(process.execPath, [CLI, "prompt"], { encoding: "utf8" });
   assert.equal(status, 0);
   assert.match(stdout, /^Install Angle Filmkit for me/);
   assert.match(stdout, /setup --remove/);
   assert.doesNotMatch(stdout, /````|^# /m);
+});
+
+test("Node 20.12 is the oldest supported: setup's prompts need its util.styleText", () => {
+  for (const v of ["20.12.0", "20.19.5", "22.0.0", "26.1.0"]) assert.equal(nodeSupported(v), true, v);
+  for (const v of ["18.19.0", "20.0.0", "20.11.1", "19.9.0"]) assert.equal(nodeSupported(v), false, v);
+});
+
+test("setup --ground takes dark or light, and anything else is a usage error before any step runs", () => {
+  const { status, stdout } = spawnSync(process.execPath, [CLI, "setup", "--yes", "--ground", "grey", "--json"], { cwd: tmpdir(), encoding: "utf8" });
+  assert.equal(status, 2);
+  assert.equal(JSON.parse(stdout).code, "option_choice");
 });
