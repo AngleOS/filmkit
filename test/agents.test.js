@@ -269,5 +269,8 @@ test("filmkit agents: --json, --mcp-command and --dry-run, and an unknown tool i
   assert.match(real.stdout, /✓ Cursor {2}configured: ~[/\\].cursor[/\\]mcp\.json mcpServers\.filmkit/);
   const bad = run(["emacs"]);
   assert.equal(bad.status, 2);
-  assert.match(bad.stderr, /unknown agent tool emacs \(tools: claude-code, claude-desktop, codex, cursor, vscode, copilot, windsurf, zed, gemini, opencode\)/);
+  assert.match(bad.stderr, /can't register in "emacs"\. Tools: claude-code, claude-desktop, codex, cursor, vscode, copilot, windsurf, zed, gemini, opencode\. Register in every one that's installed with: filmkit agents/);
+  const bare = run(["--mcp-command", "--json"]);
+  assert.equal(bare.status, 2);
+  assert.equal(JSON.parse(bare.stdout).code, "option_value");
 });

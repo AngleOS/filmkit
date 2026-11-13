@@ -63,7 +63,7 @@ test("filmkit.json overrides single values of a theme, the default one when it n
 
 test("a theme that can't be found, or that breaks the schema, says what's wrong", () => {
   assert.throws(() => loadTheme(studio(), "nope"), { code: "unknown_theme", message: /no theme called "nope"\. Themes: angle, default, paper, or a folder with a theme\.json\./ });
-  assert.throws(() => loadTheme(studio(), "./brand/theme"), /no brand\/theme\/theme\.json/);
+  assert.throws(() => loadTheme(studio(), "./brand/theme"), { code: "theme_missing", message: /^There's no brand\/theme\/theme\.json\./ });
   const bad = (/** @type {object} */ json) => () => loadTheme(studio({ "t/theme.json": json }), "./t");
   assert.throws(bad({ extends: "angle", accent: "pear" }), /t\/theme\.json: accent: "pear" should be a hex colour such as "#e3ef26"/);
   assert.throws(bad({ extends: "angle", grounds: { foreground: "#000" } }), /grounds\.foreground: should be a ground name/);
@@ -74,8 +74,9 @@ test("a theme that can't be found, or that breaks the schema, says what's wrong"
   assert.throws(bad({ extends: "angle", fonts: { display: { family: 'Inter"; }' } } }), /fonts\.display\.family: .* should be a font family name/);
   assert.throws(bad({ extends: "angle", fonts: { faces: [{ family: "Inter", weight: 400, file: "Inter.woff2" }] } }), /no fonts\/Inter\.woff2 in the theme's folders/);
   assert.throws(bad({ accent: "#000000" }), /theme "\.\/t": grounds: missing; text: missing; fonts: missing/);
-  assert.throws(bad({ extends: "." }), /t\/theme\.json extends itself/);
-  assert.throws(() => loadTheme(studio({ "t/theme.json": "{" }), "./t"), /t\/theme\.json: .*JSON/);
+  assert.throws(bad({ accent: "#000000" }), { code: "theme_key" });
+  assert.throws(bad({ extends: "." }), { code: "theme_cycle", message: /^t\/theme\.json extends itself\./ });
+  assert.throws(() => loadTheme(studio({ "t/theme.json": "{" }), "./t"), { code: "theme_json", message: /^t\/theme\.json isn't valid JSON: .*\. Fix it at: .*t\/theme\.json:1:2$/ });
 });
 
 test("filmkit.json is checked against the schema", () => {

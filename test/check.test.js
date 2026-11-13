@@ -133,6 +133,14 @@ test("the default theme passes on its grounds, so check warns of nothing", () =>
   assert.deepEqual(JSON.parse(offline(["check", "hook", "16x9", "--json"], passedHook().dir).stdout).warnings, []);
 });
 
+test("a sound that doesn't build is said in the catalogue's words, before the formats", () => {
+  const { dir } = passedHook();
+  writeFileSync(join(dir, "films/hook/sound.json"), '{ "cues": [] }');
+  // The sound is in the format's hash, so the format is checked again, and offline that stops at HyperFrames.
+  const { stdout } = offline(["check", "hook", "16x9"], dir);
+  assert.match(stdout, /^✗ sound_empty: films\/hook\/sound\.json places no cues or chords, so there's nothing to hear\. Place a cue on a scene, as in: /);
+});
+
 test("a changed film, another format or --force is checked again", () => {
   for (const args of [["check", "hook", "16x9", "--force"], ["check", "hook", "1x1"]]) {
     assert.equal(offline(args, passedHook().dir).status, 3, String(args));

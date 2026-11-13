@@ -96,13 +96,27 @@ test("doctor reports each requirement and exits 3 when one is missing", () => {
   assert.match(checks[1].hint, /^Install it with: /);
 });
 
-test("render reads the captions before it renders, so a broken captions host fails first", () => {
+/** @param {string} clip a clip to add to the plain film @param {string[]} args */
+function withClip(clip, args) {
   const dir = studioCopy();
   const page = join(dir, "films/plain/index.html");
-  writeFileSync(page, readFileSync(page, "utf8").replace("</div>\n", `<div id="cc" data-composition-src="kit/scenes/captions.html" data-start="cc" data-duration="3"></div>\n$&`));
-  const { status, stderr } = filmkit(["render", "plain"], dir, { ...process.env, PATH: "/nonexistent" });
+  writeFileSync(page, readFileSync(page, "utf8").replace("</div>\n", `${clip}\n$&`));
+  return filmkit([...args, "--json"], dir, { ...process.env, PATH: "/nonexistent" });
+}
+
+test("a start that leads nowhere is an error as soon as the film opens", () => {
+  const { status, stdout } = withClip('<div id="cc" data-start="cc" data-duration="3"></div>', ["snapshot", "plain"]);
   assert.equal(status, 2);
-  assert.match(stderr, /films\/plain\/index\.html: start of "cc" is circular/);
+  const { error, code } = JSON.parse(stdout);
+  assert.equal(code, "bad_start");
+  assert.match(error, /^films\/plain\/index\.html: the start of "cc" leads back to itself\./);
+});
+
+test("render reads the captions before it renders, so a broken captions host fails first", () => {
+  const host = `<div id="cc" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="3" data-variable-values='{lines}'></div>`;
+  const { status, stdout } = withClip(host, ["render", "plain"]);
+  assert.equal(status, 2);
+  assert.equal(JSON.parse(stdout).code, "captions_json");
 });
 
 test("explain says why each code exists, and lists them all with none", () => {

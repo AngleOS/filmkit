@@ -132,4 +132,5 @@ test("a seam whose frames didn't render says why, in HyperFrames' words", () => 
   const { status, stdout, stderr } = withFakeHyperframes(["check", "hook", "--json"]);
   assert.equal(status, 1, stderr);
   assert.deepEqual(JSON.parse(stdout).formats[0].seam, { ok: false, error: "the seam frames didn't render: Error: Chrome crashed" });
+  assert.match(stderr, /^ {2}✗ seam_unmeasured: 9x16: the seam couldn't be measured: the seam frames didn't render: Error: Chrome crashed\. See what's missing with: filmkit doctor$/m);
 });

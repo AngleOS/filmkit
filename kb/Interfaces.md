@@ -38,7 +38,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
       "seam": { "ok": true, "step": 0.21, "median": 0.12, "limit": 0.4 } }      // loops only; { ok: false, error } when its frames didn't render
   ],
   "sound": { "built": true, "path": "/abs/build/launch/sound.m4a", "lufs": -19.0, "truePeak": -1.2 } }
-  // sound: null for a film without sound.json; { "built": false, "error": "…" } fails the check
+  // sound: null for a film without sound.json; { "built": false, "code": "sound_empty", "error": "…", "fix": "…" } fails the check
 
 // explain  (`filmkit explain <code> --json`); with no code: { ok, codes: [...] }
 { "ok": true, "code": "content_overlap", "why": "…", "source": "filmkit" }   // or "hyperframes-reference", "hyperframes"

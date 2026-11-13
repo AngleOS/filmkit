@@ -91,6 +91,83 @@ const CASES = {
     'The theme\'s muted text #4a5a52 on the ink ground (#07120f) is 2.6:1, under WCAG AA\'s 4.5:1. Set text.muted in filmkit.json\'s "theme" to a colour that passes, such as: #727e78',
     "#727e78",
   ],
+  option_value: [{ command: "contact", option: "--every", takes: true }, "In filmkit contact, --every needs a value. See each command's options with: filmkit --help", "filmkit --help"],
+  theme_missing: [
+    { file: "brand/theme/theme.json" },
+    'There\'s no brand/theme/theme.json. Point "theme" at a folder that has one, or name a built-in theme, as in: "theme": "default"',
+    '"theme": "default"',
+  ],
+  theme_json: [
+    { file: "brand/theme.json", error: "Expected double-quoted property name", at: "/s/brand/theme.json:3:5" },
+    "brand/theme.json isn't valid JSON: Expected double-quoted property name. Fix it at: /s/brand/theme.json:3:5",
+    "/s/brand/theme.json:3:5",
+  ],
+  theme_key: [
+    { theme: "brand/theme.json", problems: ['accent: "pear" should be a hex colour such as "#e3ef26"'], schema: "/p/schema/filmkit.schema.json" },
+    'brand/theme.json: accent: "pear" should be a hex colour such as "#e3ef26". Each key is described in: /p/schema/filmkit.schema.json',
+    "/p/schema/filmkit.schema.json",
+  ],
+  theme_cycle: [{ file: "brand/theme.json" }, 'brand/theme.json extends itself. Have it extend another theme, as in: "extends": "default"', '"extends": "default"'],
+  bad_start: [
+    { film: "launch", problem: 'the start of "cc" leads back to itself' },
+    'films/launch/index.html: the start of "cc" leads back to itself. Start it at a time in seconds, or after a clip that\'s in the film, as in: data-start="intro + 0.5"',
+    'data-start="intro + 0.5"',
+  ],
+  captions_json: [
+    { film: "launch", error: "Unexpected token 'l'" },
+    "films/launch/index.html: the captions' data-variable-values isn't valid JSON: Unexpected token 'l'. Write it as one object, as in: data-variable-values='{\"lines\": \"0.2-2.4 Films are code\"}'",
+    "data-variable-values='{\"lines\": \"0.2-2.4 Films are code\"}'",
+  ],
+  bad_times: [{ film: "launch", option: "--every", value: "soon" }, "--every soon isn't a number of seconds. For example: filmkit contact launch --every 2s", "filmkit contact launch --every 2s"],
+  times_both: [{ film: "launch" }, "Give --every or --at, not both. For example: filmkit contact launch --every 2s", "filmkit contact launch --every 2s"],
+  past_end: [{ film: "launch", late: [12, 14], duration: 10 }, "--at 12,14 is past the end of launch, at 10 s. See a frame of each scene with: filmkit contact launch", "filmkit contact launch"],
+  no_scenes: [{ film: "launch" }, "films/launch has no timed scenes to show. Give the times with: filmkit contact launch --at 0,2,4", "filmkit contact launch --at 0,2,4"],
+  too_many_frames: [
+    { film: "launch", count: 60, max: 48, every: 2 },
+    "60 frames is too many for one sheet, which takes 48. Take one every few seconds, as in: filmkit contact launch --every 2s",
+    "filmkit contact launch --every 2s",
+  ],
+  sound_json: [
+    { film: "launch", error: "Unexpected end of JSON input", at: "/s/films/launch/sound.json:4:1" },
+    "films/launch/sound.json isn't valid JSON: Unexpected end of JSON input. Fix it at: /s/films/launch/sound.json:4:1",
+    "/s/films/launch/sound.json:4:1",
+  ],
+  sound_shape: [
+    { film: "launch", problem: '"cues" should be a list of objects' },
+    'films/launch/sound.json: "cues" should be a list of objects. Each key is described in: https://github.com/AngleOS/filmkit/blob/master/docs/sound.md',
+    "https://github.com/AngleOS/filmkit/blob/master/docs/sound.md",
+  ],
+  sound_scene: [
+    { film: "launch", problem: '"hit" is on scene "gone", which index.html doesn\'t have', clips: ["title", "endcard"] },
+    'films/launch/sound.json: "hit" is on scene "gone", which index.html doesn\'t have. Clips: title, endcard. Place it on one of them, as in: "scene": "title"',
+    '"scene": "title"',
+  ],
+  sound_bed: [
+    { film: "launch", bed: "-12" },
+    'films/launch/sound.json: "bed" is "-12", and it has to be a number: the pad\'s level under the foley, in dB. For example: "bed": -12',
+    '"bed": -12',
+  ],
+  sound_empty: [
+    { film: "launch" },
+    'films/launch/sound.json places no cues or chords, so there\'s nothing to hear. Place a cue on a scene, as in: "cues": [{ "id": "hit", "kind": "impact", "scene": "endcard", "at": 2.7 }]',
+    '"cues": [{ "id": "hit", "kind": "impact", "scene": "endcard", "at": 2.7 }]',
+  ],
+  sound_failed: [
+    { film: "launch", why: "ffmpeg couldn't encode sound.m4a" },
+    "films/launch: the sound didn't build: ffmpeg couldn't encode sound.m4a. See what's missing with: filmkit doctor",
+    "filmkit doctor",
+  ],
+  loop_too_short: [{ min: 0.6 }, 'A loop\'s root needs a data-duration of at least 0.6 s, so its seam can be measured. Make it longer, as in: data-duration="6"', 'data-duration="6"'],
+  seam_unmeasured: [
+    { format: "9x16", why: "the seam frames didn't render: Error: Chrome crashed" },
+    "9x16: the seam couldn't be measured: the seam frames didn't render: Error: Chrome crashed. See what's missing with: filmkit doctor",
+    "filmkit doctor",
+  ],
+  unknown_tool: [
+    { unknown: ["emacs"], tools: ["claude-code", "codex"] },
+    'Filmkit can\'t register in "emacs". Tools: claude-code, codex. Register in every one that\'s installed with: filmkit agents',
+    "filmkit agents",
+  ],
   unknown_code: [{ code: "nope" }, 'There\'s no error or rule called "nope". See them all with: filmkit explain', "filmkit explain"],
 };
 
