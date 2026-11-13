@@ -9,7 +9,8 @@ brand/              the logo (logo.svg, the mark the default themes reveal) and 
 films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), sound.json, assets
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
 POSTING.md          where each render goes, with its copy per platform
-AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/
+AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/, and the HyperFrames skill beside it
+.claude/skills/     the filmkit skill; `filmkit skills` adds the pinned HyperFrames' own skills, git-ignored
 build/              git-ignored: build/<film>/<format>/, rebuilt when its inputs change, and build/<film>/preview/; never edit it
 renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film>-<format>.png stills
 ```
@@ -30,6 +31,8 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
+| `scenes [name]` | the kit's scenes, each with the first line of what it does; with a name, all of it and its variables: type, default, label and an enum's options. Read from the scenes themselves: each one's comment and `data-composition-variables` |
+| `skills` | the filmkit skill and the skills the pinned HyperFrames ships (`hyperframes`, `hyperframes-cli`, `media-use`) into `.claude/skills/`, each replacing its older copy; the studio's other skills are left alone. The HyperFrames ones are git-ignored, since `skills` makes them again from the pin, and an `AGENTS.md` without a pointer to them gets one. Run it again after upgrading filmkit |
 | `doctor` | Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome, each with a hint when it's missing |
 | `agents [tools…] [--remove] [--dry-run] [--mcp-command cmd]` | registers Filmkit's MCP server and skill in each agent tool it finds (Claude Code, Codex, Cursor, VS Code, …), with a backup of every file it edits: see [agents/](agents/README.md) |
 

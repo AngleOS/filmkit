@@ -49,8 +49,13 @@ the MCP server share one implementation: MCP tools call the same functions the C
 // new  (`filmkit new <film> [--template t] --json`)
 { "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }
 
-// scenes
-{ "scenes": [{ "name": "bars", "description": "…", "variables": [{ "id": "values", "type": "string", "label": "…", "default": "…" }] }] }
+// scenes  (`filmkit scenes [name] --json`): every kit scene, or the one named
+{ "ok": true, "scenes": [{ "name": "bars", "description": "…",
+  "variables": [{ "id": "direction", "type": "enum", "label": "Direction", "default": "vertical", "options": [{ "value": "vertical", "label": "…" }] }] }] }
+
+// skills  (`filmkit skills --json`): what it installed, and the files it added lines to (.gitignore, AGENTS.md)
+{ "ok": true, "skills": [{ "name": "filmkit", "from": "filmkit", "path": "/abs/.claude/skills/filmkit" },
+  { "name": "hyperframes", "from": "hyperframes@0.8.186", "path": "/abs/.claude/skills/hyperframes" }], "files": ["/abs/.gitignore"] }
 
 // agents  (`filmkit agents [tools…] [--remove] [--dry-run] --json`); exits 1 when a tool failed
 { "ok": true, "dryRun": false, "command": { "command": "npx", "args": ["-y", "filmkit", "mcp"] },

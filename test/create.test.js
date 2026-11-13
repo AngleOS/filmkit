@@ -2,13 +2,13 @@
 // Chrome, so CI's film job checks them; these tests hold what's offline: the files, the placeholders and the errors.
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { rootTag, startTags } from "../src/build/html.js";
-import { initStudio, newFilm, templates } from "../src/create.js";
+import { initStudio, installSkills, newFilm, templates } from "../src/create.js";
 import { openFilm, openStudio } from "../src/studio.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
@@ -126,4 +126,54 @@ test("the CLI: init then new, with --json results, statement by default, and usa
   assert.deepEqual(readdirSync(join(dir, "films/hello")).sort(), ["brief.md", "index.html"]);
   assert.equal(filmkit(["new", "hello"], dir).status, 2);
   assert.equal(filmkit(["init", "."], dir).status, 2);
+});
+
+/** A stand-in for the pinned package's dist/skills: two skills and a folder that isn't one. */
+function hyperframesSkills() {
+  const dir = empty();
+  for (const name of ["hyperframes", "media-use"]) {
+    mkdirSync(join(dir, name, "references"), { recursive: true });
+    writeFileSync(join(dir, name, "SKILL.md"), `---\nname: ${name}\n---\n`);
+    writeFileSync(join(dir, name, "references", "a.md"), "a\n");
+  }
+  mkdirSync(join(dir, "notes"));
+  return dir;
+}
+
+test("skills installs the filmkit skill and the pinned HyperFrames skills, replacing old copies and keeping the studio's own", () => {
+  const acme = studio();
+  const skills = join(acme.dir, ".claude", "skills");
+  mkdirSync(join(skills, "hyperframes"), { recursive: true });
+  writeFileSync(join(skills, "hyperframes", "stale.md"), "from an older pin\n");
+  mkdirSync(join(skills, "ours"));
+  writeFileSync(join(skills, "ours", "SKILL.md"), "ours\n");
+  const agents = readFileSync(join(acme.dir, "AGENTS.md"), "utf8");
+  const { skills: installed, files } = installSkills(acme, hyperframesSkills());
+  assert.deepEqual(installed.map((s) => [s.name, s.from, s.path]), [
+    ["filmkit", "filmkit", join(skills, "filmkit")],
+    ["hyperframes", "hyperframes@0.8.186", join(skills, "hyperframes")],
+    ["media-use", "hyperframes@0.8.186", join(skills, "media-use")],
+  ]);
+  assert.ok(existsSync(join(skills, "filmkit", "SKILL.md")));
+  assert.ok(existsSync(join(skills, "media-use", "references", "a.md")));
+  assert.ok(!existsSync(join(skills, "hyperframes", "stale.md")));
+  assert.ok(!existsSync(join(skills, "notes")));
+  assert.equal(readFileSync(join(skills, "ours", "SKILL.md"), "utf8"), "ours\n");
+  // init's AGENTS.md already points to the HyperFrames skill, so only .gitignore changes
+  assert.deepEqual(files, [join(acme.dir, ".gitignore")]);
+  assert.equal(readFileSync(join(acme.dir, "AGENTS.md"), "utf8"), agents);
+  assert.equal(readFileSync(join(acme.dir, ".gitignore"), "utf8"), "build/\nrenders/\n.claude/skills/hyperframes/\n.claude/skills/media-use/\n");
+  assert.deepEqual(installSkills(acme, hyperframesSkills()).files, []);
+});
+
+test("skills points an AGENTS.md without a pointer at the skills, and writes one when there's none", () => {
+  const acme = studio();
+  const agents = join(acme.dir, "AGENTS.md");
+  writeFileSync(agents, "# Ours");
+  installSkills(acme, hyperframesSkills());
+  assert.match(readFileSync(agents, "utf8"), /^# Ours\n\n## Skills\n\nRead `\.claude\/skills\/filmkit\/SKILL\.md`[\s\S]*`\.claude\/skills\/hyperframes\/SKILL\.md`/);
+  rmSync(agents);
+  installSkills(acme, hyperframesSkills());
+  assert.match(readFileSync(agents, "utf8"), /^## Skills\n/);
+  assert.throws(() => installSkills(acme, empty()), /no skills in/);
 });

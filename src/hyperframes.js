@@ -44,6 +44,24 @@ export function hyperframesAsync(args, { cwd }) {
   });
 }
 
+/**
+ * The skills the pinned package ships (its dist/skills), written for the CLI that renders. npx puts the package's bin
+ * folder on the PATH of what it runs, so a node one-liner run there finds the package beside it, on any platform.
+ */
+export function hyperframesSkills() {
+  const find = `const { join, delimiter } = require("node:path");
+    const dir = process.env.PATH.split(delimiter).map((d) => join(d, "..", "hyperframes", "dist", "skills"))
+      .find((d) => require("node:fs").existsSync(d));
+    if (dir) console.log(dir); else process.exit(1);`;
+  const { status, stdout, error } = spawnSync("npx", ["--yes", "-p", HYPERFRAMES, "node", "-e", find], {
+    stdio: ["ignore", "pipe", 2],
+    encoding: "utf8",
+  });
+  if (error) throw npxError(error);
+  if (status !== 0) throw new RequirementError(`${HYPERFRAMES}'s skills weren't found: npx fetches the package on first use, so check the network`);
+  return stdout.trim();
+}
+
 /** @param {Error} error */
 export function npxError(error) {
   const missing = /** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT";
