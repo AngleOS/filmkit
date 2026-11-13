@@ -22,7 +22,7 @@ describe("the one page", () => {
 
   it("shows the install command and every install path", () => {
     render(<Home />);
-    expect(screen.getAllByText("npx -y github:AngleOS/filmkit setup").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("npx -y filmkit setup").length).toBeGreaterThan(0);
     for (const tab of ["Your agent", "npx", "macOS & Linux", "Windows"]) {
       expect(screen.getByRole("tab", { name: tab })).toBeInTheDocument();
     }

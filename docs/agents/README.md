@@ -15,9 +15,8 @@ filmkit agents --mcp-command "node '/path with spaces/filmkit/src/cli/index.js' 
   again updates the entry; it never adds a second one.
 - **It backs up every file before it writes:** `<file>.filmkit-backup-<date>-<time>`, beside the file, and never over
   an earlier backup (a second one in the same second gets `-2`). A run with nothing to change writes nothing.
-- **The server command** follows how you ran Filmkit: `npx -y github:AngleOS/filmkit mcp` when npx fetched it from
-  GitHub (while the repo is private), `npx -y filmkit mcp` from npm, and `node <checkout>/src/cli/index.js mcp` from
-  a clone. `--mcp-command` sets it. On Windows, npx is started through `cmd /c`.
+- **The server command** follows how you ran Filmkit: `npx -y filmkit mcp` when npx fetched it, and
+  `node <checkout>/src/cli/index.js mcp` from a clone. `--mcp-command` sets it. On Windows, npx is started through `cmd /c`.
 - **The skill** is copied to `~/.claude/skills/filmkit` for Claude Code and to `~/.agents/skills/filmkit`, the folder
   Codex, Cursor, Copilot, Devin, Zed, Gemini CLI and opencode read. `--remove` for some tools leaves that shared copy
   while another tool still has Filmkit.
@@ -38,5 +37,4 @@ filmkit agents --mcp-command "node '/path with spaces/filmkit/src/cli/index.js' 
 | Gemini CLI | `gemini` | [gemini.md](gemini.md) |
 | opencode | `opencode` | [opencode.md](opencode.md) |
 
-The pages show the entry with `npx -y filmkit mcp`. While Filmkit isn't on npm, use `github:AngleOS/filmkit` in
-place of `filmkit`. Each tool is one row in `src/agents/tools.js`, with links to the docs its paths come from.
+The pages show the entry with `npx -y filmkit mcp`. Each tool is one row in `src/agents/tools.js`, with links to the docs its paths come from.

@@ -23,8 +23,6 @@ carries only the protocol: what a command would print goes to stderr, which the 
 - **Any other client:** a stdio server with the command `npx` and the arguments `-y filmkit mcp`. Start it in the
   studio, or add `--studio /path/to/studio` to the arguments.
 
-While Filmkit isn't on npm, use `github:AngleOS/filmkit` in place of `filmkit`.
-
 ## Tools
 | Tool | Input | Returns |
 |---|---|---|

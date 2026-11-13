@@ -4,7 +4,7 @@ Paste the prompt below into your coding agent: Claude Code, Codex, Cursor, VS Co
 CLI or opencode. It installs Filmkit, connects it to your agent tools, sets up your brand and makes a first film. It
 only asks you for your brand.
 
-`npx -y github:AngleOS/filmkit prompt` prints the same prompt (`npx filmkit prompt` once Filmkit is on npm).
+`npx -y filmkit prompt` prints the same prompt.
 
 ---
 
@@ -19,8 +19,6 @@ Do this, step by step, and tell me what you did at each step:
    - Windows:      & ([scriptblock]::Create((irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1))) --yes --agents auto --no-brand --no-first-film
    It installs Node 20.12+ and ffmpeg if they're missing, and registers the `filmkit` MCP server and skill in every agent
    tool it finds. Show me the list of tools it configured.
-   Every `npx` command below uses the package spec github:AngleOS/filmkit. Never run an unscoped `npx filmkit`:
-   Filmkit isn't on npm yet, so that name could be anyone's.
 
 2. Ask me, in one message:
    - my brand or product name;
@@ -30,9 +28,9 @@ Do this, step by step, and tell me what you did at each step:
    - where to keep the studio (default: ./<name>-films).
 
 3. Set up the brand. Run, with my answers:
-     npx -y github:AngleOS/filmkit setup --yes --studio <dir> --name "<name>" [--brand-url <url>] [--logo <file>] [--ground dark|light]
+     npx -y filmkit setup --yes --studio <dir> --name "<name>" [--brand-url <url>] [--logo <file>] [--ground dark|light]
    This also makes a first film, films/hello, from the statement template. Run
-   `npx -y github:AngleOS/filmkit stills hello 1` in the studio and show me the 16:9 still. Ask whether the colours and logo
+   `npx -y filmkit stills hello 1` in the studio and show me the 16:9 still. Ask whether the colours and logo
    look right; adjust filmkit.json's theme until I say yes.
 
 4. Finish the first film, the `hello` film setup made (don't make a new one). Use the filmkit MCP tools if they're
@@ -45,7 +43,7 @@ Do this, step by step, and tell me what you did at each step:
 5. Finish by telling me:
    - how to ask you for the next film ("Make a 30-second launch film for …");
    - that the filmkit skill (skills/filmkit/SKILL.md) is the workflow you'll follow;
-   - how to remove Filmkit from my agent tools (`npx -y github:AngleOS/filmkit setup --remove`).
+   - how to remove Filmkit from my agent tools (`npx -y filmkit setup --remove`).
 
 Rules:
 - Never put my logo or brand in a public place.
@@ -62,4 +60,4 @@ Rules:
 | 3 | `filmkit setup --studio … --name …` | a studio folder with `filmkit.json`, `brand/` and `films/hello` |
 | 4 | the MCP tools or the CLI | `build/` and `renders/` inside the studio |
 
-To undo it: `npx -y github:AngleOS/filmkit setup --remove` takes Filmkit out of every agent tool's config. The studio is just a folder.
+To undo it: `npx -y filmkit setup --remove` takes Filmkit out of every agent tool's config. The studio is just a folder.

@@ -24,7 +24,7 @@ screen from them. No time-saved percentages, no "X% of marketers", no competitor
 | build/launch/contact-9x16.png · 9x16 0.7s · 9x16 5.2s · 9x16 8.4s · 9x16 11.2s | UI | `filmkit contact` writes `build/<film>/contact-<format>.png` (src/cli/commands/contact.js) and labels each frame `<format> <t>s` (src/build/contact.js) |
 | source line under caption box · fixed: source line under caption box | example | illustrative review note; the check behind it is the chart box stopping above the captions (kit/layout.js `chart`) |
 | Every word has a source. | claim | README.md, "Every word has a source." |
-| One master, four frames. · README.md · Sound from the picture. · README.md · On npm as filmkit. · ⚑ not live yet · Three rows of the studio’s CLAIMS.md | example | illustrative ledger rows; the first two are README.md word for word, and the third is shown as flagged because it isn't true yet (README.md, "Filmkit isn't on npm yet") |
+| One master, four frames. · README.md · Sound from the picture. · README.md · On npm as filmkit. · ⚑ not live yet · Three rows of the studio’s CLAIMS.md | example | illustrative ledger rows; the first two are README.md word for word, and the third was flagged because it wasn't true when the film was made (filmkit@0.1.0 came later) |
 | Sound from the motion. No stock music. | claim | README.md, "Sound from the picture. Impacts, ticks and whooshes come from the motion … There's no licensed music." |
 | Loudness, the whole film · −19 LUFS · −40 LUFS · 0 LUFS · Mastered to −19 LUFS (docs/sound.md) | number | docs/sound.md, "a gain to −19 LUFS"; `filmkit check films-are-code` measures −19 LUFS |
 | Your agent makes the film. | claim | README.md, "Your AI agent makes the film." |
@@ -39,7 +39,7 @@ server; nothing on screen is a flag or a tool that doesn't exist.
 | On screen | Kind | Source |
 |---|---|---|
 | Start a studio. | claim | `filmkit init` "make a studio" (`filmkit --help`) |
-| $ npx -y github:AngleOS/filmkit init my-studio | UI | README.md, "run it as `npx -y github:AngleOS/filmkit …`" |
+| $ npx -y filmkit init my-studio | UI | README.md, "Use it": `npx -y filmkit …` |
 | ✓ a studio for my-studio in /Users/you/my-studio · wrote filmkit.json, brand/logo.svg, films/smoke, AGENTS.md, CLAIMS.md, POSTING.md, .claude/skills/filmkit, .gitignore | UI | `init`'s output, run 2026-11-13 (the path is illustrative) |
 | Hand your agent the brief. | claim | README.md, "Write a brief." |
 | Make a 20-second launch film from films/launch/brief.md. · I’ll start it from the statement template, then check every format. | example | illustrative chat turn |

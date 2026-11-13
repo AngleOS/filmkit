@@ -25,9 +25,8 @@ output, and never invent flags.
 ## Owner correction (2026-11-13): what the build changed
 The brief is as the owner wrote it (`kb/briefs/Brief in, film out.md`, 2026-11-12). The build changed these, for the
 reasons given:
-- **The command is `npx -y github:AngleOS/filmkit init my-studio`.** Filmkit isn't on npm, and the README says never
-  to run an unscoped `npx filmkit`. The output is `init`'s own first two lines; its `Next:` line is left out because
-  it prints the unscoped form.
+- **The command is `npx -y filmkit init my-studio`**, as the README runs it. The output is `init`'s own first two
+  lines; its `Next:` line is left out to keep the beat short.
 - **Beat 1 runs 8.3 s**, so `init`'s long `wrote …` line is on screen long enough to read (check's `line_unread`).
 - **"Hand your agent the *brief.*" is its own 2 s beat.** The chat scene fills the frame from the top, so there is no
   room for a title over it.
