@@ -1,0 +1,127 @@
+<template>
+  <!-- The four frames, as a 9:16 loop: the ANGLE FILMKIT lockup small at the top, the promise under it, and under that
+       a 16:9 frame that splits into 1:1, 4:5 and 9:16, its title re-laid in each, never cropped. The frames fill with
+       the accent one after another while "Brief in. Film out." takes the promise's place, then fold back into the one
+       16:9 frame as the promise returns. The returning promise is its own layer: a fromTo late in a timeline renders its
+       from-state at frame 0, and on the poster's own title would blank the poster. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #ff-lockup { position: absolute; }
+    #ff-kit { position: absolute; font: 500 28px var(--font-mono); letter-spacing: 0.32em; color: var(--accent); line-height: 1; }
+    .ff-head { position: absolute; color: var(--foreground); text-align: center; text-wrap: balance; }
+    .ff-frame { position: absolute; border: 3px solid var(--fk-border); border-radius: 12px; background: var(--ink); overflow: hidden; }
+    .ff-title { position: absolute; color: var(--foreground); text-wrap: balance; }
+    .ff-label { position: absolute; font: 500 28px var(--font-mono); color: var(--muted-foreground); text-align: center; }
+  </style>
+  <div id="root" data-composition-id="hook">
+    <svg id="ff-lockup" data-layout-allow-overflow></svg>
+    <div id="ff-kit"><span>FILMKIT</span></div>
+    <div id="ff-poster" class="ff-head display"></div>
+    <div id="ff-brief" class="ff-head display"></div>
+    <div id="ff-return" class="ff-head display"></div>
+    <div class="ff-frame"><div class="ff-title display"></div></div>
+    <div class="ff-frame"><div class="ff-title display"></div></div>
+    <div class="ff-frame"><div class="ff-title display"></div></div>
+    <div class="ff-frame"><div class="ff-title display"></div></div>
+    <div class="ff-label"><span>16:9</span></div>
+    <div class="ff-label"><span>1:1</span></div>
+    <div class="ff-label"><span>4:5</span></div>
+    <div class="ff-label"><span>9:16</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const { W, safe } = AL;
+      const $ = (id) => document.getElementById(id);
+      const promise = "Your agent makes the *film.*";
+
+      // The lockup and FILMKIT beside it, centred as one on the safe box's top, drawn whole: it is on the poster.
+      const L = KB.lockupBox(300, safe.top + 18), kit = 230, inner = W - safe.left - safe.right;
+      const lockLeft = safe.left + (inner - L.w - 28 - kit) / 2;
+      gsap.set($("ff-lockup"), { left: lockLeft, top: L.top, width: L.w, height: L.h });
+      gsap.set(KB.lockup($("ff-lockup")).wipe, { attr: { width: 60 } });
+      gsap.set($("ff-kit"), { left: lockLeft + L.w + 28, top: L.top + L.h / 2 - 14 });
+
+      const head = { left: safe.left, top: safe.top + 110, width: inner, fontSize: 108 };
+      [["ff-poster", promise], ["ff-brief", "Brief in. Film *out.*"], ["ff-return", promise]].forEach(([id, text]) => {
+        gsap.set($(id), head);
+        $(id).innerHTML = KM.wordSpans(text);
+      });
+
+      // The frames' room: under the promise's two lines, down to the safe box's floor.
+      const room = { left: safe.left, top: head.top + 300, width: inner, height: AL.H - safe.bottom - head.top - 300 };
+      const frames = [...document.querySelectorAll(".ff-frame")].reverse(), labels = document.querySelectorAll(".ff-label");
+      // Each frame's size, and its title's place as fractions of it, as the kit's statements set them in that format.
+      const layouts = [
+        { w: 1920, h: 1080, x: 0.06, y: 0.5, width: 0.7, size: 120, align: "left" },
+        { w: 1080, h: 1080, x: 0.08, y: 0.34, width: 0.84, size: 96, align: "center" },
+        { w: 1080, h: 1350, x: 0.08, y: 0.36, width: 0.84, size: 100, align: "center" },
+        { w: 1080, h: 1920, x: 0.06, y: 0.34, width: 0.78, size: 130, align: "center" },
+      ];
+      // Two rows, 16:9 and 1:1 over 4:5 and 9:16, each on its own baseline over its labels.
+      const gap = 24, label = 56, rows = [[0, 1], [2, 3]];
+      const across = Math.min(...rows.map((r) => (room.width - gap) / r.reduce((a, i) => a + layouts[i].w, 0)));
+      const tall = rows.reduce((a, r) => a + Math.max(...r.map((i) => layouts[i].h)), 0);
+      const u = Math.min(across, (room.height - 2 * label - gap) / tall);
+      /** @type {{ left: number, top: number, width: number, height: number }[]} */
+      const slots = [];
+      let y = room.top + (room.height - tall * u - 2 * label - gap) / 2;
+      for (const row of rows) {
+        const base = y + Math.max(...row.map((i) => layouts[i].h)) * u;
+        let x = room.left + (room.width - row.reduce((a, i) => a + layouts[i].w * u, 0) - gap) / 2;
+        for (const i of row) {
+          slots[i] = { left: x, top: base - layouts[i].h * u, width: layouts[i].w * u, height: layouts[i].h * u };
+          gsap.set(labels[i], { left: x - 40, width: layouts[i].w * u + 80, top: base + 12 });
+          x += layouts[i].w * u + gap;
+        }
+        y = base + label + gap;
+      }
+      /** @param {typeof layouts[0]} l @param {{ width: number, height: number }} s */
+      const titleIn = (l, s) => ({ left: s.width * l.x, top: s.height * l.y, width: s.width * l.width, fontSize: Math.max(28, Math.round(l.size * u)), textAlign: l.align });
+      // The master: the 16:9 slot's size, centred in the room. The copies wait under it, unseen.
+      const master = { ...slots[0], left: room.left + (room.width - slots[0].width) / 2, top: room.top + (room.height - slots[0].height) / 2 };
+      const titles = frames.map((f) => f.querySelector(".ff-title"));
+      frames.forEach((frame, i) => {
+        titles[i].innerHTML = KM.wordSpans(promise);
+        gsap.set(frame, master);
+        gsap.set(titles[i], titleIn(layouts[0], master));
+        if (i > 0) gsap.set([frame, titles[i]], { opacity: 0 });
+      });
+      gsap.set(labels, { opacity: 0 });
+
+      // Frame 0 is the poster and holds; then the copies part from under the master and their titles re-lay.
+      tl.set(frames.slice(1), { opacity: 1 }, 0.6);
+      frames.forEach((frame, i) => {
+        tl.to(frame, { ...slots[i], duration: 0.7, ease: "expo.inOut" }, 0.6 + 0.08 * i);
+        tl.to(titles[i], { ...titleIn(layouts[i], slots[i]), duration: 0.7, ease: "expo.inOut" }, 0.6 + 0.08 * i);
+      });
+      tl.to(titles.slice(1), { opacity: 1, duration: 0.3, ease: "none" }, 1.15);
+      tl.to(labels, { opacity: 1, duration: 0.3, stagger: 0.08, ease: "none" }, 1.4);
+
+      // The promise gives way to what it means, and each frame fills as it's made. GSAP can't tween to a var().
+      const css = getComputedStyle($("root")), token = (/** @type {string} */ name) => css.getPropertyValue(name).trim();
+      const lit = { borderColor: token("--accent"), backgroundColor: token("--accent") }, dark = token("--ink");
+      const unlit = { borderColor: token("--fk-border"), backgroundColor: dark };
+      KM.out(tl, $("ff-poster"), 3.0);
+      KM.words(tl, $("ff-brief").querySelectorAll(".word"), 3.3);
+      frames.forEach((frame, i) => {
+        tl.to(frame, { ...lit, duration: 0.25, ease: "none" }, 3.7 + 0.4 * i);
+        tl.to(titles[i].querySelectorAll(".word"), { color: dark, duration: 0.25, ease: "none" }, 3.7 + 0.4 * i);
+      });
+      KM.out(tl, $("ff-brief"), 5.6);
+
+      // Back through an action: the frames go dark, fold into the master, and the promise returns on its own layer.
+      KM.words(tl, $("ff-return").querySelectorAll(".word"), 5.85);
+      tl.to(frames, { ...unlit, duration: 0.3, ease: "none" }, 6.0);
+      const ink = (/** @type {number} */ _, /** @type {Element} */ el) => token(el.classList.contains("accent") ? "--accent" : "--foreground");
+      tl.to(titles.flatMap((t) => [...t.querySelectorAll(".word")]), { color: ink, duration: 0.3, ease: "none" }, 6.0);
+      tl.to([...labels, ...titles.slice(1)], { opacity: 0, duration: 0.25, ease: "none" }, 6.0);
+      frames.forEach((frame, i) => {
+        tl.to(frame, { ...master, duration: 0.7, ease: "expo.inOut" }, 6.25 + 0.08 * (3 - i));
+        tl.to(titles[i], { ...titleIn(layouts[0], master), duration: 0.7, ease: "expo.inOut" }, 6.25 + 0.08 * (3 - i));
+      });
+      tl.set(frames.slice(1), { opacity: 0 }, 7.3);
+      window.__timelines["hook"] = tl;
+    })();
+  </script>
+</template>
