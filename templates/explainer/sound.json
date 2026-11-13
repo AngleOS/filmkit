@@ -1,0 +1,32 @@
+{
+  "key": 73.42,
+  "bed": -12,
+  "cues": [
+    { "id": "pb-open", "kind": "air", "scene": "problem", "at": 0.05, "dur": 0.8, "x": 960, "y": 540, "gain": -16 },
+    { "id": "cm-rise", "kind": "whoosh", "scene": "compare-title", "at": 0.15, "dur": 0.6, "apex": 0.15, "x": 960, "y": 200, "w": 1300, "h": 120, "dir": "up", "gain": -18 },
+    { "id": "cm-bars", "kind": "pop", "scene": "compare", "at": 0.5, "n": 3, "every": 0.25, "step": 2, "x": 960, "y": 640, "w": 200, "h": 300, "gain": -14 },
+    { "id": "nu-lead", "kind": "air", "scene": "number", "at": 0.1, "dur": 0.5, "x": 960, "y": 400, "gain": -16 },
+    { "id": "nu-roll", "kind": "tick", "scene": "number", "at": 0.35, "n": 8, "every": 0.18, "x": 960, "y": 540, "w": 300, "h": 200, "gain": -20 },
+    { "id": "nu-land", "kind": "ding", "scene": "number", "at": 1.85, "x": 960, "y": 540, "w": 300, "h": 200, "gain": -12 },
+    { "id": "rs-rise", "kind": "whoosh", "scene": "reasons-title", "at": 0.15, "dur": 0.6, "apex": 0.15, "x": 960, "y": 200, "w": 1300, "h": 120, "dir": "up", "gain": -18 },
+    { "id": "rs-cards", "kind": "land", "scene": "reasons", "at": 0.45, "n": 3, "every": 0.6, "x": 960, "y": 600, "w": 500, "h": 300, "gain": -14 },
+    { "id": "an-ink", "kind": "ding", "scene": "answer", "at": 0.15, "n": 4, "every": 0.12, "step": 2, "x": 960, "y": 540, "w": 300, "h": 120, "gain": -14 },
+    { "id": "ec-claim", "kind": "air", "scene": "endcard", "at": 0.15, "dur": 0.45, "x": 960, "y": 450, "gain": -14 },
+    { "id": "ec-lines", "kind": "air", "scene": "endcard", "at": 2.05, "dur": 0.7, "x": 1500, "y": 800, "gain": -12 },
+    { "id": "ec-rise", "kind": "riser", "scene": "endcard", "at": 1.95, "dur": 0.75, "gain": -10 },
+    { "id": "ec-hit", "kind": "impact", "scene": "endcard", "at": 2.7, "x": 960, "y": 520, "w": 380, "h": 90, "gain": 0 },
+    { "id": "ec-sting", "kind": "sting", "scene": "endcard", "at": 2.7, "gain": -6 },
+    { "id": "ec-word", "kind": "air", "scene": "endcard", "at": 3.1, "dur": 0.45, "x": 1100, "y": 520, "gain": -12 }
+  ],
+  "chords": [
+    { "scene": "problem", "at": 0, "until": 2.8, "notes": [59, 66, 69, 74, 76], "level": -8, "cutoff": 2800, "attack": 0.9 },
+    { "scene": "compare", "at": 0, "until": 4.4, "notes": [55, 62, 69, 71, 78], "sub": 43, "level": -7, "cutoff": 3000, "attack": 0.6 },
+    { "scene": "number", "at": 0, "until": 3.8, "notes": [57, 64, 69, 71, 76], "level": -7, "cutoff": 3000, "attack": 0.6 },
+    { "scene": "reasons", "at": 0, "until": 5.2, "notes": [55, 62, 69, 71, 78], "sub": 43, "level": -7, "cutoff": 3000, "attack": 0.6 },
+    { "scene": "answer", "at": 0, "until": 3.8, "notes": [59, 66, 69, 76], "level": -9, "cutoff": 2600, "attack": 0.8 },
+    { "scene": "endcard", "at": 0, "until": 1.9, "notes": [59, 66, 69, 76], "level": -10, "cutoff": 2600, "attack": 0.8 },
+    { "scene": "endcard", "at": 2.7, "until": 7, "notes": [62, 66, 69, 74, 76, 81], "sub": 50, "level": -5, "cutoff": 3600, "attack": 0.08 }
+  ],
+  "blooms": [{ "scene": "endcard", "at": 2.7, "db": 9 }],
+  "pockets": [{ "scene": "endcard", "at": 1.9, "until": 2.7 }]
+}
