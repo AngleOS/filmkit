@@ -93,6 +93,7 @@ user's films.
 | Command | What it does |
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
+| `brand [--name] [--logo] [--accent] [--ground]` | the studio's brand (§8): the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light) |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
 | `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel (with text under the safe box a warning), and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |

@@ -168,6 +168,22 @@ const CASES = {
     'Filmkit can\'t register in "emacs". Tools: claude-code, codex. Register in every one that\'s installed with: filmkit agents',
     "filmkit agents",
   ],
+  brand_nothing: [
+    {},
+    "Say what to set for the brand: its name, logo, accent or ground. For example: filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
+    "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
+  ],
+  brand_option: [
+    { option: "--accent", value: "orange", expected: 'a hex colour such as "#ff5a1f"' },
+    'In filmkit brand, --accent "orange" should be a hex colour such as "#ff5a1f". For example: filmkit brand --accent \'#ff5a1f\'',
+    "filmkit brand --accent '#ff5a1f'",
+  ],
+  logo_missing: [
+    { file: "/s/acme.svg" },
+    "There's no logo at /s/acme.svg. Give the path to the logo, from this folder, as in: filmkit brand --logo brand/acme.svg",
+    "filmkit brand --logo brand/acme.svg",
+  ],
+  bad_logo: [{ file: "/s/acme.jpg" }, "/s/acme.jpg isn't an SVG or a PNG. Export the logo as an SVG, then: filmkit brand --logo logo.svg", "filmkit brand --logo logo.svg"],
   option_choice: [
     { command: "setup", option: "--ground", value: "grey", choices: ["dark", "light"] },
     'In filmkit setup, --ground is dark or light, not "grey". For example: --ground dark',

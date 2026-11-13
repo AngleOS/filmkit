@@ -31,14 +31,23 @@ export const FORMATS = Object.keys(SIZES);
  * @returns {Studio}
  */
 export function openStudio(dir) {
-  const root = dir ? resolve(dir) : findStudio(process.cwd());
+  const root = studioDir(dir);
   const file = join(root, "filmkit.json");
-  if (!root || !existsSync(file)) throw fail("no_studio", { dir: dir ? root : process.cwd(), walked: !dir });
   const config = readJson(file, "config_json");
   const problems = validate(config);
   if (problems.length) throw fail("config_key", { problems, schema: join(PACKAGE, "schema", "filmkit.schema.json") });
   const theme = loadTheme(root, config.theme);
   return { dir: root, name: config.name ?? basename(root), formats: config.formats ?? FORMATS, theme, renders: resolve(root, config.renders ?? "renders") };
+}
+
+/**
+ * The studio's directory, without opening it: `dir` when given, else the nearest with a filmkit.json.
+ * @param {string} [dir]
+ */
+export function studioDir(dir) {
+  const root = dir ? resolve(dir) : findStudio(process.cwd());
+  if (!root || !existsSync(join(root, "filmkit.json"))) throw fail("no_studio", { dir: dir ? root : process.cwd(), walked: !dir });
+  return root;
 }
 
 /** @param {string} from @returns {string} the directory, or "" when there's none */
