@@ -2,9 +2,11 @@
 // The filmkit CLI. Each command is a module in commands/; this finds it, parses its options and prints its result.
 // It never prompts (an agent can't answer), --json prints one result object on stdout, and the exit code says what
 // went wrong (kb/Interfaces.md): 1 a failed check, 2 a usage error, 3 a missing requirement, 4 a failed render.
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 import { parseArgs } from "node:util";
 import { FilmkitError, fail } from "../errors.js";
+import { PACKAGE } from "../studio.js";
 import { banner } from "./banner.js";
 
 /**
@@ -41,6 +43,10 @@ async function main() {
   const argv = process.argv.slice(2);
   const at = commandIndex(argv);
   const name = argv[at];
+  if (at < 0 && (argv.includes("--version") || argv.includes("-v"))) {
+    console.log(JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8")).version);
+    return 0;
+  }
   if (at < 0 || name === "help" || argv.includes("--help") || argv.includes("-h")) {
     console.log([banner(argv.includes("--json")), await help()].filter(Boolean).join("\n\n"));
     return at < 0 && !argv.includes("--help") && !argv.includes("-h") ? 2 : 0;
