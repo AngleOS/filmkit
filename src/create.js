@@ -4,6 +4,7 @@
 // CLAIMS.md, each placeholder row flagged ⚑, so a film can't be posted with a template's words.
 import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
+import { rootTag } from "./build/html.js";
 import { fail } from "./errors.js";
 import { HYPERFRAMES } from "./hyperframes.js";
 import { FORMATS, PACKAGE } from "./studio.js";
@@ -137,6 +138,19 @@ export function newFilm(studio, film, template) {
   const claims = join(studio.dir, "CLAIMS.md");
   appendFileSync(claims, `\n## ${film}\n\n${fill(readFileSync(join(from, "claims.md"), "utf8"), vars)}`);
   return { film, template, files: [...files, claims] };
+}
+
+/**
+ * A template as a film that's built but never written into films/, such as brand's still.
+ * @param {import("./studio.js").Studio} studio
+ * @param {string} film
+ * @param {string} template
+ * @returns {import("./studio.js").Film}
+ */
+export function templateFilm(studio, film, template) {
+  const dir = join(TEMPLATES, template);
+  const html = fill(readFileSync(join(dir, "index.html"), "utf8"), { name: studio.name, film }, inAttribute);
+  return { name: film, dir, html, root: rootTag(html).attrs };
 }
 
 /**

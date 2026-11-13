@@ -17,13 +17,23 @@
     return e;
   };
 
+  /** The display face at 10 px, as a canvas or document.fonts names it. */
+  const face = () => {
+    const css = getComputedStyle(document.documentElement);
+    return `${css.getPropertyValue("--title-weight")} 10px ${css.getPropertyValue("--font-display")}`;
+  };
+
   // The lockup's width in viewBox units: the mark, the gap and the name as the display face sets it.
   const units = () => {
-    const css = getComputedStyle(document.documentElement), ctx = /** @type {any} */ (document.createElement("canvas").getContext("2d"));
-    ctx.font = `${css.getPropertyValue("--title-weight")} 10px ${css.getPropertyValue("--font-display")}`;
-    ctx.letterSpacing = css.getPropertyValue("--title-tracking").trim() || "0px";
+    const ctx = /** @type {any} */ (document.createElement("canvas").getContext("2d"));
+    ctx.font = face();
+    ctx.letterSpacing = getComputedStyle(document.documentElement).getPropertyValue("--title-tracking").trim() || "0px";
     return GAP + ctx.measureText(w.KB.name).width;
   };
+
+  // A scene lays out before the theme's fonts load, and measured in the fallback face a long name is cut at the
+  // lockup's edge: the lockup's scenes build once the display face has loaded.
+  const ready = () => document.fonts.load(face(), w.KB.name);
 
   /** A copy of the studio's logo in the 12-unit square. @param {Element} parent @param {string} id */
   const logo = (parent, id) => {
@@ -66,5 +76,5 @@
     return { w: bw, h, left: R((w.AL.W - bw) / 2), top: R(cy - h / 2), markCx: R(6 * ppu), shift: R((u / 2 - 6) * ppu) };
   };
 
-  w.KB = { ...w.KB, lockup, lockupBox };
+  w.KB = { ...w.KB, lockup, lockupBox, ready };
 })();
