@@ -74,8 +74,37 @@ const CASES = {
     `npx ${HYPERFRAMES} browser ensure`,
   ],
   no_report: [{}, "HyperFrames gave no report. See what's missing with: filmkit doctor", "filmkit doctor"],
+  ...findings(),
+  seam: [
+    { film: "hook", format: "9x16", step: 0.9, limit: 0.4, end: 7.96 },
+    "9x16: the loop's last frame doesn't flow into frame 0 (a step of 0.9, over the limit of 0.4). See the seam with: filmkit snapshot hook 9x16 --at 7.96,0",
+    "filmkit snapshot hook 9x16 --at 7.96,0",
+  ],
   unknown_code: [{ code: "nope" }, 'There\'s no error or rule called "nope". See them all with: filmkit explain', "filmkit explain"],
 };
+
+/** The check findings: each is seen at a time in a format, and its fix is the snapshot that shows it. */
+function findings() {
+  const at = { film: "launch", format: "9x16", time: 12.4, label: '"Films are code" (#t)', other: '"Four frames" (#s)' };
+  const show = "filmkit snapshot launch 9x16 --at 12.4";
+  /** @type {Record<string, [Record<string, any>, string, string]>} */
+  const cases = {};
+  /** @param {string} code @param {Record<string, any>} params @param {string} said @param {string} [lead] */
+  const add = (code, params, said, lead = "See it with") => (cases[code] = [{ ...at, ...params }, `9x16 at 12.4 s: ${said} ${lead}: ${show}`, show]);
+  add("content_overlap", {}, '"Films are code" (#t) overlaps "Four frames" (#s).');
+  add("text_box_overflow", { other: "#box", by: " by 40 px" }, '"Films are code" (#t) runs out of #box by 40 px.');
+  add("canvas_overflow", { by: " by 12 px" }, '"Films are code" (#t) runs out of the frame by 12 px.');
+  add("container_overflow", { other: "#card" }, '"Films are code" (#t) spills out of #card, which cuts it off.');
+  add("clipped_text", {}, '"Films are code" (#t) is cut off by its own box.');
+  add("text_occluded", { other: "#window" }, '"Films are code" (#t) is covered by #window.');
+  add("contrast_aa_failure", { ratio: 2.1, required: 4.5, suggested: "rgb(140,140,140)" }, '"Films are code" (#t) is 2.1:1 against its ground, under WCAG AA\'s 4.5:1; rgb(140,140,140) would pass.');
+  add("line_unread", { seconds: 0.5, floor: 1.05 }, '"Films are code" (#t) is on screen 0.5 s, under the 1.05 s it needs to be read.', "Hold it longer (about 0.5 s + 0.3 s a word). See it with");
+  add("text_below_floor", { px: 18, floor: 28 }, '"Films are code" (#t) is 18 px, under the 28 px a phone can read.', "Set it to at least 28 px. See it with");
+  add("dead_stretch", { seconds: 4.2 }, "nothing on screen changes for 4.2 s.", "Start the next move within 3 s, or put data-hold on what holds still on purpose. See it with");
+  add("first_frame_empty", {}, "frame 0 shows only the ground, and it's the thumbnail on social feeds.", 'Have the title on screen at 0 s ("entrance": "none"). See it with');
+  cases.film_silent = [{ ...at, duration: 30 }, "9x16: the film runs 30 s with no sound. Give it sound from its motion in: films/launch/sound.json", "films/launch/sound.json"];
+  return cases;
+}
 
 test("every catalogue entry is tested here", () => {
   assert.deepEqual(Object.keys(CASES).sort(), Object.keys(CATALOGUE).sort());

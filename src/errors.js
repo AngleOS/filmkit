@@ -40,6 +40,15 @@ const install = (what, platform = process.platform) => INSTALL[what][/** @type {
 /** @param {string[]} names */
 const list = (names) => (names.length ? names.join(", ") : "none yet");
 
+// A check finding's parameters: the film, the format and the time it was seen at, the element by its text (`label`)
+// and what it collides with (`other`).
+/** @param {Params} p */
+const when = ({ format, time }) => `${format} at ${time} s`;
+/** @param {Params} p */
+export const snapshot = ({ film, format, time }) => `filmkit snapshot ${film} ${format} --at ${time}`;
+/** @param {string} lead @returns {(p: Params) => [string, string]} */
+const showing = (lead) => (p) => [lead, snapshot(p)];
+
 /** @type {Record<string, Entry>} */
 export const CATALOGUE = {
   unknown_command: {
@@ -201,6 +210,103 @@ export const CATALOGUE = {
     why: "check runs HyperFrames on each format and reads its report. With none, HyperFrames itself didn't run: " +
       "most often it couldn't be fetched (the first run needs the network) or Chrome is missing. `filmkit doctor` " +
       "says which.",
+  },
+  content_overlap: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} overlaps ${p.other}.`,
+    fix: showing("See it with"),
+    why: "Two text blocks on top of each other can't be read, in any format. Each format is laid out for its own " +
+      "frame, so text that sits apart in 16x9 can meet in 9x16 or 1x1. Give each block its own zone with " +
+      "AL.pick({ L, S, V }), or put data-layout-allow-overlap on the text when the layering is meant.",
+  },
+  text_box_overflow: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} runs out of ${p.other}${p.by}.`,
+    fix: showing("See it with"),
+    why: "Text that's wider than its box spills over what's next to it, or out of the frame. It happens most in the " +
+      "narrow formats (9x16, 1x1, 4x5), where the same line has less room: write the line breaks into the copy, " +
+      "shorten the line, or let the box grow.",
+  },
+  canvas_overflow: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} runs out of the frame${p.by}.`,
+    fix: showing("See it with"),
+    why: "Words outside the frame aren't in the film. Keep words and the key action inside the format's safe zone " +
+      "(AL.safe): 5 % of 16x9, 64 px in 1x1 and 4x5, and clear of the feed's header, buttons and caption block in " +
+      "9x16. Mark an entrance or exit that travels off the frame with data-layout-allow-overflow.",
+  },
+  container_overflow: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} spills out of ${p.other}, which cuts it off.`,
+    fix: showing("See it with"),
+    why: "A box with overflow hidden cuts off whatever leaves it, so the part outside never shows. Size the child " +
+      "to fit, or the box to hold it.",
+  },
+  clipped_text: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is cut off by its own box.`,
+    fix: showing("See it with"),
+    why: "Text taller or wider than its own box, with overflow hidden, loses letters. Let the box fit the text, or " +
+      "set the text smaller.",
+  },
+  text_occluded: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is covered by ${p.other}.`,
+    fix: showing("See it with"),
+    why: "Text under something opaque can't be read. Later hosts paint over earlier ones, so a scene over another " +
+      "covers its words. Move one, end the lower one first, or put data-layout-allow-occlusion on the element " +
+      "that's meant to cover the text.",
+  },
+  contrast_aa_failure: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is ${p.ratio}:1 against its ground, under WCAG AA's ${p.required}:1${p.suggested ? `; ${p.suggested} would pass` : ""}.`,
+    fix: showing("See it with"),
+    why: "Text must stand out from its ground to be read on a phone in daylight: WCAG AA asks 4.5:1, or 3:1 for " +
+      "large text. Use the theme's text colour for its ground (each ground has one), and keep the accent for one " +
+      "word on a ground it reads on.",
+  },
+  line_unread: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is on screen ${p.seconds} s, under the ${p.floor} s it needs to be read.`,
+    fix: showing("Hold it longer (about 0.5 s + 0.3 s a word). See it with"),
+    why: "A line has to stay long enough to be read: 0.4 s for one or two words, otherwise about 0.5 s and 0.3 s a " +
+      "word, and the film's last line 2 s. Hold the card 1.15–1.5 s after its last word lands.",
+  },
+  text_below_floor: {
+    exit: 1,
+    message: (p) => `${when(p)}: ${p.label} is ${p.px} px, under the ${p.floor} px a phone can read.`,
+    fix: (p) => [`Set it to at least ${p.floor} px. See it with`, snapshot(p)],
+    why: "The type floor is 28 px at 1080 (2.6 % of the frame's short side), the smallest a phone can read. " +
+      "Statements are far bigger: 110–140 px in 9x16. Text that's texture, not reading, takes data-layout-ignore.",
+  },
+  dead_stretch: {
+    exit: 1,
+    message: (p) => `${when(p)}: nothing on screen changes for ${p.seconds} s.`,
+    fix: showing("Start the next move within 3 s, or put data-hold on what holds still on purpose. See it with"),
+    why: "More than 3 s where nothing moves reads as a frozen film, and viewers scroll on. Give the hold a real " +
+      "next action; an end card's last 3 s are exempt.",
+  },
+  first_frame_empty: {
+    exit: 1,
+    message: (p) => `${when(p)}: frame 0 shows only the ground, and it's the thumbnail on social feeds.`,
+    fix: showing("Have the title on screen at 0 s (\"entrance\": \"none\"). See it with"),
+    why: "Feeds and players show a film's first frame before it plays, so frame 0 is its poster. Start with the " +
+      "hook line already on screen.",
+  },
+  film_silent: {
+    exit: 1,
+    message: ({ format, duration }) => `${format}: the film runs ${duration} s with no sound.`,
+    fix: ({ film }) => ["Give it sound from its motion in", `films/${film}/sound.json`],
+    why: "A film over 15 s plays better with sound. Filmkit makes it from the motion in sound.json: cues on what " +
+      "moves over a tonal pad, mixed to −19 LUFS. A hook loop is silent on purpose.",
+  },
+  seam: {
+    exit: 1,
+    message: ({ format, step, limit }) => `${format}: the loop's last frame doesn't flow into frame 0 (a step of ${step}, over the limit of ${limit}).`,
+    fix: ({ film, format, end }) => ["See the seam with", `filmkit snapshot ${film} ${format} --at ${end},0`],
+    why: "A loop plays again from frame 0 as soon as it ends, so the step from its last frame to frame 0 may be at " +
+      "most 1.5 × the median step at its ends (and at least 0.4). Return to frame 0 through an action and hold " +
+      "still across the seam, or keep moving at one speed.",
   },
   unknown_code: {
     exit: 2,
