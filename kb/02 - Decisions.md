@@ -74,7 +74,7 @@ The foundation (kb, AGENTS.md, README, LICENSE) was written by the orchestrating
 
 ## D-007 · 2026-11-12 · Angle Filmkit: an Angle-branded product, with Angle's look as the default
 **Decision (owner, 2026-11-12):** "make this an angle branded product though. use our logo branding etc wherever
-appropriate and cool." The repo stays private for now; the owner adds collaborators.
+appropriate and cool." The repo stayed private until D-010.
 
 - **Name.** The product is **Angle Filmkit**. The package and CLI stay `filmkit`, and the MCP server is
   `filmkit` ("Angle Filmkit").
@@ -181,3 +181,16 @@ edges.
 
 ## Related
 - [[projects/filmkit/00 - Home]] · [[projects/filmkit/Design]] · [[projects/filmkit/Origins]]
+
+## D-010 · 2026-11-13 · The repo is public, closed to outside interaction
+
+**Decision:** AngleOS/filmkit went public on 2026-11-13, history and issues as they were, after a leak review (no
+secrets in 380 commits, every PR ref, or 463 issue and PR texts; what's exposed is internal detail: host names, session
+ids, the owner's commit emails). Only the owner pushes or opens PRs, so the repo is closed to everyone else:
+- an org-wide interaction limit, `collaborators_only`, stops outsiders opening issues or PRs or commenting. That also
+  keeps agentd's intake (issue forms that label `agent`, `/agent` and review relays, triage, the Expert) to us,
+  since agentd doesn't check authors. **It expires 2027-05-13**; renew it (`gh api -X PUT orgs/AngleOS/interaction-limits
+  -f limit=collaborators_only -f expiry=six_months`) or gate agentd on `author_association` before then;
+- fork PR workflows need approval from every outside contributor, and the default workflow token is read-only;
+- CI stays on the self-hosted runners, so the `Default` runner group must allow public repositories.
+**Why:** "peace of mind, not perfect": no secrets leak, and nobody outside can drive the fleet or the runners.
