@@ -22,7 +22,7 @@ it's posted.
 | 1 | 0.0–2.8 | `title` on ink, on from frame 0 (entrance none): the poster a feed shows | The problem, in one *line.* | the problem the audience already feels; ⚑ placeholder |
 | 2 | 2.8–7.2 | `bars`: three bars to scale, the last in the accent, under a `title` at the top | Most teams ship X a *week.* | ⚑ example data: a comparison, with its source line |
 | 3 | 7.2–11.0 | `counter` rolling to the number that matters | 4× · What changes when … | ⚑ example data: the one number, with its source |
-| 4 | 11.0–16.2 | `cards`: three reasons, under a `title` at the top | Faster. · Cheaper. · Yours. | ⚑ placeholder: each reason with its one-line proof |
+| 4 | 11.0–16.2 | `cards`: three reasons, under a `title` at the top | Three reasons to *switch.* · Faster. · Cheaper. · Yours. | ⚑ placeholder: each reason with its one-line proof |
 | 5 | 16.2–20.0 | `title` (ink) on ink | What {{name}} does about *it.* | ⚑ placeholder |
 | 6 | 20.0–27.0 | `endcard`: the promise as its claim, the mark, the status line and the URL | {{name}}, in one *line.* · Now available · example.com | ⚑ placeholder |
 
