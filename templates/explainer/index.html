@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- {{film}}: an explainer, from filmkit's explainer template. The problem, a comparison in bars, the number that
+         matters, three reasons, what the brand does about it, then the end card with the promise. Every number here is
+         example data: brief.md says what to change first. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="27" data-width="1920" data-height="1080">
+      <div id="problem" data-composition-id="problem" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="2.8" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"The problem,\nin one *line.*","entrance":"none"}'></div>
+      <div id="compare" data-composition-id="compare" data-composition-src="kit/scenes/bars.html" data-start="2.8" data-duration="4.4" data-track-index="1" data-track-kind="graphics" data-variable-values='{"data":"2024: 2\n2025: 3\n2026: 5","highlight":"2026","axis":"Example data · releases a week","source":"Example data · Replace with your source"}'></div>
+      <div id="compare-title" data-composition-id="compare-title" data-composition-src="kit/scenes/title.html" data-start="2.8" data-duration="4.4" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Most teams ship X a *week.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="number" data-composition-id="number" data-composition-src="kit/scenes/counter.html" data-start="7.2" data-duration="3.8" data-track-index="1" data-track-kind="graphics" data-variable-values='{"value":4,"from":1,"suffix":"×","lead":"What changes when …","source":"Example data · Replace with your source"}'></div>
+      <div id="reasons" data-composition-id="reasons" data-composition-src="kit/scenes/cards.html" data-start="11" data-duration="5.2" data-track-index="1" data-track-kind="graphics" data-variable-values='{"cards":"zap | Faster. | One line on what makes it faster\ndollar-sign | Cheaper. | One line on what it saves\nuser | Yours. | One line on what stays yours","source":"Example data · Replace with your source"}'></div>
+      <div id="reasons-title" data-composition-id="reasons-title" data-composition-src="kit/scenes/title.html" data-start="11" data-duration="5.2" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Three reasons to *switch.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="answer" data-composition-id="answer" data-composition-src="kit/scenes/title.html" data-start="16.2" data-duration="3.8" data-track-index="1" data-track-kind="graphics" data-variable-values='{"text":"What {{name}} does\nabout *it.*","entrance":"ink"}'></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="kit/scenes/endcard.html" data-start="20" data-duration="7" data-track-index="1" data-track-kind="graphics" data-variable-values='{"claim":"{{name}}, in one *line.*","line":"Now available","cta":"example.com"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="27" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.0-2.7 The problem, in one line.\n3.1-7.1 Most teams ship X a week.\n7.5-10.9 What changes when …: four times.\n11.3-16.1 Three reasons to switch: faster, cheaper and yours.\n16.5-19.9 What {{name}} does about it.\n20.3-23.0 {{name}}, in one line."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/chart.js"></script>
+    <script src="kit/icons.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

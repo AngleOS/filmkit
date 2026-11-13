@@ -1,0 +1,27 @@
+{
+  "key": 73.42,
+  "bed": -12,
+  "cues": [
+    { "id": "wi-open", "kind": "air", "scene": "window", "at": 0.05, "dur": 0.6, "x": 960, "y": 600, "gain": -16 },
+    { "id": "as-type", "kind": "type", "scene": "ask", "at": 0.4, "n": 15, "every": 0.142, "jitter": 0.35, "x": 960, "y": 540, "w": 60, "h": 40, "gain": -14 },
+    { "id": "as-send", "kind": "click", "scene": "ask", "at": 3.08, "x": 1500, "y": 540, "w": 64, "h": 64, "gain": -10 },
+    { "id": "an-user", "kind": "pop", "scene": "answer", "at": 0.1, "x": 1400, "y": 300, "w": 600, "h": 80, "gain": -14 },
+    { "id": "an-reply", "kind": "type", "scene": "answer", "at": 0.7, "n": 5, "every": 0.16, "x": 900, "y": 500, "w": 60, "h": 40, "gain": -20 },
+    { "id": "ft-bar", "kind": "air", "scene": "feature", "at": 0.1, "dur": 0.4, "x": 300, "y": 900, "gain": -16 },
+    { "id": "ft-name", "kind": "pop", "scene": "feature", "at": 0.2, "x": 400, "y": 880, "w": 400, "h": 60, "gain": -12 },
+    { "id": "ft-out", "kind": "air", "scene": "feature", "at": 3.2, "dur": 0.2, "x": 400, "y": 880, "gain": -18 },
+    { "id": "ec-lines", "kind": "air", "scene": "endcard", "at": 0.34, "dur": 0.7, "x": 1500, "y": 800, "gain": -12 },
+    { "id": "ec-rise", "kind": "riser", "scene": "endcard", "at": 0.25, "dur": 0.75, "gain": -9 },
+    { "id": "ec-hit", "kind": "impact", "scene": "endcard", "at": 1.0, "x": 960, "y": 520, "w": 380, "h": 90, "gain": -2 },
+    { "id": "ec-sting", "kind": "sting", "scene": "endcard", "at": 1.0, "gain": -8 },
+    { "id": "ec-word", "kind": "air", "scene": "endcard", "at": 1.45, "dur": 0.45, "x": 1100, "y": 520, "gain": -12 }
+  ],
+  "chords": [
+    { "scene": "window", "at": 0, "until": 3.5, "notes": [59, 66, 69, 74, 76], "level": -8, "cutoff": 2800, "attack": 0.9 },
+    { "scene": "ask", "at": 0, "until": 4.5, "notes": [57, 64, 69, 71, 76], "level": -9, "cutoff": 2800, "attack": 0.6 },
+    { "scene": "answer", "at": 0, "until": 7, "notes": [55, 62, 69, 71, 78], "sub": 43, "level": -7, "cutoff": 3000, "attack": 0.6 },
+    { "scene": "endcard", "at": 1.0, "until": 6.5, "notes": [62, 66, 69, 74, 76, 81], "sub": 50, "level": -5, "cutoff": 3600, "attack": 0.08 }
+  ],
+  "blooms": [{ "scene": "endcard", "at": 1.0, "db": 9 }],
+  "pockets": [{ "scene": "endcard", "at": 0, "until": 1.0 }]
+}

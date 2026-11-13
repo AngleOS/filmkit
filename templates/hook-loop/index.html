@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- {{film}}: a 9:16 hook loop, from filmkit's hook-loop template. It plays again from frame 0 as soon as it ends, so
+         `check` runs the seam gate. Frame 0 is the poster: the promise, already on screen. A grid arrives under it and
+         lights 6 of 10, then clears, and the last second holds the poster still across the seam. Silent: feeds play
+         hooks muted, and a sound would restart on every pass. The beats and what to change are in brief.md. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1080" data-height="1920" data-formats="9x16" data-loop="true">
+      <div id="hook" data-hold data-composition-id="hook" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="8" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"{{name}},\nin one *line.*","entrance":"none","place":"head","ground":"none"}'></div>
+      <div id="count" data-composition-id="count" data-composition-src="kit/scenes/grid.html" data-start="0.4" data-duration="6.6" data-track-index="1" data-track-kind="graphics" data-variable-values='{"total":10,"lit":6,"label":"6 of 10","sub":"what the number counts","source":"Example data · Replace with your source","ground":"none","out":6.1}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="8" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.0-7.8 {{name}}, in one line. 6 of 10."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/chart.js"></script>
+    <script src="kit/icons.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
