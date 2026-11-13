@@ -98,6 +98,104 @@
     return count;
   };
 
+  // Deterministic noise in 0..1 from an integer: no Math.random in a frame, so every render lays out alike.
+  const noise = (i) => {
+    let s = (i * 2654435761 + 1013904223) >>> 0;
+    s ^= s >>> 15;
+    s = Math.imul(s, 2246822519) >>> 0;
+    s ^= s >>> 13;
+    return (s >>> 0) / 4294967296;
+  };
+
+  // n mesh nodes over `width` × `height`: a staggered grid of about square cells, at most `most` px across and 1.8 of
+  // a node apart, each node jittered in its cell but kept clear of its neighbours and a node's radius in from the
+  // edges. The grid's spare cells are left out at random, so it reads as a network, not a lattice.
+  const scatter = (n, width, height, { most = Infinity } = {}) => {
+    const cols = Math.max(1, Math.min(n, R(Math.sqrt((n * width) / height)))), rows = Math.ceil(n / cols);
+    const size = Math.floor(Math.min(most, width / cols / 1.8, height / rows / 1.8));
+    const stepX = cols > 1 ? (width - size) / (cols - 0.5) : 0, stepY = rows > 1 ? (height - size) / (rows - 1) : 0;
+    const jitter = Math.max(0, Math.min(stepX || Infinity, stepY || Infinity) - 1.6 * size) / 2;
+    const spare = new Set(Array.from({ length: cols * rows }, (_, i) => i).sort((a, b) => noise(a + 500) - noise(b + 500)).slice(0, cols * rows - n));
+    const nodes = [];
+    for (let i = 0; i < cols * rows; i++) {
+      if (spare.has(i)) continue;
+      const r = Math.floor(i / cols), c = i % cols;
+      const x = cols > 1 ? size / 2 + (c + 0.5 * (r % 2)) * stepX : width / 2;
+      const y = rows > 1 ? size / 2 + r * stepY : height / 2;
+      const keep = (z, len) => R(Math.max(size / 2, Math.min(len - size / 2, z)));
+      nodes.push({ x: keep(x + (noise(i) - 0.5) * 2 * jitter, width), y: keep(y + (noise(i + 97) - 0.5) * 2 * jitter, height) });
+    }
+    return { size, nodes };
+  };
+
+  // How far p is from the segment a–b.
+  const off = (p, a, b) => {
+    const dx = b.x - a.x, dy = b.y - a.y, t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / (dx * dx + dy * dy || 1)));
+    return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
+  };
+  // A mesh's links, [i, j] with i < j, once each: a spanning tree, so a route joins any two nodes, and each node to
+  // its `near` nearest, unless that link would pass within `clear` px of another node's centre (through its ring). The
+  // tree's own links clear the nodes when they sit more than 1.16 × `clear` apart (scatter's do): a node that near a
+  // link is nearer one of its ends, so the tree takes that shorter link instead.
+  const links = (nodes, near = 3, clear = 0) => {
+    const dist = (i, j) => Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
+    const seen = new Set(), out = [];
+    const add = (i, j) => {
+      const key = Math.min(i, j) + "-" + Math.max(i, j);
+      if (seen.has(key)) return;
+      seen.add(key);
+      out.push([Math.min(i, j), Math.max(i, j)]);
+    };
+    const tree = new Set([0]);
+    while (tree.size < nodes.length) {
+      let best = [Infinity, 0, 0];
+      for (const i of tree) nodes.forEach((_, j) => !tree.has(j) && dist(i, j) < best[0] && (best = [dist(i, j), i, j]));
+      add(best[1], best[2]);
+      tree.add(best[2]);
+    }
+    const through = (i, j) => nodes.some((p, k) => k !== i && k !== j && off(p, nodes[i], nodes[j]) < clear);
+    nodes.forEach((_, i) => nodes.map((_, j) => j).filter((j) => j !== i).sort((a, b) => dist(i, a) - dist(i, b)).slice(0, near).forEach((j) => through(i, j) || add(i, j)));
+    return out;
+  };
+
+  // The nodes on the shortest way from `from` to `to` along the links (Dijkstra), both ends included.
+  const route = (nodes, edges, from, to) => {
+    const dist = nodes.map(() => Infinity), prev = nodes.map(() => -1), done = new Set();
+    dist[from] = 0;
+    while (done.size < nodes.length) {
+      let at = -1;
+      dist.forEach((d, i) => !done.has(i) && (at < 0 || d < dist[at]) && (at = i));
+      if (at === to || dist[at] === Infinity) break;
+      done.add(at);
+      for (const [i, j] of edges) {
+        const next = i === at ? j : j === at ? i : -1;
+        const d = next < 0 ? Infinity : dist[at] + Math.hypot(nodes[at].x - nodes[next].x, nodes[at].y - nodes[next].y);
+        if (d < dist[next]) [dist[next], prev[next]] = [d, at];
+      }
+    }
+    const path = [to];
+    while (path[0] !== from && prev[path[0]] >= 0) path.unshift(prev[path[0]]);
+    return path;
+  };
+
+  // A pulse along a route in `dur` s at an even speed: each stop's point and the time it gets there.
+  const legs = (nodes, path, dur) => {
+    const at = [0];
+    for (let k = 1; k < path.length; k++) at.push(at[k - 1] + Math.hypot(nodes[path[k]].x - nodes[path[k - 1]].x, nodes[path[k]].y - nodes[path[k - 1]].y));
+    return path.map((i, k) => ({ x: nodes[i].x, y: nodes[i].y, t: at.at(-1) ? (dur * at[k]) / at.at(-1) : 0 }));
+  };
+
+  // A link from a to b, stopping `by` px short of each, so it meets a node's ring rather than crossing it.
+  const trim = (a, b, by) => {
+    const len = Math.hypot(b.x - a.x, b.y - a.y) || 1, dx = ((b.x - a.x) / len) * by, dy = ((b.y - a.y) / len) * by;
+    return { x1: R(a.x + dx), y1: R(a.y + dy), x2: R(b.x - dx), y2: R(b.y - dy) };
+  };
+
+  // Where a value sits on a meter's scale from lo to hi, as 0..1.
+  const share = (value, lo, hi) => (hi === lo ? 0 : Math.min(1, Math.max(0, (value - lo) / (hi - lo))));
+  // A gauge's arc: a half circle centred on cx, cy, from its left end over the top to its right.
+  const arc = (cx, cy, r) => `M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`;
+
   // A label `h` tall at `top` that a line at `y` would strike through moves to sit on the line instead.
   const clear = (top, h, y) => (y > top && y < top + h ? y - h : top);
 
@@ -123,5 +221,5 @@
     return t + dur;
   };
 
-  window.KC = { format, rows, fields, top, lengths, bands, grid, span, ticks, spread, textWidth, fit, lines, clear, delta, steps, roll };
+  window.KC = { format, rows, fields, top, lengths, bands, grid, span, ticks, spread, textWidth, fit, lines, clear, delta, steps, roll, noise, scatter, links, route, legs, trim, share, arc };
 })();
