@@ -1,0 +1,86 @@
+<template>
+  <!-- One master, four frames: a 16:9 frame with the launch film's title splits into 1:1, 4:5 and 9:16, and the title
+       re-lays itself in each (its size, wrap and place from that frame's own layout), never cropped. Frames to scale
+       with each other, on the stage under the title at the top. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .fo-frame { position: absolute; border: 3px solid var(--fk-border); border-radius: 12px; background: var(--ink); overflow: hidden; }
+    .fo-title { position: absolute; color: var(--foreground); text-wrap: balance; }
+    .fo-label { position: absolute; font: 500 28px var(--font-mono); color: var(--muted-foreground); text-align: center; }
+  </style>
+  <div id="root" data-composition-id="four">
+    <div class="fo-frame"><div class="fo-title display"></div></div>
+    <div class="fo-frame"><div class="fo-title display"></div></div>
+    <div class="fo-frame"><div class="fo-title display"></div></div>
+    <div class="fo-frame"><div class="fo-title display"></div></div>
+    <div class="fo-label"><span>16:9</span></div>
+    <div class="fo-label"><span>1:1</span></div>
+    <div class="fo-label"><span>4:5</span></div>
+    <div class="fo-label"><span>9:16</span></div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const { stage, pick } = AL;
+      // The master on top, so the copies come out from under it.
+      const frames = [...document.querySelectorAll(".fo-frame")].reverse(), labels = document.querySelectorAll(".fo-label");
+      // Each frame's size, and its title's place as fractions of it: low and left in 16:9, centred in the square ones,
+      // high in 9:16 clear of the feed's buttons; sizes in the frame's own pixels, as the kit's statements set them.
+      const layouts = [
+        { w: 1920, h: 1080, x: 0.06, y: 0.56, width: 0.6, size: 120, align: "left" },
+        { w: 1080, h: 1080, x: 0.08, y: 0.34, width: 0.84, size: 96, align: "center" },
+        { w: 1080, h: 1350, x: 0.08, y: 0.36, width: 0.84, size: 100, align: "center" },
+        { w: 1080, h: 1920, x: 0.06, y: 0.34, width: 0.78, size: 130, align: "center" },
+      ];
+      // One row of four, or two of two (16:9 and 1:1 over 4:5 and 9:16), whichever draws the frames larger. Each row
+      // stands on its own baseline, over its labels.
+      const gap = pick({ L: 48, S: 28, V: 24 }), label = 56;
+      const fit = (/** @type {number[][]} */ rows) => {
+        const across = Math.min(...rows.map((r) => (stage.width - (r.length - 1) * gap) / r.reduce((a, i) => a + layouts[i].w, 0)));
+        const tall = rows.reduce((a, r) => a + Math.max(...r.map((i) => layouts[i].h)), 0);
+        return { rows, u: Math.min(across, (stage.height - rows.length * label - (rows.length - 1) * gap) / tall) };
+      };
+      const { rows, u } = [fit([[0, 1, 2, 3]]), fit([[0, 1], [2, 3]])].sort((a, b) => b.u - a.u)[0];
+      const slots = [], bases = [];
+      let y = stage.top + (stage.height - rows.reduce((a, r) => a + Math.max(...r.map((i) => layouts[i].h)) * u + label, 0) - (rows.length - 1) * gap) / 2;
+      for (const row of rows) {
+        const base = y + Math.max(...row.map((i) => layouts[i].h)) * u;
+        let x = stage.left + (stage.width - row.reduce((a, i) => a + layouts[i].w * u, 0) - (row.length - 1) * gap) / 2;
+        for (const i of row) {
+          slots[i] = { left: x, top: base - layouts[i].h * u, width: layouts[i].w * u, height: layouts[i].h * u };
+          bases[i] = base;
+          x += layouts[i].w * u + gap;
+        }
+        y = base + label + gap;
+      }
+      /** @param {typeof layouts[0]} l @param {{ width: number, height: number }} s */
+      const titleIn = (l, s) => ({ left: s.width * l.x, top: s.height * l.y, width: s.width * l.width, fontSize: Math.max(28, Math.round(l.size * u)), textAlign: l.align });
+      // The master starts centred, at its 16:9 slot's size.
+      const master = { ...slots[0], left: stage.left + (stage.width - slots[0].width) / 2 };
+
+      frames.forEach((frame, i) => {
+        const title = frame.querySelector(".fo-title");
+        title.innerHTML = KM.wordSpans("Launch day is *Tuesday.*");
+        gsap.set(frame, master);
+        gsap.set(title, titleIn(layouts[0], master));
+        if (i > 0) gsap.set([frame, title], { opacity: 0 });
+      });
+      labels.forEach((el, i) => gsap.set(el, { left: slots[i].left - 40, width: slots[i].width + 80, top: bases[i] + 16 }));
+
+      KM.arrive(tl, frames[0], 0.15);
+      // The split: the copies appear under the master and move out to their slots as their titles re-lay.
+      tl.set(frames.slice(1), { opacity: 1 }, 1.3);
+      frames.forEach((frame, i) => {
+        tl.to(frame, { ...slots[i], duration: 0.7, ease: "expo.inOut" }, 1.3 + 0.08 * i);
+        tl.to(frame.querySelector(".fo-title"), { ...titleIn(layouts[i], slots[i]), duration: 0.7, ease: "expo.inOut" }, 1.3 + 0.08 * i);
+      });
+      // The copies' titles show once the frames have parted, so no two titles cross on the way.
+      tl.to(frames.slice(1).map((f) => f.querySelector(".fo-title")), { opacity: 1, duration: 0.3, ease: "none" }, 1.85);
+      tl.fromTo(labels, { opacity: 0, y: 12 }, { opacity: 1, y: 0, duration: 0.5, stagger: 0.08, ease: "expo.out" }, 2.1);
+      // Each frame lights in turn, as its format is checked. GSAP can't tween to a var(), so the accent is read here.
+      const accent = getComputedStyle(frames[0]).getPropertyValue("--accent").trim();
+      tl.to(frames, { borderColor: accent, duration: 0.2, stagger: 0.15, ease: "none" }, 4);
+      window.__timelines["four"] = tl;
+    })();
+  </script>
+</template>
