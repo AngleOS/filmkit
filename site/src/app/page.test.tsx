@@ -61,5 +61,6 @@ describe("the one page", () => {
     expect(
       results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`),
     ).toEqual([]);
-  });
+    // axe over the whole page takes about 5 s in jsdom on a busy runner, right at vitest's default timeout.
+  }, 20_000);
 });
