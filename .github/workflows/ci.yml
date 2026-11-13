@@ -76,8 +76,8 @@ jobs:
       - run: npm run typecheck
 
   # Every example film checked in each of its formats (HyperFrames' lint, runtime, layout, motion and contrast passes
-  # in Chrome), then a two-second film rendered end to end in a temp directory, not uploaded. X64: HyperFrames
-  # downloads Chrome for Testing, which has no Linux ARM64 build.
+  # in Chrome), and every template as `new` makes it in a fresh studio, then a two-second film rendered end to end in a
+  # temp directory, not uploaded. X64: HyperFrames downloads Chrome for Testing, which has no Linux ARM64 build.
   films:
     needs: runners
     runs-on: [self-hosted, '${{ needs.runners.outputs.pool }}', Linux, X64]
@@ -98,6 +98,17 @@ jobs:
           failed=0
           for film in examples/studio/films/*/; do
             node src/cli/index.js check "$(basename "$film")" --studio examples/studio || failed=1
+          done
+          exit "$failed"
+      - name: check every template
+        run: |
+          studio=$(mktemp -d)/acme
+          node src/cli/index.js init "$studio" --name Acme
+          failed=0
+          for template in templates/*/index.html; do
+            name=$(basename "$(dirname "$template")")
+            { node src/cli/index.js new "$name" --template "$name" --studio "$studio" &&
+              node src/cli/index.js check "$name" --studio "$studio"; } || failed=1
           done
           exit "$failed"
       - name: render two seconds

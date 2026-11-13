@@ -2,12 +2,13 @@
 type: design
 status: active
 tags: [filmkit, templates]
-updated: 2026-11-12
+updated: 2026-11-13
 issues: [AngleOS/filmkit#8]
 ---
 # Templates: the films `filmkit new --template` starts from
 
-A template is a complete film that passes `check` in its formats as generated. It contains:
+A template is a complete film that passes `check` in its formats as generated: CI's `films` job makes each one with
+`new` in a fresh studio from `init` and checks it. It contains:
 - `brief.md`: the brief template with the beats already filled in for this kind of film;
 - `index.html`: kit scenes, with placeholder copy written as real sentences, never "Lorem ipsum";
 - `sound.json` for a film over 15 s (`explainer` and `product-demo`), scored to its scenes' motion; a hook loop and a
