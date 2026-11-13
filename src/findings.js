@@ -3,6 +3,7 @@
 // have catalogue entries; any other code keeps HyperFrames' own message and fix hint, which say it best.
 import { isAbsolute, relative } from "node:path";
 import { CATALOGUE, describe, snapshot } from "./errors.js";
+import { safeBox } from "./safe.js";
 
 /**
  * @typedef {{ code: string, message: string, selector?: string, time?: number, fix?: string }} Finding
@@ -13,6 +14,8 @@ import { CATALOGUE, describe, snapshot } from "./errors.js";
 
 /** The selector HyperFrames gives a finding about the whole film rather than one element. */
 const WHOLE = "[data-composition-id]";
+/** HyperFrames' codes for Filmkit's own rules: check gives it the band under the safe box as its caption zone. */
+const OWN = /** @type {Record<string, string>} */ ({ caption_zone_collision: "safe_zone" });
 /** Labels longer than this are cut at a word, so a paragraph doesn't fill the line. */
 const LONG = 40;
 
@@ -43,9 +46,10 @@ export function translate(raws, where) {
     const time = typeof raw.time === "number" ? round(raw.time) : undefined;
     const selector = raw.selector && raw.selector !== WHOLE ? raw.selector : undefined;
     const label = selector && name(selector);
-    const base = { code: raw.code, ...(selector && { selector }), ...(time !== undefined && { time }) };
-    if (CATALOGUE[raw.code] && time !== undefined) {
-      const { message, fix } = describe(raw.code, { ...where, ...params(raw), time, label, other: name(raw.containerSelector) });
+    const code = OWN[raw.code] ?? raw.code;
+    const base = { code, ...(selector && { selector }), ...(time !== undefined && { time }) };
+    if (CATALOGUE[code] && time !== undefined) {
+      const { message, fix } = describe(code, { ...where, ...params(raw, where), time, label, other: name(raw.containerSelector) });
       return { ...base, message, fix };
     }
     return { ...base, ...ownWords(raw, where, time, label) };
@@ -55,8 +59,9 @@ export function translate(raws, where) {
 /**
  * What a catalogue entry needs from the finding beyond its place and time.
  * @param {Raw} raw
+ * @param {Where} where
  */
-function params(raw) {
+function params(raw, where) {
   const over = Math.max(0, ...Object.values(raw.overflow ?? {}));
   return {
     by: over ? ` by ${Math.round(over)} px` : "",
@@ -67,6 +72,7 @@ function params(raw) {
     floor: raw.floorPx ?? round(raw.floorSeconds ?? 0),
     px: raw.fontPx,
     covered: covered(raw),
+    band: raw.code === "caption_zone_collision" ? safeBox(where.format).bottom : undefined,
   };
 }
 

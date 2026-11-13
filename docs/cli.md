@@ -24,7 +24,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 |---|---|
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
-| `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
+| `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, with the band under the safe box, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
 | `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
@@ -108,7 +108,7 @@ error in `filmkit.json`, a `theme.json` or a film's `sound.json` points at its l
 snapshot that shows it:
 `✗ content_overlap: 9x16 at 12.4 s: "Films are code" (#t) overlaps "Four frames" (#s). See it with: filmkit snapshot launch 9x16 --at 12.4`.
 The rules a film often breaks (overlap, overflow, occlusion, contrast, the type floor, unread lines, dead stretches, an
-empty first frame, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
+empty first frame, the safe box, no sound, the seam) are in the catalogue. Any other HyperFrames rule keeps HyperFrames' message and
 fix hint, at the film's own file and line. `filmkit explain` answers for those from the pinned HyperFrames' skill
 references once npx has fetched it, or else says which kind of check it is.
 
@@ -118,6 +118,12 @@ ground gets (on `paper`, `text.onPaper`, `text.mutedOnPaper` and `accentOn.paper
 passes:
 `⚠ theme_contrast: The theme's accent #e3ef26 on the paper ground (#ffffff) is 1.26:1, under WCAG AA's 3:1 for display type. Set accentOn.paper in filmkit.json's "theme" to a colour that passes, such as: #949b19`.
 The rendered frames' contrast (`contrast_aa_failure`) fails the check: that's the text really on screen, at its size.
+
+**The safe box.** Words and the key action stay in `AL.safe`, clear of a feed's header, caption and buttons. Check
+samples each scene two thirds in, once its words have arrived, and warns of text in the band under the safe box, where
+the feed hides the most (HyperFrames measures one band):
+`⚠ safe_zone: 9x16 at 1.67 s: "Shop now" (#cta) is under the safe box, in the bottom 420 px, where a feed's caption and buttons cover it. Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with: filmkit snapshot launch 9x16 --at 1.67`.
+The top and sides are left to the review of the frames.
 
 HyperFrames runs through `npx` at one pinned version (`src/hyperframes.js`), with telemetry off and
 `HYPERFRAMES_SKIP_SKILLS` set.
