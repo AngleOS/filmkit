@@ -1,7 +1,7 @@
 // Nothing goes silent for long (kb/Experience.md § Progress and speed). In a terminal each running format has one
-// line on stderr, redrawn every second (and when its step changes, not on every frame a render reports): its step, its
-// frames, the time so far and, once the frame rate is known, the time left. Anywhere else (a pipe, a CI log, an agent's shell) a redrawn line is noise, so each step prints one line
-// as it starts, through the command's log.
+// line on stderr, redrawn every second, and at once when its step changes but not on every frame a render reports:
+// its step, its frames, the time so far and, once the frame rate is known, the time left. Anywhere else (a pipe, a CI
+// log, an agent's shell) a redrawn line is noise, so each step prints one line through the command's log instead.
 
 /**
  * @typedef {{ code: string, done?: number, total?: number }} Stage  a stage of a HyperFrames render, as it reports it
