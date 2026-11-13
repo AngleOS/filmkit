@@ -17,7 +17,8 @@
     <div id="mk-line" class="display"></div>
   </div>
   <script>
-    (function () {
+    // The lockup is laid out from the name as the theme's display face sets it, so it waits for that face to load.
+    Promise.resolve(KB.ready?.()).then(function () {
       const tl = gsap.timeline({ paused: true });
       const v = AL.vars(document.getElementById("root"), window.__hyperframes);
       const { H, pick } = AL;
@@ -34,6 +35,6 @@
       if (v.line) KM.words(tl, line.querySelectorAll(".word"), c + 0.95);
       if (v.out > 0) KM.out(tl, [svg, line, motif], v.out);
       window.__timelines["mark"] = tl;
-    })();
+    });
   </script>
 </template>

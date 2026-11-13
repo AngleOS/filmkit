@@ -1,4 +1,4 @@
-// The walkthroughs of setup and tour (D-008): the only commands that ask, and only a person at a terminal. Every
+// The walkthroughs of setup, tour and brand (D-008): the only commands that ask, and only a person at a terminal. Every
 // question has a flag, so with --yes, --json or on a pipe they run without one.
 import { banner, pear } from "./banner.js";
 import { nodeSupported } from "./commands/doctor.js";

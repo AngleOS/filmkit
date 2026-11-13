@@ -129,7 +129,17 @@ test("with no brand flags, setup leaves the default theme and says how to make i
   const { steps, calls } = stubs();
   const { result, lines } = await setupYes({ name: "Acme", "no-first-film": true }, steps);
   assert.deepEqual([result.ok, result.brand, calls.brand], [true, null, []]);
-  assert.ok(lines.includes("· the default theme: make it yours with filmkit brand --accent <hex> --logo <file>"));
+  assert.ok(lines.includes("· the default theme: make it yours with filmkit brand"));
+});
+
+test("in a terminal, the brand step runs filmkit brand even with no brand flags: it asks for the brand itself", async () => {
+  const { steps, calls } = stubs();
+  const dir = join(realpathSync(mkdtempSync(join(tmpdir(), "filmkit-setup-"))), "acme-films");
+  const out = { log: () => {}, heading: () => {}, json: false };
+  const ask = { ...fromFlags({ studio: dir, name: "Acme", agents: "none" }), firstFilm: async () => false };
+  const result = await setup({ ask, brand: { yes: false }, open: false }, out, steps);
+  assert.equal(result.ok, true);
+  assert.deepEqual(calls.brand.map((o) => [o.name, o.yes]), [["Acme", false]]);
 });
 
 test("the studio's default folder is the brand's name, made plain", () => {

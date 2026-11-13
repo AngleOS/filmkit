@@ -73,6 +73,14 @@ npx filmkit brand --from-url acme.com --ground light   # read from the website, 
   Fonts.", not by `fonts`, which may name a font added since.)
 - `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
 
+In a terminal, `filmkit brand` with none of these (the name aside) asks instead: the website first, then the logo, the
+accent, light or dark and the font, each the site didn't give. For a site's font that Google Fonts doesn't have, the
+font question starts from an open one like it. An empty answer keeps what the brand has. With the brand written, it
+opens a still in it, the [poster](../templates/poster/index.html) template's mark and line in 16:9, at
+`build/brand-still/still.png`, and asks whether it looks right; a no asks again, each question starting from the brand
+the still showed. Given flags, it only shows the still and asks. `--yes`, `--json` or a pipe ask nothing, so an agent
+runs it from flags alone; `setup` in a terminal asks the same questions as its brand step.
+
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
 so the brand keeps Angle's motif, type and motion (D-007), and `filmkit.json`'s `theme` becomes `"brand/theme"`.
 Single values `filmkit.json` set over its old theme, such as `"credit": false`, stay over the brand's, but its colours
@@ -125,6 +133,9 @@ and buttons: where the brand's own colour falls short, the theme takes the neare
   - `lockupBox(w, cy)` is the lockup's box at width `w`, centred across the frame on `cy`:
     `{ w, h, left, top, markCx, shift }`. `markCx` is the mark's centre from the box's left edge, and `shift` is how
     far the mark steps left as the wordmark wipes in. Both are in pixels.
+  - `ready()`, optional, returns a promise the mark and endcard scenes wait for before they lay the lockup out. A
+    lockup that measures its name in the display face, as `default`'s does, loads that face first: a scene lays out
+    before the theme's fonts load.
 
   Colour it with the custom properties (`--brand-mark`, `--brand-word`, `--brand-line`, `--accent`), never literals,
   so `.on-paper` restyles it. Give gradients and clip paths ids with a counter: a film can mount a scene more than

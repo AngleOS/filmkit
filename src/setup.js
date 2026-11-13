@@ -5,7 +5,6 @@
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { brandStudio } from "./cli/commands/brand.js";
 import { requirements } from "./cli/commands/doctor.js";
 import { initStudio, newFilm } from "./create.js";
 import { hyperframes } from "./hyperframes.js";
@@ -44,7 +43,8 @@ export const STEPS = {
   requirements,
   fetchChrome: () => hyperframes(["browser", "ensure"], { cwd: process.cwd(), toStderr: true }),
   agents: async (ctx) => (await command("agents")).run(ctx),
-  brand: brandStudio,
+  // Imported when it runs: brand opens its still with setup's `open`.
+  brand: async (ctx) => (await import("./cli/commands/brand.js")).brandStudio(ctx),
   check: async (ctx) => (await command("check")).run(ctx),
   contact: async (ctx) => (await command("contact")).run(ctx),
   open: (path) => {
@@ -104,7 +104,8 @@ export async function setup({ ask, brand, open }, { log, heading, json }, steps 
 
   heading("Brand");
   if (!brand) log("· skipped: the studio keeps the default theme");
-  else if (!(brand.url || brand.logo || brand.accent || brand.ground)) log("· the default theme: make it yours with filmkit brand --accent <hex> --logo <file>");
+  // In a terminal, brand asks for what no flag gives; unattended, with nothing given, there's nothing to write.
+  else if (brand.yes && !(brand.url || brand.logo || brand.accent || brand.ground)) log("· the default theme: make it yours with filmkit brand");
   else {
     const { url, logo, accent, ground, yes } = brand;
     result.brand = await steps.brand(ctx([], { studio: dir, name: where.name ?? result.studio.name, "from-url": url, logo, accent, ground, yes }));
