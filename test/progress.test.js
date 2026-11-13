@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
-import { chmodSync, cpSync, mkdirSync, mkdtempSync, realpathSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
@@ -84,11 +84,11 @@ test("a failed run's last words come from its stderr, else its stdout without th
   assert.deepEqual(lastWords({ stdout: "◆ Rendering\n  ███░░  12%  Capturing\n@hf-progress {}\n✗ Chrome crashed\n", stderr: "" }), ["◆ Rendering", "✗ Chrome crashed"]);
 });
 
-// A stand-in for `npx --yes hyperframes@… <command> …`: check passes; render reports two frames and writes its MP4,
-// unless FAKE_RENDER_FAILS is set; snapshot fails.
+// A stand-in for `npx --yes hyperframes@… <command> …`: check passes, and writes its arguments to FAKE_ARGS when set;
+// render reports two frames and writes its MP4, unless FAKE_RENDER_FAILS is set; snapshot fails.
 const NPX = `#!/bin/sh
 case "$3" in
-  check) echo '{"ok":true}' ;;
+  check) [ -n "$FAKE_ARGS" ] && echo "$@" > "$FAKE_ARGS"; echo '{"ok":true}' ;;
   render)
     for out; do :; done
     if [ -n "$FAKE_RENDER_FAILS" ]; then echo "Error: no space left on device" >&2; exit 1; fi
@@ -133,4 +133,11 @@ test("a seam whose frames didn't render says why, in HyperFrames' words", () => 
   assert.equal(status, 1, stderr);
   assert.deepEqual(JSON.parse(stdout).formats[0].seam, { ok: false, error: "the seam frames didn't render: Error: Chrome crashed" });
   assert.match(stderr, /^ {2}✗ seam_unmeasured: 9x16: the seam couldn't be measured: the seam frames didn't render: Error: Chrome crashed\. See what's missing with: filmkit doctor$/m);
+});
+
+test("check has HyperFrames flag text under the safe box, sampled two thirds into the film without scenes", () => {
+  const args = join(realpathSync(mkdtempSync(join(tmpdir(), "filmkit-args-"))), "args");
+  const { status, stderr } = withFakeHyperframes(["check", "plain", "16x9", "--force"], { FAKE_ARGS: args });
+  assert.equal(status, 0, stderr);
+  assert.match(readFileSync(args, "utf8"), / check --json --caption-zone x0=0;y0=0\.95;x1=1;y1=1;seek=0\.6667$/m);
 });

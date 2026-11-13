@@ -170,6 +170,20 @@ test("a long text is cut at a word to a label", () => {
   assert.match(error.message, /^16x9 at 1 s: "A paragraph far too long to name a…" \(#p\) is cut off by its own box\./);
 });
 
+test("text in the band under the safe box is a safe_zone warning, with the band's height in the format", () => {
+  const raw = { code: "caption_zone_collision", severity: "warning", time: 12.4, selector: "#cta", text: "Shop now", message: "overlaps the reserved caption band" };
+  const { ok, warnings } = findings({ ok: true, stdout: JSON.stringify({ ok: true, layout: { findings: [raw] } }) }, { ...where, format: "9x16" });
+  assert.equal(ok, true);
+  assert.deepEqual(warnings, [{
+    code: "safe_zone",
+    selector: "#cta",
+    time: 12.4,
+    message: '9x16 at 12.4 s: "Shop now" (#cta) is under the safe box, in the bottom 420 px, where a feed\'s caption and buttons cover it. ' +
+      "Move it up into AL.safe, or put data-layout-allow-caption-zone on copy meant for the foot. See it with: filmkit snapshot bad 9x16 --at 12.4",
+    fix: "filmkit snapshot bad 9x16 --at 12.4",
+  }]);
+});
+
 test("covered text says how much: the word most hidden behind a video's matte, or the share of it", () => {
   const matte = { code: "text_occluded", severity: "error", time: 2, selector: "#cap", text: "Say hello", containerSelector: "#cutout", coveredFraction: 0.62,
     message: 'Text sits partly behind a transparent video\'s matte; its most covered word "hello" is 62% hidden.' };
