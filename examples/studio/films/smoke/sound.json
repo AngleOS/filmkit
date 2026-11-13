@@ -1,0 +1,45 @@
+{
+  "key": 73.42,
+  "bed": -12,
+  "cues": [
+    { "id": "po-open", "kind": "air", "scene": "poster", "at": 0.1, "dur": 0.8, "x": 960, "y": 540, "gain": -16 },
+    { "id": "st-words", "kind": "air", "scene": "statement", "at": 0.15, "dur": 0.45, "x": 960, "y": 500, "gain": -14 },
+    { "id": "st-sub", "kind": "tick", "scene": "statement", "at": 0.64, "x": 960, "y": 640, "w": 600, "h": 50, "gain": -16 },
+    { "id": "se-rise", "kind": "whoosh", "scene": "section", "at": 0.15, "dur": 0.6, "apex": 0.15, "x": 960, "y": 540, "w": 1300, "h": 120, "dir": "up", "gain": -18 },
+    { "id": "pr-ink", "kind": "ding", "scene": "promise", "at": 0.15, "n": 4, "every": 0.12, "step": 2, "x": 960, "y": 540, "w": 300, "h": 120, "gain": -14 },
+    { "id": "hl-words", "kind": "air", "scene": "headline", "at": 0.15, "dur": 0.5, "x": 700, "y": 300, "gain": -15 },
+    { "id": "lt-bar", "kind": "air", "scene": "who", "at": 0.1, "dur": 0.4, "x": 300, "y": 900, "gain": -16 },
+    { "id": "lt-name", "kind": "pop", "scene": "who", "at": 0.2, "x": 400, "y": 880, "w": 400, "h": 60, "gain": -12 },
+    { "id": "lt-out", "kind": "air", "scene": "who", "at": 2.2, "dur": 0.2, "x": 400, "y": 880, "gain": -18 },
+    { "id": "mo-lines", "kind": "air", "scene": "motif", "at": 0.05, "dur": 0.7, "x": 1500, "y": 800, "gain": -12 },
+    { "id": "mo-rise", "kind": "whoosh", "scene": "over-motif", "at": 0.15, "dur": 0.6, "apex": 0.15, "x": 960, "y": 540, "w": 1300, "h": 120, "dir": "up", "gain": -18 },
+    { "id": "mk-lines", "kind": "air", "scene": "mark", "at": 0.34, "dur": 0.7, "x": 1500, "y": 800, "gain": -12 },
+    { "id": "mk-rise", "kind": "riser", "scene": "mark", "at": 0.25, "dur": 0.75, "gain": -9 },
+    { "id": "mk-hit", "kind": "impact", "scene": "mark", "at": 1.0, "x": 960, "y": 540, "w": 420, "h": 90, "gain": -2 },
+    { "id": "mk-sting", "kind": "sting", "scene": "mark", "at": 1.0, "gain": -8 },
+    { "id": "mk-word", "kind": "air", "scene": "mark", "at": 1.45, "dur": 0.45, "x": 1100, "y": 540, "gain": -12 },
+    { "id": "ec-claim", "kind": "air", "scene": "endcard", "at": 0.15, "dur": 0.45, "x": 960, "y": 450, "gain": -14 },
+    { "id": "ec-lines", "kind": "air", "scene": "endcard", "at": 2.05, "dur": 0.7, "x": 1500, "y": 800, "gain": -12 },
+    { "id": "ec-rise", "kind": "riser", "scene": "endcard", "at": 1.95, "dur": 0.75, "gain": -10 },
+    { "id": "ec-hit", "kind": "impact", "scene": "endcard", "at": 2.7, "x": 960, "y": 520, "w": 380, "h": 90, "gain": 0 },
+    { "id": "ec-sting", "kind": "sting", "scene": "endcard", "at": 2.7, "gain": -6 },
+    { "id": "ec-word", "kind": "air", "scene": "endcard", "at": 3.1, "dur": 0.45, "x": 1100, "y": 520, "gain": -12 }
+  ],
+  "chords": [
+    { "scene": "poster", "at": 0, "until": 5, "notes": [59, 66, 69, 74, 76], "level": -8, "cutoff": 2800, "attack": 0.9 },
+    { "scene": "section", "at": 0, "until": 5, "notes": [55, 62, 69, 71, 78], "sub": 43, "level": -7, "cutoff": 3000, "attack": 0.6 },
+    { "scene": "headline", "at": 0, "until": 3, "notes": [57, 64, 69, 71, 76], "level": -7, "cutoff": 3000, "attack": 0.9 },
+    { "scene": "motif", "at": 0, "until": 3, "notes": [59, 66, 69, 76], "level": -10, "cutoff": 2600, "attack": 0.8 },
+    { "scene": "mark", "at": 1.0, "until": 3.5, "notes": [62, 66, 69, 76, 78], "sub": 50, "level": -6, "cutoff": 3200, "attack": 0.15 },
+    { "scene": "endcard", "at": 0, "until": 1.9, "notes": [59, 66, 69, 76], "level": -10, "cutoff": 2600, "attack": 0.8 },
+    { "scene": "endcard", "at": 2.7, "until": 6, "notes": [62, 66, 69, 74, 76, 81], "sub": 50, "level": -5, "cutoff": 3600, "attack": 0.08 }
+  ],
+  "blooms": [
+    { "scene": "mark", "at": 1.0, "db": 8 },
+    { "scene": "endcard", "at": 2.7, "db": 9 }
+  ],
+  "pockets": [
+    { "scene": "mark", "at": 0, "until": 1.0 },
+    { "scene": "endcard", "at": 1.9, "until": 2.7 }
+  ]
+}

@@ -6,7 +6,7 @@ the one `--studio <dir>` names.
 ```
 filmkit.json        { "name": "Acme", "formats": ["16x9", "9x16", "1x1", "4x5"], "theme": "default", "renders": "renders" }
 brand/              the logo and the brand's own files
-films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), assets
+films/<name>/       brief.md, index.html (the master), compositions/ (the film's own scenes), sound.json, assets
 CLAIMS.md           every word on screen, with its source; a ⚑ row holds back posting
 POSTING.md          where each render goes, with its copy per platform
 AGENTS.md           points an agent at the filmkit skill, in .claude/skills/filmkit/
@@ -23,7 +23,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 |---|---|
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
-| `check <film> [formats…] [--force]` | assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
+| `check <film> [formats…] [--force]` | builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
 | `snapshot <film> [format] [--at t,t,…] [--frames n]` | PNG frames and a contact sheet of one format, in `build/<film>/snaps-<format>/` |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | a contact sheet per format, `build/<film>/contact-<format>.png`: frames tiled within 2048 px, each labelled with its format and time; with no times, each scene 0.7 s after it starts (at most 48 frames) |
 | `preview <film> [format] [--no-open]` | HyperFrames Studio on the film, live: it reloads on save, and `f` shows the next format |
@@ -52,9 +52,9 @@ same tab, and `q` (or Ctrl+C) stops Studio. Keys are read from stdin, so an agen
 prints `{ film, format, ok, dir, url }` when it stops, `format` being the last one shown.
 
 **Speed.** `check` runs the formats in parallel: one per two cores and per 4 GB of memory, so two on an 8 GB laptop. It
-hashes each format's inputs (the film's files, the kit, GSAP, the theme, the HyperFrames pin and filmkit's version) and
-skips a format whose hash matches its last pass, in `build/<film>/<format>/.filmkit-hash`, printing `16x9 unchanged ✓`
-with the warnings (and a loop's seam) it passed with. A failed format is always checked again. `render` keeps an MP4
+builds the sound first, then hashes each format's inputs (the film's files, its built sound, the kit, GSAP, the theme,
+the HyperFrames pin and filmkit's version) and skips a format whose hash matches its last pass, in
+`build/<film>/<format>/.filmkit-hash`, printing `16x9 unchanged ✓` with the warnings (and a loop's seam) it passed with. A failed format is always checked again. `render` keeps an MP4
 made from the same hash (`build/<film>/render-<format>.json`), so an interrupted render redoes only what's missing or
 stale. Renders run one at a time, as each already uses every core. `--force` redoes everything.
 
@@ -74,13 +74,18 @@ the last frame back to frame 0 is over max(0.4, 1.5 × the median step at the en
 still passes when nothing changes. The rules for making one are in
 `skills/filmkit/references/look-and-motion.md` § Hook loops, and `examples/studio/films/loop` is one.
 
+**Sound.** A film with a `sound.json` gets `build/<film>/sound.m4a`, built by `check` (so `render` and `stills` too) and
+`preview`, mastered to −19 LUFS under −1 dBTP and mounted in every format. `check` prints its loudness and fails when it
+can't be built. How to write `sound.json`: [sound.md](sound.md).
+
 **Captions.** The `captions` scene is the film's caption track: one host spanning the film, with `lines` as
 `start-end text`, one per line, in seconds of the scene. `render` and `captions` write them, moved to the film's time,
 as `renders/<film>.srt` and `.vtt`: one pair serves every format, to upload as closed captions. A film with no captions
 scene gets no files. With `burn` the scene also draws them into the picture, in `AL.captions`.
 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
-`kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`, `new` as `{ ok, film, template, files }`, `captions` and `stills` as the MCP tools of the same name, `doctor` as
+`kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`; `new` as `{ ok, film, template, files }`; `check`'s
+`sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same name; `doctor` as
 `{ ok, checks: [{ name, ok, detail, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
 

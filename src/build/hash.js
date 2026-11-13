@@ -1,12 +1,11 @@
-// One hash of everything a format is made from: its sources' paths and contents, the format, the HyperFrames pin and
-// filmkit's version. `check` skips a format whose hash still matches its last pass, and `render` keeps an MP4 made
-// from the same hash. Contents count, not mtimes, so a fresh checkout or a copied studio still matches.
+// One hash of everything a format is made from: its sources' paths and contents, the theme's values, the format, the
+// HyperFrames pin and filmkit's version. `check` skips a format whose hash still matches its last pass, and `render`
+// keeps an MP4 made from the same hash. Contents count, not mtimes, so a fresh checkout or a copied studio still matches.
 import { createHash } from "node:crypto";
 import { lstatSync, readFileSync, readdirSync, readlinkSync, realpathSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { HYPERFRAMES } from "../hyperframes.js";
 import { PACKAGE } from "../studio.js";
-import { themeCss } from "../theme.js";
 import { sources } from "./assemble.js";
 
 const VERSION = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8")).version;
@@ -17,10 +16,9 @@ const VERSION = JSON.parse(readFileSync(join(PACKAGE, "package.json"), "utf8")).
  * @param {string} format
  */
 export function formatHash(studio, film, format) {
-  const hash = createHash("sha256").update(`${format}\0${HYPERFRAMES}\0filmkit@${VERSION}\0`);
+  const hash = createHash("sha256").update(`${format}\0${HYPERFRAMES}\0filmkit@${VERSION}\0${JSON.stringify(studio.theme.values)}\0`);
   // A source itself may be a link (a film folder kept elsewhere): its contents count, as assemble copies them.
   for (const [name, path] of Object.entries(sources(studio, film))) add(hash, name, realpathSync(path));
-  hash.update(`theme.css\0${themeCss(studio.theme.values)}\0`);
   return hash.digest("hex");
 }
 
