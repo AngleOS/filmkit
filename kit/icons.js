@@ -1,6 +1,8 @@
 // Icons for the kit's scenes, as KI.svg(name, size): lucide paths (lucide-react 1.61, ISC, © Lucide Icons and
 // Contributors; the licence is kit/LICENSE-lucide.txt), stroked in the current text colour. KI.names lists them.
-(function () {
+// KI is a top-level `var` and a window property, like layout.js's AL.
+var KI = (function () {
+  /** @type {Record<string, string>} */
   const paths = {
     building: '<path d="M10 12h4"/><path d="M10 8h4"/><path d="M14 21v-3a2 2 0 0 0-4 0v3"/><path d="M6 10H4a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-2"/><path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16"/>',
     calendar: '<path d="M8 2v3"/><path d="M16 2v3"/><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/>',
@@ -27,7 +29,9 @@
     x: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
     zap: '<path d="M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z"/>',
   };
+  /** @param {string} name @param {number} [size] */
   const svg = (name, size = 24) =>
     `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${paths[name] || ""}</svg>`;
-  window.KI = { svg, names: Object.keys(paths) };
+  return { svg, names: Object.keys(paths) };
 })();
+window.KI = KI;

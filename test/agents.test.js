@@ -48,7 +48,8 @@ function fixtureHome(platform) {
     else write(file, `{\n  "theme": "mine",\n  "mcpServers": {\n    "other": ${other}\n  }\n}\n`);
   }
   const bin = join(home, "bin");
-  for (const name of ["gemini", "opencode"]) write(join(bin, platform === "win32" ? `${name}.cmd` : name), "");
+  // Spelled as PATHEXT has it: Windows matches either case, a case-sensitive file system (CI's Linux) only this one.
+  for (const name of ["gemini", "opencode"]) write(join(bin, platform === "win32" ? `${name}.CMD` : name), "");
   /** @type {import("../src/agents/register.js").Host} */
   const host = { home, platform, vars: { PATH: bin, PATHEXT: ".EXE;.CMD" } };
   return { home, host, files };

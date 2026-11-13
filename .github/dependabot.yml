@@ -1,0 +1,23 @@
+version: 2
+# One grouped PR a week per ecosystem. HyperFrames isn't an npm dependency (src/hyperframes.js pins it for npx), so
+# it moves by hand, after checking every example film.
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      npm:
+        patterns: ["*"]
+    # Node's types stay on the engines floor (Node 20), so the type check rejects newer Node APIs; move them with it.
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+  # The SHA-pinned actions in .github/workflows
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]
