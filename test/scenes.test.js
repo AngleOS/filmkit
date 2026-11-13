@@ -1,10 +1,13 @@
 // Kit scenes are documented from their own declarations, and the kit carries no brand: the theme draws the motif and
 // the logo through window.KB (D-007).
 import assert from "node:assert/strict";
-import { readdirSync, readFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 import { startTags } from "../src/build/html.js";
+import { brandJs, loadTheme } from "../src/theme.js";
 
 const kit = new URL("../kit/", import.meta.url);
 const scenes = readdirSync(new URL("scenes/", kit)).filter((f) => f.endsWith(".html"));
@@ -33,33 +36,60 @@ test("kit code names no colour: every colour comes from the theme", () => {
   }
 });
 
-/** The default theme's brand.js run against just enough DOM to build its SVG. */
-function defaultKB() {
+/**
+ * The default theme's compiled brand.js (angle's lines, then its own lockup) for a studio named `name`, run against
+ * just enough DOM to build its SVG. The display face sets each letter 6 units wide at 10.
+ * @param {string} name
+ */
+function defaultKB(name) {
+  const dir = mkdtempSync(join(tmpdir(), "filmkit-scenes-"));
+  mkdirSync(join(dir, "brand"));
+  writeFileSync(join(dir, "brand", "logo.svg"), '<svg viewBox="0 0 24 24"><linearGradient id="g"/><path fill="url(#g)"/></svg>');
   /** @returns {any} */
-  const element = () => ({
+  const element = (/** @type {string} */ _ns, /** @type {string} */ tag) => ({
+    tag,
     /** @type {Record<string, string>} */ attrs: {},
     /** @type {any[]} */ children: [],
     /** @param {string} k @param {unknown} v */ setAttribute(k, v) { this.attrs[k] = String(v); },
     /** @param {any} c */ appendChild(c) { this.children.push(c); return c; },
   });
   const window = /** @type {any} */ ({ AL: { W: 1920, H: 1080, mode: "L" } });
-  window.document = { createElementNS: element };
-  runInNewContext(readFileSync(new URL("../themes/default/brand.js", import.meta.url), "utf8"), { window, ...window });
+  const context = { measureText: (/** @type {string} */ text) => ({ width: text.length * 6 }) };
+  window.document = { createElementNS: element, createElement: () => ({ getContext: () => context }), documentElement: {} };
+  window.getComputedStyle = () => ({ getPropertyValue: () => "" });
+  window.DOMParser = class {
+    /** @param {string} svg */
+    parseFromString(svg) {
+      const [, box, inner] = /viewBox="([^"]*)">(.*)<\/svg>/.exec(svg) ?? [];
+      return { documentElement: { nodeName: "svg", getAttribute: () => box, innerHTML: inner } };
+    }
+  };
+  runInNewContext(brandJs(loadTheme(dir, "default"), name), { window, ...window });
   return { KB: window.KB, element };
 }
 
-test("the default theme's KB draws a motif and a lockup whose mark meets in two pieces", () => {
-  const { KB, element } = defaultKB();
-  const motif = KB.motif(element());
-  assert.ok(Object.values(motif).every((group) => group.length && group.every((/** @type {any} */ l) => l.attrs.pathLength === "1")));
-  const parts = KB.lockup(element());
+/** @param {any} e @returns {any[]} */
+const all = (e) => [e, ...e.children.flatMap(all)];
+
+test("the default theme keeps angle's lines, and its lockup is the studio's logo, cut in two, beside its name", () => {
+  const { KB, element } = defaultKB("Acme");
+  const motif = KB.motif(element("", "svg"));
+  assert.deepEqual(Object.keys(motif), ["diag", "horiz"]);
+  const parts = KB.lockup(element("", "svg"));
   for (const part of ["mark", "para", "tri", "word", "wipe"]) assert.ok(parts[part], part);
+  const [para, tri] = [parts.para, parts.tri].map((half) => half.children[0]);
+  assert.deepEqual([para.attrs.viewBox, para.attrs.width], ["0 0 24 24", "12"]);
+  // Each copy of the logo gets its own ids, so neither paints the other's gradient.
+  assert.equal(para.innerHTML, '<linearGradient id="kb-logo-1-p-g"/><path fill="url(#kb-logo-1-p-g)"/>');
+  assert.match(tri.innerHTML, /id="kb-logo-1-t-g"/);
+  assert.equal(all(parts.word).find((e) => e.tag === "text").textContent, "Acme");
 });
 
-test("the default lockup box is centred on the frame at the asked width", () => {
-  const { KB } = defaultKB();
-  const box = KB.lockupBox(720, 540);
-  assert.equal(box.left, (1920 - 720) / 2);
-  assert.equal(box.top, Math.round(540 - box.h / 2));
-  assert.ok(box.markCx > 0 && box.shift > 0 && box.markCx + box.shift <= 360);
+test("the default lockup box is centred on the frame, as wide as its name, and never wider than asked", () => {
+  const { KB } = defaultKB("Acme");
+  const box = KB.lockupBox(670, 540);
+  assert.deepEqual({ ...box }, { w: 410, h: 120, left: 755, top: 480, markCx: 60, shift: 145 });
+  const long = defaultKB("Acme Corporation International").KB.lockupBox(670, 540);
+  assert.equal(long.w, 670);
+  assert.equal(long.left, (1920 - 670) / 2);
 });

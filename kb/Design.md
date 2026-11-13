@@ -55,8 +55,10 @@ user's films.
 - **chart.js (`KC`)**: the infographics' maths, tested in Node: values to lengths and bands, label sizes and
   placement, number formats (grouped, plain, compact), the delta, and a value rolling a frame at a time; a grid's
   cells (the largest square that fits, filled a column at a time so a bracket spans the lit columns), ticks evenly or
-  to scale, labels spread clear of each other, and a line's wrap.
-- **icons.js (`KI`)**: a small lucide set (ISC) for `cards` and `grid`, stroked in the text colour.
+  to scale, labels spread clear of each other, and a line's wrap; a mesh's nodes (a jittered grid, clear of each
+  other), its links (a spanning tree and each node's nearest, none through a node) and a pulse's route (the shortest
+  way) at an even speed; a meter's share of its scale and a gauge's arc.
+- **icons.js (`KI`)**: a small lucide set (ISC) for `cards`, `grid` and `mesh`, stroked in the text colour.
 - **theme**: the brand as data, from `filmkit.json`:
   - grounds: named fills such as `ink`, `paper`, `accent-dark`;
   - one accent colour: one word per title, the motif, the primary button;
@@ -73,7 +75,7 @@ user's films.
   - **product:** `chat`, `code`, `terminal`, `composer`, `ui` (a generic app frame for rebuilt product UI);
   - **infographics:** `bars` (proportional, rolling values, a cap or reference line), `counter`, `stat` (before and
     after, with the delta), `grid` (n of m lit, with a bracket), `cards` (flip-in cards with source lines),
-    `timeline` (ticks on a ruler), `mesh` (nodes connecting, with a pulse), `meter`;
+    `timeline` (ticks on a ruler), `mesh` (nodes connecting, with a pulse), `meter` (a gauge or a horizontal level);
   - **captions:** `captions`. It draws nothing; it is the source of the SRT/VTT, and `burn` puts them in the picture.
 - **sound**, from the film's `sound.json` (how to write it: `docs/sound.md`):
   - cues from the picture (impact, tick, whoosh, type…), each placed by a scene's `id` and seconds into it, resolved
@@ -156,7 +158,9 @@ logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points t
 single values (`{ "extends": "angle", "accent": "#ff5a1f" }`); a `theme.json` can extend another theme the same way.
 `filmkit.json` and `theme.json` are validated against `schema/filmkit.schema.json`. `theme.json`'s `grounds` use the
 names scenes take (`ink`, `accent-dark`, `paper`, and any others), and the build compiles the merged values to
-`kit/theme/theme.css` (`docs/themes.md`). End cards carry "Made with Angle Filmkit" unless `"credit": false`.
+`kit/theme/theme.css` (`docs/themes.md`). Each folder's `brand.js` adds to `window.KB`, base first, after the studio's
+name, its logo's mark and the credit, which the build compiles in; `default` keeps `angle`'s lines and reveals the
+studio's `brand/logo.svg` beside its name. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
 
 ### 8. Install, setup and onboarding (D-008)
 The goal is that someone with an agent goes from nothing to a first film in their brand **in one command, or one

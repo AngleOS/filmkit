@@ -22,7 +22,7 @@ you can retheme them completely.
 - **A kit with taste:**
   - title entrances and a logo reveal;
   - product UI scenes: chat, code, terminal;
-  - infographic scenes: bars, counters, stats, grids, cards, timelines.
+  - infographic scenes: bars, counters, stats, grids, cards, timelines, meshes, meters.
   
   Motion rules hold them together.
 - **Sound from the picture.** Impacts, ticks and whooshes come from the motion, over a tonal pad, mastered to −19

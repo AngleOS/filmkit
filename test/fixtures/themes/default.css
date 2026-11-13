@@ -7,38 +7,39 @@
 @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Medium.woff2"); font-weight: 500; }
 
 :root {
-  --ink: #101114;
-  --accent-dark: #1b2550;
-  --paper: #f3f1ea;
-  --accent: #ff7a45;
-  --foreground: #f3f1ea;
-  --muted-foreground: #a7a8b0;
+  --ink: #07120f;
+  --accent-dark: #145237;
+  --jet: #2c2c2c;
+  --paper: #ffffff;
+  --accent: #e3ef26;
+  --foreground: #eef3ec;
+  --muted-foreground: #a9bdb2;
   --font-display: "Geist", sans-serif;
   --font-ui: "Geist", sans-serif;
   --font-mono: "Geist Mono", monospace;
   --title-weight: 600;
   --title-tracking: -0.035em;
   --title-leading: 1.02;
-  --brand-mark: #ff7a45;
-  --brand-word: #f3f1ea;
-  --brand-line: #ff7a45;
-  --code-keyword: #ffab8a;
-  --code-string: #a5d6ff;
-  --code-title: #d2a8ff;
-  --code-number: #79c0ff;
-  --code-attr: #ffd08a;
+  --brand-mark: #e3ef26;
+  --brand-word: #ffffff;
+  --brand-line: #e3ef26;
+  --code-keyword: #ffc9c2;
+  --code-string: #cfe6ff;
+  --code-title: #e6d0ff;
+  --code-number: #bcdcff;
+  --code-attr: #ffd4a8;
 }
 
 .on-paper {
-  --foreground: #16171c;
-  --muted-foreground: #5b5d66;
-  --accent: #c2410c;
-  --brand-mark: #c2410c;
-  --brand-word: #16171c;
-  --brand-line: #c2410c;
-  --code-keyword: #b42318;
+  --foreground: #07120f;
+  --muted-foreground: #56665e;
+  --accent: #145237;
+  --brand-mark: #145237;
+  --brand-word: #07120f;
+  --brand-line: #145237;
+  --code-keyword: #9a0d22;
   --code-string: #0a3069;
-  --code-title: #6639ba;
-  --code-number: #0550ae;
-  --code-attr: #8a4b00;
+  --code-title: #5a2fa8;
+  --code-number: #034090;
+  --code-attr: #7a2e00;
 }

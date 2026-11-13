@@ -3,6 +3,7 @@ build/
 !/src/build/
 renders/
 *.mp4
+!/site/public/media/*.mp4
 *.mov
 *.wav
 *.m4a
