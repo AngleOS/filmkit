@@ -108,7 +108,12 @@ esac
 `;
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 
-/** Runs the CLI in a copy of the fixture studio, with the stand-in as npx. @param {string[]} args @param {object} [env] */
+/**
+ * Runs the CLI in a copy of the fixture studio, with the stand-in as npx, and an npm cache of its own: the stand-in leaves
+ * a package there that's only a package.json.
+ * @param {string[]} args
+ * @param {object} [env]
+ */
 function withFakeHyperframes(args, env = {}) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "filmkit-progress-")));
   cpSync(new URL("fixtures/studio", import.meta.url), dir, { recursive: true });
@@ -116,7 +121,7 @@ function withFakeHyperframes(args, env = {}) {
   writeFileSync(join(dir, "bin/npx"), NPX);
   chmodSync(join(dir, "bin/npx"), 0o755);
   const PATH = `${join(dir, "bin")}:${process.env.PATH}`;
-  return spawnSync(process.execPath, [CLI, ...args], { cwd: dir, env: { ...process.env, PATH, ...env }, encoding: "utf8" });
+  return spawnSync(process.execPath, [CLI, ...args], { cwd: dir, env: { ...process.env, PATH, npm_config_cache: join(dir, "npm"), ...env }, encoding: "utf8" });
 }
 
 test("off a terminal, render prints each step of the render as it starts", () => {
