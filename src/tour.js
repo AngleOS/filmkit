@@ -119,14 +119,19 @@ export async function tour(studio, film, { ask, open }, { log, heading, json }, 
 
 /**
  * What to do after the tour, with the brand's name in the agent's first ask. The statement template's line is its
- * promise scene; another film's words are in each scene's variables.
+ * promise scene; another film's words are in each scene's variables. With no film (a no to the first step), only
+ * the way back in.
  * @param {import("./studio.js").Studio} studio
  * @param {string} film
  */
-export const next = (studio, film) => [
-  readFileSync(join(studio.dir, "films", film, "index.html"), "utf8").includes('id="promise"')
-    ? `Change the line: it's the promise scene's "text" in films/${film}/index.html.`
-    : `Change the words: they're each scene's data-variable-values in films/${film}/index.html.`,
-  `Watch the film as you edit it with filmkit preview ${film}.`,
-  `Or ask your agent, "Make a 30-second launch film for ${studio.name}". It follows the filmkit skill.`,
-];
+export function next(studio, film) {
+  const page = join(studio.dir, "films", film, "index.html");
+  if (!existsSync(page)) return [`Run filmkit tour again when you're ready.`];
+  return [
+    readFileSync(page, "utf8").includes('id="promise"')
+      ? `Change the line: it's the promise scene's "text" in films/${film}/index.html.`
+      : `Change the words: they're each scene's data-variable-values in films/${film}/index.html.`,
+    `Watch the film as you edit it with filmkit preview ${film}.`,
+    `Or ask your agent, "Make a 30-second launch film for ${studio.name}". It follows the filmkit skill.`,
+  ];
+}

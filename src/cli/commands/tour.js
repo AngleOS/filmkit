@@ -24,7 +24,7 @@ export async function run(ctx) {
   if (!result.ok) p.cancel("The tour stopped at the step above: fix it, then run filmkit tour again.");
   else {
     const lines = next(studio, film);
-    out.log(lines.slice(0, -1).join("\n"));
+    if (lines.length > 1) out.log(lines.slice(0, -1).join("\n"));
     p.outro(lines.at(-1));
   }
   return result;

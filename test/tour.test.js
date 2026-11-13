@@ -80,6 +80,18 @@ test("a no ends the tour at that step, with what ran so far", async () => {
   assert.equal(calls.check.length, 1);
 });
 
+test("a no to the first step makes no film, and the closing lines only say how to come back", async () => {
+  const s = studio();
+  const { steps, calls } = stubs();
+  const { result, lines } = await run(s, async () => false, steps);
+  assert.equal(result.ok, true);
+  assert.equal(result.stopped, "new");
+  assert.ok(!existsSync(join(s.dir, "films/hello")));
+  assert.equal(calls.check.length, 0);
+  assert.ok(lines.some((l) => l.includes("skipped: run filmkit new hello --template statement")));
+  assert.deepEqual(next(s, "hello"), ["Run filmkit tour again when you're ready."]);
+});
+
 test("the tour uses a film that's already there without asking to make it, or naming a template it didn't use", async () => {
   const s = studio();
   newFilm(s, "launch", "explainer");
