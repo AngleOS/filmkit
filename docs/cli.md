@@ -22,6 +22,8 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 
 | Command | What it does |
 |---|---|
+| `setup [--yes] [--agents auto\|none\|ids] [--studio dir] [--name brand] [--brand-url url] [--logo file] [--ground dark\|light] [--no-brand] [--no-first-film]` | from nothing to a first film, in five steps: the requirements (fetching HyperFrames' Chrome once when it's missing), the agent tools (`agents`, every one installed with `auto`), a studio (`init`, in `./<brand>-films` by default), the brand (`filmkit brand`, once this version has it; until then the default theme) and a first film (`new hello --template statement`, `check`, and its 16:9 contact sheet, opened in the browser). In a terminal it asks each choice its flag doesn't make; with `--yes`, `--json` or on a pipe it asks nothing, and without `--studio` or `--name` it stops after the agent tools, so an agent can ask for the brand first. Run again, it keeps the studio and the film. `--remove` takes Filmkit out of every agent tool and leaves the studio alone |
+| `prompt` | prints the prompt that has your agent install Filmkit and set it up with your brand, from [install-with-your-agent](install-with-your-agent.md), to paste into it |
 | `init [dir] [--name brand]` | a studio in `dir` (the current directory by default) for `brand` (the folder's name by default): `filmkit.json`, `brand/logo.svg`, `films/smoke` (every kit scene, to check the theme), `CLAIMS.md`, `POSTING.md`, `AGENTS.md`, the filmkit skill in `.claude/skills/filmkit/` and a `.gitignore` for `build/` and `renders/`. Files already there are kept, never overwritten |
 | `new <film> [--template t]` | `films/<film>/` from a template, `statement` when none is named (the templates are in `kb/Templates.md`), with the brand's name filled in, and the template's placeholder lines appended to `CLAIMS.md` as ⚑ rows. Every template passes `check` as generated |
 | `check <film> [formats…] [--force]` | warns when the theme's text is under WCAG AA on one of its grounds, builds the film's sound, then assembles each format and runs `hyperframes check` on it, and a loop's seam gate, listing each format's errors and warnings as it finishes; skips a format unchanged since it passed |
@@ -90,8 +92,10 @@ scene gets no files. With `burn` the scene also draws them into the picture, in 
 **Output.** Every command prints what it wrote. With `--json` it prints one JSON object on stdout, in the shapes in
 `kb/Interfaces.md` (`init` as `{ ok, studio, name, files, kept }`; `new` as `{ ok, film, template, files }`; `check`'s
 `sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same name; `doctor` as
-`{ ok, checks: [{ name, ok, detail, code?, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
-stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
+`{ ok, checks: [{ name, ok, detail, code?, hint? }] }`; `setup` as `{ ok, requirements, agents, studio, brand, film }`,
+each step's own result or `null` when it was skipped), with absolute paths; progress and HyperFrames' own output go to
+stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts but `setup`, and
+only a person at a terminal (D-008): every question it asks has a flag.
 `--help` and `doctor` open with the Angle banner, `╱◣ ANGLE FILMKIT` in Pear, but only in a colour terminal: never with
 `--json`, on a pipe (even with `FORCE_COLOR` set, as agent harnesses do), or when `NO_COLOR` or `FORCE_COLOR=0` is set.
 

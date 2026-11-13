@@ -2,7 +2,7 @@
 # Angle Filmkit installer for macOS and Linux (D-008).
 #
 #   curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh
-#   curl -fsSL …/install.sh | sh -s -- --yes --agents auto --brand-url https://example.com
+#   curl -fsSL …/install.sh | sh -s -- --yes --agents auto --name Acme --brand-url https://acme.com
 #
 # It checks Node ≥ 20 and ffmpeg, installs what's missing with the system's package manager (it asks first, unless
 # --yes), then runs `filmkit setup` with the same arguments. Setup registers Filmkit's MCP server with your agent tools,

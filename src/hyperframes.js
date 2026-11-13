@@ -13,14 +13,15 @@ Object.assign(process.env, { DO_NOT_TRACK: "1", HYPERFRAMES_NO_TELEMETRY: "1", H
 
 /**
  * Runs the pinned HyperFrames CLI in `cwd`. Its output streams to the terminal; with `toStderr` it goes to stderr, so
- * stdout stays clean for --json, and with `capture` its stdout is returned instead (for its own --json).
+ * stdout stays clean for --json, and with `capture` its stdout is returned instead (for its own --json) and its stderr
+ * dropped: its doctor's probes ("docker: command not found") would land in the middle of setup's walkthrough.
  * @param {string[]} args
  * @param {{ cwd: string, toStderr?: boolean, capture?: boolean }} options
  */
 export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
   const { status, stdout, error } = spawnSync("npx", ["--yes", HYPERFRAMES, ...args], {
     cwd,
-    stdio: capture ? ["ignore", "pipe", 2] : toStderr ? ["ignore", 2, 2] : "inherit",
+    stdio: capture ? ["ignore", "pipe", "ignore"] : toStderr ? ["ignore", 2, 2] : "inherit",
     encoding: "utf8",
     maxBuffer: 64 * 1024 * 1024,
   });

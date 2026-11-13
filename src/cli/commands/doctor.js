@@ -20,11 +20,14 @@ export async function run({ log, json }) {
   // banner() checks stdout, which is where log writes when json is false.
   const top = banner(json);
   if (top) log(`${top}\n`);
-  const checks = [node(), ffmpegVersion(), ...hyperframesAndChrome()];
+  const checks = requirements();
   for (const c of checks) log(`${c.ok ? "✓" : "✗"} ${c.name.padEnd(11)} ${c.detail}${c.hint ? `\n    ${c.hint}` : ""}`);
   const ok = checks.every((c) => c.ok);
   return { ok, checks, ...(!ok && { exit: 3 }) };
 }
+
+/** Each requirement, checked. setup runs these too. */
+export const requirements = () => [node(), ffmpegVersion(), ...hyperframesAndChrome()];
 
 /** @returns {Check} */
 function node() {
