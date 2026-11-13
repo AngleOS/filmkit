@@ -114,6 +114,8 @@ export const soundPath = (studio, film) => join(studio.dir, "build", film.name, 
  */
 function readScore(film, source) {
   const sound = readJson(source, "sound_json", { film: film.name });
+  const wrong = shapeProblem(sound);
+  if (wrong) throw fail("sound_shape", { film: film.name, problem: wrong });
   let sheet;
   try {
     sheet = score(film.html, sound);
@@ -123,6 +125,19 @@ function readScore(film, source) {
   }
   if (sheet.bed !== undefined && !Number.isFinite(sheet.bed)) throw fail("sound_bed", { film: film.name, bed: sheet.bed });
   return sheet;
+}
+
+/**
+ * What's wrong with sound.json's shape, for score() to read it: one object, its placed rows each a list of objects.
+ * @param {unknown} sound
+ * @returns {string | null}
+ */
+function shapeProblem(sound) {
+  const isObject = (/** @type {unknown} */ v) => v?.constructor === Object;
+  if (!isObject(sound)) return "it should be one object";
+  const rows = /** @type {Record<string, unknown>} */ (sound);
+  const bad = PLACED.find((key) => rows[key] !== undefined && !(Array.isArray(rows[key]) && rows[key].every(isObject)));
+  return bad ? `"${bad}" should be a list of objects` : null;
 }
 
 /** A sound that didn't build, and why. @param {string} code @param {import("../errors.js").Params} params @returns {Sound} */

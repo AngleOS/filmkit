@@ -132,6 +132,11 @@ const CASES = {
     "films/launch/sound.json isn't valid JSON: Unexpected end of JSON input. Fix it at: /s/films/launch/sound.json:4:1",
     "/s/films/launch/sound.json:4:1",
   ],
+  sound_shape: [
+    { film: "launch", problem: '"cues" should be a list of objects' },
+    'films/launch/sound.json: "cues" should be a list of objects. Each key is described in: https://github.com/AngleOS/filmkit/blob/master/docs/sound.md',
+    "https://github.com/AngleOS/filmkit/blob/master/docs/sound.md",
+  ],
   sound_scene: [
     { film: "launch", problem: '"hit" is on scene "gone", which index.html doesn\'t have', clips: ["title", "endcard"] },
     'films/launch/sound.json: "hit" is on scene "gone", which index.html doesn\'t have. Clips: title, endcard. Place it on one of them, as in: "scene": "title"',

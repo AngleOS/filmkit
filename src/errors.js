@@ -420,6 +420,13 @@ export const CATALOGUE = {
     why: "sound.json is the film's sound as one JSON object: cues, chords, blooms and pockets placed on its scenes " +
       "(docs/sound.md). Its keys are quoted, and the last item in a list or object has no trailing comma.",
   },
+  sound_shape: {
+    exit: 2,
+    message: ({ film, problem }) => `films/${film}/sound.json: ${problem}.`,
+    fix: () => ["Each key is described in", "https://github.com/AngleOS/filmkit/blob/master/docs/sound.md"],
+    why: "sound.json is one object whose cues, chords, blooms and pockets are lists of rows, each row an object " +
+      "placed on a scene (\"scene\" and \"at\") or at a time (\"t\").",
+  },
   sound_scene: {
     exit: 2,
     message: ({ film, problem, clips }) => `films/${film}/sound.json: ${problem}. Clips: ${list(clips)}.`,

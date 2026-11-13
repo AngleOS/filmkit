@@ -61,7 +61,8 @@ function parseOptions(name, command, args) {
     return parseArgs({ args, options: { ...GLOBAL, ...command.options }, allowPositionals: true });
   } catch (e) {
     const { code, message } = /** @type {NodeJS.ErrnoException} */ (e);
-    const option = message.match(/'(-[^' ]+)/)?.[1];
+    // The long name: an option with a short alias is "'-e, --every <value>'" in Node's message.
+    const option = message.match(/(--[\w-]+)/)?.[1] ?? message.match(/'(-[^' ,]+)/)?.[1];
     if (code === "ERR_PARSE_ARGS_UNKNOWN_OPTION" && option) throw fail("unknown_option", { command: name, option });
     // A string option given no value, or a flag given one.
     const declared = option && { ...GLOBAL, ...command.options }[option.replace(/^--/, "")];

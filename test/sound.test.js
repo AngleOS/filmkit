@@ -111,6 +111,7 @@ test("a sound.json that places nothing fails the sound, and a bed that isn't a n
   fails('{ "bed": "-12" }', "sound_bed");
   fails('{ "cues": [{ "id": "hit", "kind": "impact", "scene": "gone" }] }', "sound_scene");
   fails('{ "cues": [', "sound_json");
+  for (const shape of ['{ "cues": "boom" }', "null", "[]", '{ "cues": [null] }', '{ "chords": [3] }']) fails(shape, "sound_shape");
 });
 
 test("the foley stays dry: sound-sheet never sees the pad's bed, so it is silent until the first cue", { skip: !hasFfmpeg && "no ffmpeg" }, () => {
