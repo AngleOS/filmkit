@@ -12,6 +12,8 @@ export async function run({ options, log }) {
   const root = studioDir(/** @type {string | undefined} */ (options.studio));
   /** @param {string} key */
   const given = (key) => /** @type {string | undefined} */ (options[key]);
+  // setup passes on its --brand-url; reading a site is still to come, so say the URL went unused rather than drop it.
+  if (given("from-url")) log(`· ${given("from-url")} isn't read yet: this version of filmkit brand takes the name, logo, accent and ground`);
   const result = writeBrand(root, { name: given("name"), logo: given("logo"), accent: given("accent"), ground: given("ground") });
   log(`✓ ${result.name}'s brand in ${root}`);
   const { palette } = result;

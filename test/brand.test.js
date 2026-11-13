@@ -9,6 +9,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { hex, hsl, palette, proposeGround } from "../src/brand/palette.js";
 import { writeBrand } from "../src/brand/write.js";
+import { run as brand } from "../src/cli/commands/brand.js";
 import { contrast, themeContrast } from "../src/contrast.js";
 import { initStudio } from "../src/create.js";
 import { openStudio } from "../src/studio.js";
@@ -163,4 +164,13 @@ test("filmkit brand --json prints what it wrote and the palette", () => {
   const result = JSON.parse(stdout);
   assert.deepEqual([result.ok, result.name, result.palette.ground, result.palette.adjusted.map((/** @type {{ key: string }} */ a) => a.key)], [true, "Acme", "dark", ["accentOn.paper"]]);
   assert.deepEqual(result.files, [join(dir, "brand", "theme", "theme.json"), join(dir, "filmkit.json")]);
+});
+
+test("a site URL from setup is said to be unused, not dropped quietly", async () => {
+  const dir = studio();
+  /** @type {string[]} */
+  const lines = [];
+  const result = await brand({ args: [], options: { studio: dir, name: "Acme", "from-url": "https://acme.test" }, json: false, log: (line) => lines.push(String(line)) });
+  assert.equal(result.ok, true);
+  assert.equal(lines[0], "· https://acme.test isn't read yet: this version of filmkit brand takes the name, logo, accent and ground");
 });
