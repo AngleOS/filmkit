@@ -6,11 +6,14 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [Use the npm package now that filmkit@0.1.0 is published](https://github.com/AngleOS/filmkit/issues/135) `filmkit#135`
 
+## In Progress
+
+- [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
+
 ## Todo
 
 - [Weekly dependency / CVE review (2026-W46)](https://github.com/AngleOS/filmkit/issues/1) `filmkit#1`
 - [filmkit v0.1: AI agents make brand films in HTML](https://github.com/AngleOS/filmkit/issues/2) `filmkit#2` · High
-- [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
 - [Owner: make filmkit public and publish it to npm](https://github.com/AngleOS/filmkit/issues/15) `filmkit#15` · Medium
 
 ## Done
