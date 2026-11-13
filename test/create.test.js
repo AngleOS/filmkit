@@ -9,7 +9,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { rootTag, startTags } from "../src/build/html.js";
 import { initStudio, installSkills, newFilm, templates } from "../src/create.js";
-import { openFilm, openStudio } from "../src/studio.js";
+import { openFilm, openStudio, RequirementError } from "../src/studio.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 /** The package root: a template's kit/… paths are the package's own kit/ in a build. */
@@ -175,5 +175,5 @@ test("skills points an AGENTS.md without a pointer at the skills, and writes one
   rmSync(agents);
   installSkills(acme, hyperframesSkills());
   assert.match(readFileSync(agents, "utf8"), /^## Skills\n/);
-  assert.throws(() => installSkills(acme, empty()), /no skills in/);
+  assert.throws(() => installSkills(acme, empty()), (e) => e instanceof RequirementError && /ships no skills in/.test(e.message));
 });

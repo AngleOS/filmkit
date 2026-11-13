@@ -22,5 +22,5 @@ export async function run({ args, log }) {
   return { ok: true, scenes };
 }
 
-/** @param {string} text */
+/** Up to the first ".", "!" or "?" before a space, so a scene's comment avoids abbreviations such as "e.g." @param {string} text */
 const firstSentence = (text) => /^.*?[.!?](?=\s|$)/.exec(text)?.[0] ?? text;
