@@ -13,7 +13,7 @@ import { GROUNDS, palette, proposeGround } from "./palette.js";
 
 /** filmkit.json's "theme" once the brand is written: the folder brand/theme. */
 export const THEME = "brand/theme";
-const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+export const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 /** Angle's accent, which `default` has: the palette's accent when nothing names another. */
 const PEAR = "#e3ef26";
 

@@ -512,7 +512,8 @@ export const CATALOGUE = {
     fix: () => ["For example", "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'"],
     why: "filmkit brand changes only what it's given: --name, --logo (an SVG, or a PNG it embeds), --accent (a hex " +
       "colour), --ground (dark or light) and --font (a Google Fonts family), or --from-url, a website to read the logo, " +
-      "accent, ground and font from. The accent and the ground make the palette, brand/theme/theme.json.",
+      "accent, ground and font from. The accent and the ground make the palette, brand/theme/theme.json. In a " +
+      "terminal, without --yes or --json, it asks for each instead.",
   },
   brand_option: {
     exit: 2,

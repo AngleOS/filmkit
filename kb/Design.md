@@ -93,7 +93,7 @@ user's films.
 | Command | What it does |
 |---|---|
 | `init [dir]` | a studio with the default theme, a smoke film and the agent skill installed |
-| `brand [--from-url] [--name] [--logo] [--accent] [--ground] [--font]` | the studio's brand (§8), given or read from its website (its robots.txt kept to): the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light), with a Google Fonts family (regular to bold, and its licence) in its `fonts/` for titles and text |
+| `brand [--from-url] [--name] [--logo] [--accent] [--ground] [--font] [--yes]` | the studio's brand (§8), given, read from its website (its robots.txt kept to) or, in a terminal, asked for and shown as a still to say yes to: the logo to `brand/logo.svg`, and a palette from the accent and ground, each colour passing WCAG AA on its grounds, as the theme folder `brand/theme` over `default` (dark) or `paper` (light), with a Google Fonts family (regular to bold, and its licence) in its `fonts/` for titles and text |
 | `new <film> [--template t]` | a film from a template: `statement`, `explainer`, `product-demo`, `hook-loop`, `poster` |
 | `check <film> [formats…]` | theme valid, and its text against WCAG AA on each of its grounds (a warning), scenes valid, sound built, `hyperframes check` per format in parallel (with text under the safe box a warning), and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); a live line per running format; non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
@@ -154,7 +154,7 @@ This is the workflow that made the Angle films, written for any agent:
 
 ### 7. Themes (D-007)
 A theme is a folder: `theme.json` (grounds, accent, text, fonts, logo, motif, credit), `tokens.css`, `fonts/`, `logo/`
-and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy) }`. The built-ins are
+and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy), ready?() }` (`ready`, a promise the lockup's scenes build after, such as its display face loading). The built-ins are
 `angle` (the full brand; the reference implementation is `themes/angle/`), `default` (Angle's look with the studio's
 logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points to its own folder, and can override
 single values (`{ "extends": "angle", "accent": "#ff5a1f" }`); a `theme.json` can extend another theme the same way.
