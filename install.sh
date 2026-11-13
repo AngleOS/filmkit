@@ -8,9 +8,7 @@
 # --yes), then runs `filmkit setup` with the same arguments. Setup registers Filmkit's MCP server with your agent tools,
 # makes a studio, sets up your brand and makes a first film.
 #
-# FILMKIT_PKG picks what npx runs: `filmkit` once it's on npm. While the repo is private, it's `github:AngleOS/filmkit`,
-# which needs your git credentials for GitHub. In that case, run this script from a clone, because raw.githubusercontent.com
-# can't serve a private file to curl.
+# FILMKIT_PKG picks what npx runs: `github:AngleOS/filmkit` until Filmkit is on npm, then `filmkit`.
 set -eu
 
 FILMKIT_PKG=${FILMKIT_PKG:-github:AngleOS/filmkit}
