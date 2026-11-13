@@ -29,8 +29,8 @@ test("starts resolve after another clip, with an offset either way", () => {
 });
 
 test("a start after a missing or circular clip is an error", () => {
-  assert.throws(() => sceneStarts(`<div id="a" data-start="nope + 1"></div>`), /no clip "nope" to start from/);
-  assert.throws(() => sceneStarts(`<div id="a" data-start="b"></div><div id="b" data-start="a"></div>`), /start of "a" is circular/);
+  assert.throws(() => sceneStarts(`<div id="a" data-start="nope + 1"></div>`), /"a" starts after "nope", and there's no clip "nope"/);
+  assert.throws(() => sceneStarts(`<div id="a" data-start="b"></div><div id="b" data-start="a"></div>`), /the start of "a" leads back to itself/);
 });
 
 test("SRT and VTT stamp hours, minutes, seconds and milliseconds", () => {

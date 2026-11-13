@@ -1,7 +1,7 @@
 import { homedir } from "node:os";
 import { mcpCommand, parseCommand, registerAgents } from "../../agents/register.js";
 import { TOOLS } from "../../agents/tools.js";
-import { FilmkitError } from "../../studio.js";
+import { fail } from "../../errors.js";
 
 export const usage = "agents [tools…]";
 export const summary = "registers filmkit's MCP server and skill in each agent tool installed (--remove, --dry-run, --mcp-command)";
@@ -17,9 +17,8 @@ const MARK = { configured: "✓", removed: "✓", skipped: "·", failed: "✗" }
 export async function run({ args, options, log }) {
   const ids = TOOLS.map((t) => t.id);
   const unknown = args.filter((a) => !ids.includes(a));
-  if (unknown.length) throw new FilmkitError(`unknown agent tool ${unknown.join(", ")} (tools: ${ids.join(", ")})`);
-  const line = options["mcp-command"];
-  if (line !== undefined && typeof line !== "string") throw new FilmkitError("--mcp-command needs the command that runs filmkit mcp");
+  if (unknown.length) throw fail("unknown_tool", { unknown, tools: ids });
+  const line = /** @type {string | undefined} */ (options["mcp-command"]);
   const command = line ? parseCommand(line) : mcpCommand();
   const dryRun = options["dry-run"] === true;
   const remove = options.remove === true;

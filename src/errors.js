@@ -66,6 +66,12 @@ export const CATALOGUE = {
     why: "Each command takes its own options, plus --json and --studio <dir>, which every command takes. " +
       "`filmkit --help` lists each command with its options.",
   },
+  option_value: {
+    exit: 2,
+    message: ({ command, option, takes }) => `In filmkit ${command}, ${option} ${takes ? "needs a value" : "takes no value"}.`,
+    fix: () => ["See each command's options with", "filmkit --help"],
+    why: "An option that takes a value has it next, as --every 2s or --every=2s; a flag such as --force stands alone.",
+  },
   no_studio: {
     exit: 2,
     message: ({ dir, walked }) => `No filmkit.json in ${dir}${walked ? " or above" : ""}, so there's no studio here.`,
@@ -95,6 +101,35 @@ export const CATALOGUE = {
     fix: ({ themes }) => ["Name one of them, as in", `"theme": "${themes.includes("default") ? "default" : themes[0]}"`],
     why: "A theme is the brand as data: grounds, accent, fonts, logo and motif. filmkit.json names a built-in " +
       "theme, a theme folder in the studio, or single values over one of those; with no \"theme\" it's \"default\".",
+  },
+  theme_missing: {
+    exit: 2,
+    message: ({ file }) => `There's no ${file}.`,
+    fix: () => ["Point \"theme\" at a folder that has one, or name a built-in theme, as in", '"theme": "default"'],
+    why: "A theme folder is known by its theme.json. filmkit.json's \"theme\", and a theme.json's \"extends\", take a " +
+      "built-in theme's name or a folder's path, from the file they're in.",
+  },
+  theme_json: {
+    exit: 2,
+    message: ({ file, error }) => `${file} isn't valid JSON: ${error}.`,
+    fix: ({ at }) => ["Fix it at", at],
+    why: "A theme.json holds the brand as one JSON object. Its keys are quoted, and the last item in a list or object " +
+      "has no trailing comma.",
+  },
+  theme_key: {
+    exit: 2,
+    message: ({ theme, problems }) => `${theme}: ${problems.join("; ")}.`,
+    fix: ({ schema }) => ["Each key is described in", schema],
+    why: "Each theme.json is checked against Filmkit's schema, and so is the theme it makes with its bases: grounds " +
+      "(ink, accent-dark and paper at least), the accent, text and fonts, every colour in hex. docs/themes.md " +
+      "describes each key.",
+  },
+  theme_cycle: {
+    exit: 2,
+    message: ({ file }) => `${file} extends itself.`,
+    fix: () => ["Have it extend another theme, as in", '"extends": "default"'],
+    why: "A theme's \"extends\" names the theme it's based on, and the chain has to end: at a built-in theme, or at " +
+      "a theme.json with no \"extends\".",
   },
   unknown_format: {
     exit: 2,
@@ -156,6 +191,21 @@ export const CATALOGUE = {
       'data-composition-id="main": Filmkit sets its data-width and data-height per format, and reads its ' +
       "data-duration and data-formats.",
   },
+  bad_start: {
+    exit: 2,
+    message: ({ film, problem }) => `films/${film}/index.html: ${problem}.`,
+    fix: () => ["Start it at a time in seconds, or after a clip that's in the film, as in", 'data-start="intro + 0.5"'],
+    why: "A clip's data-start is a time in seconds, or the id of the clip it follows (\"intro\", \"intro + 0.5\", " +
+      "\"intro - 1\"). Filmkit follows those starts to place the sound's cues and the captions, so each has to lead " +
+      "to a time.",
+  },
+  captions_json: {
+    exit: 2,
+    message: ({ film, error }) => `films/${film}/index.html: the captions' data-variable-values isn't valid JSON: ${error}.`,
+    fix: () => ["Write it as one object, as in", `data-variable-values='{"lines": "0.2-2.4 Films are code"}'`],
+    why: "The captions scene's lines are the film's captions, burned in and written to renders/<film>.srt and .vtt, " +
+      "so Filmkit reads them from its data-variable-values: one JSON object, in single quotes in the HTML.",
+  },
   unknown_scene: {
     exit: 2,
     message: ({ film, scene }) => `films/${film}/index.html uses kit/scenes/${scene}.html, and the kit has no scene "${scene}".`,
@@ -175,6 +225,41 @@ export const CATALOGUE = {
     message: () => "Say when, in seconds.",
     fix: ({ film }) => ["For example", `filmkit stills ${film} 2.5`],
     why: "A still is one frame of the film, so stills needs the time to take it at, in seconds from the start.",
+  },
+  bad_times: {
+    exit: 2,
+    message: ({ option, value }) => `${option} ${value} isn't ${option === "--every" ? "a number of seconds" : "a list of times in seconds"}.`,
+    fix: ({ film, option }) => ["For example", `filmkit contact ${film} ${option === "--every" ? "--every 2s" : "--at 0,2.5,6"}`],
+    why: "A contact sheet shows a frame of each scene just after it starts, or one at each time given (--at), or " +
+      "one every few seconds (--every), at most 48 to a sheet so each frame can still be read.",
+  },
+  times_both: {
+    exit: 2,
+    message: () => "Give --every or --at, not both.",
+    fix: ({ film }) => ["For example", `filmkit contact ${film} --every 2s`],
+    why: "A contact sheet shows a frame of each scene just after it starts, or one at each time given (--at), or " +
+      "one every few seconds (--every), at most 48 to a sheet so each frame can still be read.",
+  },
+  past_end: {
+    exit: 2,
+    message: ({ film, late, duration }) => `--at ${late.join(",")} is past the end of ${film}, at ${duration} s.`,
+    fix: ({ film }) => ["See a frame of each scene with", `filmkit contact ${film}`],
+    why: "A contact sheet shows a frame of each scene just after it starts, or one at each time given (--at), or " +
+      "one every few seconds (--every), at most 48 to a sheet so each frame can still be read.",
+  },
+  no_scenes: {
+    exit: 2,
+    message: ({ film }) => `films/${film} has no timed scenes to show.`,
+    fix: ({ film }) => ["Give the times with", `filmkit contact ${film} --at 0,2,4`],
+    why: "A contact sheet shows a frame of each scene just after it starts, or one at each time given (--at), or " +
+      "one every few seconds (--every), at most 48 to a sheet so each frame can still be read.",
+  },
+  too_many_frames: {
+    exit: 2,
+    message: ({ count, max }) => `${count} frames is too many for one sheet, which takes ${max}.`,
+    fix: ({ film, every }) => ["Take one every few seconds, as in", `filmkit contact ${film} --every ${every}s`],
+    why: "A contact sheet shows a frame of each scene just after it starts, or one at each time given (--at), or " +
+      "one every few seconds (--every), at most 48 to a sheet so each frame can still be read.",
   },
   node_missing: {
     exit: 3,
@@ -328,6 +413,41 @@ export const CATALOGUE = {
     why: "A film over 15 s plays better with sound. Filmkit makes it from the motion in sound.json: cues on what " +
       "moves over a tonal pad, mixed to −19 LUFS. A hook loop is silent on purpose.",
   },
+  sound_json: {
+    exit: 2,
+    message: ({ film, error }) => `films/${film}/sound.json isn't valid JSON: ${error}.`,
+    fix: ({ at }) => ["Fix it at", at],
+    why: "sound.json is the film's sound as one JSON object: cues, chords, blooms and pockets placed on its scenes " +
+      "(docs/sound.md). Its keys are quoted, and the last item in a list or object has no trailing comma.",
+  },
+  sound_scene: {
+    exit: 2,
+    message: ({ film, problem, clips }) => `films/${film}/sound.json: ${problem}. Clips: ${list(clips)}.`,
+    fix: ({ clips }) => ["Place it on one of them, as in", `"scene": "${clips[0] ?? "title"}"`],
+    why: "A cue placed on a scene moves with it: \"scene\" is the id of a timed clip in the film's index.html, and " +
+      "\"at\" the seconds into it. So a cue stays on its beat when the scenes before it change length.",
+  },
+  sound_bed: {
+    exit: 2,
+    message: ({ film, bed }) => `films/${film}/sound.json: "bed" is ${JSON.stringify(bed)}, and it has to be a number: the pad's level under the foley, in dB.`,
+    fix: () => ["For example", '"bed": -12'],
+    why: "A sound.json's \"bed\" sets how far the tonal pad sits under the foley, in dB (−12 when it's left out). The foley stays " +
+      "dry, so it's the one level the mix takes.",
+  },
+  sound_empty: {
+    exit: 1,
+    message: ({ film }) => `films/${film}/sound.json places no cues or chords, so there's nothing to hear.`,
+    fix: () => ["Place a cue on a scene, as in", '"cues": [{ "id": "hit", "kind": "impact", "scene": "endcard", "at": 2.7 }]'],
+    why: "The sound comes from what moves: a cue for each hit, whoosh or click on its scene, and chords for the pad " +
+      "under them. A film that should be silent has no sound.json.",
+  },
+  sound_failed: {
+    exit: 1,
+    message: ({ film, why }) => `films/${film}: the sound didn't build: ${why}.`,
+    fix: () => ["See what's missing with", "filmkit doctor"],
+    why: "The sound is rendered in Node (the foley and the pad), then mixed and mastered to −19 LUFS by ffmpeg. When " +
+      "a step fails, `filmkit doctor` checks what it needs.",
+  },
   seam: {
     exit: 1,
     message: ({ format, step, limit }) => `${format}: the loop's last frame doesn't flow into frame 0 (a step of ${step}, over the limit of ${limit}).`,
@@ -335,6 +455,26 @@ export const CATALOGUE = {
     why: "A loop plays again from frame 0 as soon as it ends, so the step from its last frame to frame 0 may be at " +
       "most 1.5 × the median step at its ends (and at least 0.4). Return to frame 0 through an action and hold " +
       "still across the seam, or keep moving at one speed.",
+  },
+  loop_too_short: {
+    exit: 2,
+    message: ({ min }) => `A loop's root needs a data-duration of at least ${min} s, so its seam can be measured.`,
+    fix: () => ["Make it longer, as in", 'data-duration="6"'],
+    why: "The seam gate compares a loop's first and last 9 frames, so it needs 18 of them: 0.6 s at 30 fps.",
+  },
+  seam_unmeasured: {
+    exit: 1,
+    message: ({ format, why }) => `${format}: the seam couldn't be measured: ${why}.`,
+    fix: () => ["See what's missing with", "filmkit doctor"],
+    why: "The seam gate renders a loop's first and last 9 frames with HyperFrames and decodes them with ffmpeg, so " +
+      "it needs Chrome and ffmpeg both.",
+  },
+  unknown_tool: {
+    exit: 2,
+    message: ({ unknown, tools }) => `Filmkit can't register in ${unknown.map((/** @type {string} */ t) => `"${t}"`).join(", ")}. Tools: ${tools.join(", ")}.`,
+    fix: () => ["Register in every one that's installed with", "filmkit agents"],
+    why: "filmkit agents adds Filmkit's MCP server and skill to the agent tools it knows, each by its id. With no " +
+      "ids it does every one that's installed, and leaves the others alone.",
   },
   unknown_code: {
     exit: 2,

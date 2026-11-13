@@ -6,9 +6,9 @@
 // frames smooth the noise between neighbours but not across the seam, which then measures ~1.7× its neighbours.
 import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
+import { fail } from "../errors.js";
 import { ffmpegOutput } from "../ffmpeg.js";
 import { hyperframesAsync, lastWords } from "../hyperframes.js";
-import { FilmkitError } from "../studio.js";
 
 const FLOOR = 0.4;
 const RATIO = 1.5;
@@ -63,7 +63,7 @@ export function gate(first, last) {
  */
 export function seamTimes(duration) {
   const frames = Math.round(duration * FPS);
-  if (!(frames >= 2 * ENDS)) throw new FilmkitError(`a loop's root needs a data-duration of at least ${(2 * ENDS) / FPS} s`);
+  if (!(frames >= 2 * ENDS)) throw fail("loop_too_short", { min: (2 * ENDS) / FPS });
   const at = (/** @type {number} */ k) => (k / FPS).toFixed(6);
   const ends = [...Array(ENDS).keys()];
   return [...ends.map(at), ...ends.map((k) => at(frames - ENDS + k))];

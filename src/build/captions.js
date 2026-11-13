@@ -3,7 +3,7 @@
 // time. Every format is laid out from the same master with the same timing, so one pair of files serves them all.
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { FilmkitError } from "../studio.js";
+import { fail } from "../errors.js";
 import { startTags } from "./html.js";
 
 const SCENE = "kit/scenes/captions.html";
@@ -26,8 +26,8 @@ export function sceneStarts(html) {
   /** @param {string} id @param {string[]} seen @returns {Timing} */
   const resolve = (id, seen) => {
     if (resolved[id]) return resolved[id];
-    if (!clips[id]) throw new Error(`no clip "${id}" to start from`);
-    if (seen.includes(id)) throw new Error(`start of "${id}" is circular`);
+    if (!clips[id]) throw new Error(`"${seen.at(-1)}" starts after "${id}", and there's no clip "${id}"`);
+    if (seen.includes(id)) throw new Error(`the start of "${id}" leads back to itself`);
     const after = clips[id]["data-start"].trim().match(AFTER);
     const prior = after && resolve(after[1], [...seen, id]);
     const start = prior ? prior.start + prior.duration + (after[2] === "-" ? -1 : 1) * +(after[3] ?? 0) : +clips[id]["data-start"];
@@ -76,14 +76,15 @@ export const srt = (lines) => lines.map((l, i) => `${i + 1}\n${stamp(l.start, ",
 export const vtt = (lines) => "WEBVTT\n\n" + lines.map((l) => `${stamp(l.start, ".")} --> ${stamp(l.end, ".")}\n${l.text}\n`).join("\n");
 
 /**
- * The film's caption lines; a broken captions host is a usage error that names the film.
+ * The film's caption lines; a captions host whose values aren't JSON is a usage error that names the film. (openFilm
+ * has checked its starts.)
  * @param {import("../studio.js").Film} film
  */
 export function readCaptions(film) {
   try {
     return captionLines(film.html);
   } catch (e) {
-    throw new FilmkitError(`films/${film.name}/index.html: ${/** @type {Error} */ (e).message}`);
+    throw fail("captions_json", { film: film.name, error: /** @type {Error} */ (e).message });
   }
 }
 

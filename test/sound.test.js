@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { pad } from "../kit/sound/pad.js";
 import { buildSound, loudness, score } from "../src/build/sound.js";
+import { describe } from "../src/errors.js";
 import { FilmkitError, openFilm, openStudio } from "../src/studio.js";
 
 const HTML = `
@@ -49,7 +50,7 @@ test("the score carries the master's canvas, frame rate and length, and sound.js
 });
 
 test("a row in an unknown scene is named", () => {
-  assert.throws(() => score(HTML, { cues: [{ id: "hit", kind: "impact", scene: "gone", at: 1 }] }), /hit: no scene "gone"/);
+  assert.throws(() => score(HTML, { cues: [{ id: "hit", kind: "impact", scene: "gone", at: 1 }] }), { scene: "gone", message: '"hit" is on scene "gone", which index.html doesn\'t have' });
 });
 
 const SHORT = score(HTML.replace('data-duration="12"', 'data-duration="4"'), {
@@ -100,9 +101,16 @@ test("a film without sound.json has no sound, and loses the last one", () => {
 test("a sound.json that places nothing fails the sound, and a bed that isn't a number is a usage error", () => {
   const { dir, studio, film } = studioCopy("fixtures/studio", "hook");
   writeFileSync(join(dir, "films/hook/sound.json"), '{ "cues": [] }');
-  assert.deepEqual(buildSound(studio, film), { built: false, error: "sound.json places no cues or chords, so there's nothing to hear" });
-  writeFileSync(join(dir, "films/hook/sound.json"), '{ "bed": "-12" }');
-  assert.throws(() => buildSound(studio, film), (e) => e instanceof FilmkitError && /films\/hook\/sound\.json: "bed"/.test(e.message));
+  const empty = buildSound(studio, film);
+  assert.deepEqual(empty && !empty.built && [empty.code, empty.error], ["sound_empty", describe("sound_empty", { film: "hook" }).message]);
+  /** @param {string} text sound.json @param {string} code */
+  const fails = (text, code) => {
+    writeFileSync(join(dir, "films/hook/sound.json"), text);
+    assert.throws(() => buildSound(studio, film), (e) => e instanceof FilmkitError && e.code === code && e.exit === 2, code);
+  };
+  fails('{ "bed": "-12" }', "sound_bed");
+  fails('{ "cues": [{ "id": "hit", "kind": "impact", "scene": "gone" }] }', "sound_scene");
+  fails('{ "cues": [', "sound_json");
 });
 
 test("the foley stays dry: sound-sheet never sees the pad's bed, so it is silent until the first cue", { skip: !hasFfmpeg && "no ffmpeg" }, () => {

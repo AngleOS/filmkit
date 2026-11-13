@@ -76,11 +76,11 @@ test("a label too long for its cell keeps the time whole and drops the format", 
 
 test("contact rejects unreadable times before it snapshots anything", () => {
   for (const [args, message] of [
-    [["contact", "hook", "--every", "2s", "--at", "1"], /--every or --at, not both/],
-    [["contact", "hook", "--every", "soon"], /--every soon: say how often/],
-    [["contact", "hook", "--at", "1,x"], /--at 1,x: list times in seconds/],
-    [["contact", "hook", "--at", "1,6"], /--at 6: past the end of hook \(6 s\)/],
-    [["contact", "hook", "--every", "0.1"], /60 frames is too many for one sheet \(at most 48\)/],
+    [["contact", "hook", "--every", "2s", "--at", "1"], /Give --every or --at, not both\. For example: filmkit contact hook --every 2s/],
+    [["contact", "hook", "--every", "soon"], /--every soon isn't a number of seconds\./],
+    [["contact", "hook", "--at", "1,x"], /--at 1,x isn't a list of times in seconds\. For example: filmkit contact hook --at 0,2\.5,6/],
+    [["contact", "hook", "--at", "1,6"], /--at 6 is past the end of hook, at 6 s\. See a frame of each scene with: filmkit contact hook$/m],
+    [["contact", "hook", "--every", "0.1"], /60 frames is too many for one sheet, which takes 48\. Take one every few seconds, as in: filmkit contact hook --every 1s/],
   ]) {
     const { status, stderr } = filmkit(/** @type {string[]} */ (args));
     assert.equal(status, 2, String(args));

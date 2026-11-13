@@ -60,8 +60,13 @@ function parseOptions(name, command, args) {
   try {
     return parseArgs({ args, options: { ...GLOBAL, ...command.options }, allowPositionals: true });
   } catch (e) {
-    const option = /** @type {NodeJS.ErrnoException} */ (e).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION" && /** @type {Error} */ (e).message.match(/'([^']+)'/)?.[1];
-    throw option ? fail("unknown_option", { command: name, option }) : e;
+    const { code, message } = /** @type {NodeJS.ErrnoException} */ (e);
+    const option = message.match(/'(-[^' ]+)/)?.[1];
+    if (code === "ERR_PARSE_ARGS_UNKNOWN_OPTION" && option) throw fail("unknown_option", { command: name, option });
+    // A string option given no value, or a flag given one.
+    const declared = option && { ...GLOBAL, ...command.options }[option.replace(/^--/, "")];
+    if (code === "ERR_PARSE_ARGS_INVALID_OPTION_VALUE" && declared) throw fail("option_value", { command: name, option, takes: declared.type === "string" });
+    throw e;
   }
 }
 
