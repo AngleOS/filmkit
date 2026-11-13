@@ -21,8 +21,8 @@ const CASES = {
     "/p/schema/filmkit.schema.json",
   ],
   unknown_theme: [
-    { theme: "nope", themes: ["angle", "default"] },
-    'There\'s no theme called "nope". Themes: angle, default, or a folder with a theme.json. Name one of them, as in: "theme": "default"',
+    { theme: "nope", themes: ["angle", "default", "paper"] },
+    'There\'s no theme called "nope". Themes: angle, default, paper, or a folder with a theme.json. Name one of them, as in: "theme": "default"',
     '"theme": "default"',
   ],
   unknown_format: [{ formats: ["16:9"], known: FORMATS }, 'There\'s no format called "16:9". Use one of: 16x9 9x16 1x1 4x5', "16x9 9x16 1x1 4x5"],
