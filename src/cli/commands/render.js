@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { readCaptions, writeCaptions } from "../../build/captions.js";
-import { hyperframes } from "../../hyperframes.js";
+import { hyperframesAsync, lastWords } from "../../hyperframes.js";
+import { progress, renderStage } from "../../progress.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 import { checkFilm, lastPass } from "./check.js";
 
@@ -10,13 +11,29 @@ export const summary = "check, then renders/<film>-<format>.mp4 at delivery qual
 export const options = { force: { type: /** @type {const} */ ("boolean") } };
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ args, options, json, log }) {
+export async function run({ args, options, log }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   // Read before the long renders, so a broken captions host fails first rather than after every MP4.
   const lines = readCaptions(film);
-  const force = options.force === true;
-  const checked = await checkFilm(studio, film, resolveFormats(studio, film, args.slice(1)), log, force);
+  const live = progress(log);
+  try {
+    return await renderFilm(studio, film, resolveFormats(studio, film, args.slice(1)), lines, live, options.force === true);
+  } finally {
+    live.close();
+  }
+}
+
+/**
+ * @param {import("../../studio.js").Studio} studio
+ * @param {import("../../studio.js").Film} film
+ * @param {string[]} formats
+ * @param {ReturnType<typeof readCaptions>} lines
+ * @param {import("../../progress.js").Progress} live
+ * @param {boolean} force
+ */
+async function renderFilm(studio, film, formats, lines, live, force) {
+  const checked = await checkFilm(studio, film, formats, live, force);
   if (!checked.ok) return { ...checked, renders: [] };
   const renders = studio.renders;
   mkdirSync(renders, { recursive: true });
@@ -31,18 +48,26 @@ export async function run({ args, options, json, log }) {
     if (!current) {
       // No record while it renders, so an interrupted render is redone next time.
       rmSync(made, { force: true });
-      if (!hyperframes(["render", "-q", "delivery", "-o", path], { cwd: dir, toStderr: json }).ok) {
+      live.step(format, "rendering");
+      const onLine = (/** @type {string} */ line) => {
+        const stage = renderStage(line);
+        if (stage) live.step(format, stage.step, stage);
+      };
+      const run = await hyperframesAsync(["render", "-q", "delivery", "-o", path], { cwd: dir, onLine });
+      live.end(format);
+      if (!run.ok) {
+        live.log([`${format} ✗ render failed`, ...lastWords(run).map((line) => `  ${line}`)].join("\n"));
         failed.push(format);
         continue;
       }
       writeFileSync(made, JSON.stringify({ hash, bytes: statSync(path).size }) + "\n");
     }
     rendered.push({ format, path, seconds: +film.root["data-duration"], bytes: statSync(path).size });
-    log(current ? `${path} unchanged` : path);
+    live.log(current ? `${path} unchanged` : path);
   }
   const { srt, vtt } = writeCaptions(studio, film, lines);
-  if (srt) log(`${srt}\n${vtt}`);
-  if (failed.length) log(`✗ ${film.name}: render failed in ${failed.join(", ")}`);
+  if (srt) live.log(`${srt}\n${vtt}`);
+  if (failed.length) live.log(`✗ ${film.name}: render failed in ${failed.join(", ")}`);
   return { film: film.name, ok: !failed.length, renders: rendered, captions: { srt, vtt }, ...(failed.length && { failed, exit: 4 }) };
 }
 
