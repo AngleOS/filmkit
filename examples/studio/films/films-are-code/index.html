@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- Films are code: Angle Filmkit's argument film (brief.md). The infographic scenes carry it: the export rounds a
+         video editor knows, one edit as four exports, a diff, one master in four frames, a review that catches its own
+         collision, the claims ledger and the loudness. Every line is in the studio's CLAIMS.md. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="47.3" data-width="1920" data-height="1080">
+      <div id="files" data-composition-id="files" data-composition-src="kit/scenes/cards.html" data-start="0" data-duration="5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"cards":"file-text | v3.mp4 | Monday\nfile-text | v4_final.mp4 | Wednesday\nfile-text | v7_final_FINAL.mp4 | Friday, 11:48 pm","highlight":3,"source":"Illustration · made-up file names"}'></div>
+      <div id="files-title" data-composition-id="files-title" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Every change,\nanother *round.*","place":"top","ground":"none","entrance":"none"}'></div>
+      <div id="formats" data-composition-id="formats" data-composition-src="kit/scenes/bars.html" data-start="5" data-duration="3" data-track-index="1" data-track-kind="graphics" data-variable-values='{"data":"16:9: 1\n1:1: 1\n4:5: 1\n9:16: 1","axis":"Exports for one change, by format","source":"The four formats Filmkit renders (README)"}'></div>
+      <div id="exports" data-composition-id="exports" data-composition-src="kit/scenes/counter.html" data-start="8" data-duration="3" data-track-index="1" data-track-kind="graphics" data-variable-values='{"value":4,"from":1,"duration":0.8,"lead":"Exports for one change","sub":"1 change × 4 formats","source":"Derived: 1 change × 4 formats"}'></div>
+      <div id="exports-title" data-composition-id="exports-title" data-composition-src="kit/scenes/title.html" data-start="5" data-duration="6" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"One edit.\nFour *exports.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="diff" data-composition-id="diff" data-composition-src="kit/scenes/code.html" data-start="11" data-duration="6" data-track-index="1" data-track-kind="graphics" data-variable-values='{"title":"films/launch/index.html","lang":"shell","code":"$ git diff\n@@ -14 +14 @@\n-\"text\":\"Launch day is *Monday.*\"\n+\"text\":\"Launch day is *Tuesday.*\"","mark":"Tuesday","markAt":2.8}'></div>
+      <div id="diff-title" data-composition-id="diff-title" data-composition-src="kit/scenes/title.html" data-start="11" data-duration="6" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"A film that’s code\nchanges like *code.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="four" data-composition-id="four" data-composition-src="compositions/four.html" data-start="17" data-duration="7" data-track-index="1" data-track-kind="graphics"></div>
+      <div id="four-title" data-composition-id="four-title" data-composition-src="kit/scenes/title.html" data-start="17" data-duration="7" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"One master.\nFour *frames.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="sheet" data-composition-id="sheet" data-composition-src="kit/scenes/ui.html" data-start="24" data-duration="7" data-track-index="1" data-track-kind="graphics" data-variable-values='{"title":"build/launch/contact-9x16.png"}'></div>
+      <div id="review" data-composition-id="review" data-composition-src="compositions/review.html" data-start="24" data-duration="7" data-track-index="2" data-track-kind="graphics"></div>
+      <div id="review-title" data-composition-id="review-title" data-composition-src="kit/scenes/title.html" data-start="24" data-duration="7" data-track-index="3" data-track-kind="graphics" data-variable-values='{"text":"It looks at\nits own *frames.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="claims" data-composition-id="claims" data-composition-src="kit/scenes/cards.html" data-start="31" data-duration="6" data-hold data-track-index="1" data-track-kind="graphics" data-variable-values='{"cards":"file-text | One master, four frames. | README.md\nfile-text | Sound from the picture. | README.md\ntriangle-alert | On npm as filmkit. | ⚑ not live yet","highlight":3,"source":"Three rows of the studio’s CLAIMS.md"}'></div>
+      <div id="claims-title" data-composition-id="claims-title" data-composition-src="kit/scenes/title.html" data-start="31" data-duration="6" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Every word\nhas a *source.*","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="loudness" data-composition-id="loudness" data-composition-src="kit/scenes/meter.html" data-start="37" data-duration="4.3" data-track-index="1" data-track-kind="graphics" data-variable-values='{"value":-19,"from":-40,"min":-40,"max":0,"style":"level","label":"Loudness, the whole film","suffix":" LUFS","ground":"accent-dark","source":"Mastered to −19 LUFS (docs/sound.md)"}'></div>
+      <div id="loudness-title" data-composition-id="loudness-title" data-composition-src="kit/scenes/title.html" data-start="37" data-duration="4.3" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"Sound from the *motion.*\nNo stock music.","place":"top","ground":"none","entrance":"rise"}'></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="kit/scenes/endcard.html" data-start="41.3" data-duration="6" data-track-index="1" data-track-kind="graphics" data-variable-values='{"claim":"Your agent makes the *film.*","line":"Pre-alpha · MIT","cta":"angleos.github.io/filmkit"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="47.3" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.3-4.8 Every change to a launch film is another round of exports.\n5.3-10.8 One edit means four exports: 16:9, 1:1, 4:5 and 9:16.\n11.3-16.8 A film that’s code changes like code: one line in a diff.\n17.3-23.8 One master becomes four frames, each laid out for its own.\n24.3-30.8 It looks at its own frames, and moves a source line out from under the captions.\n31.3-36.8 Every word on screen has a source in CLAIMS.md.\n37.3-41.1 The sound is made from the motion, mastered to −19 LUFS. No stock music.\n41.6-45.8 Your agent makes the film."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/chart.js"></script>
+    <script src="kit/icons.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
