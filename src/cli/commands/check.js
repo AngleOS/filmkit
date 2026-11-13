@@ -8,6 +8,7 @@ import { describe } from "../../errors.js";
 import { translate } from "../../findings.js";
 import { hyperframesAsync } from "../../hyperframes.js";
 import { pool, slots } from "../../pool.js";
+import { progress } from "../../progress.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "check <film> [formats…] [--force]";
@@ -19,7 +20,7 @@ const PASSED = ".filmkit-hash";
 
 /**
  * @typedef {import("../../findings.js").Finding} Finding
- * @typedef {import("../../build/seam.js").Seam | { ok: false, error: string }} SeamCheck
+ * @typedef {import("../../build/seam.js").SeamCheck} SeamCheck
  * @typedef {{ format: string, dir: string, ok: boolean, errors: Finding[], warnings: Finding[], seam?: SeamCheck }} FormatCheck
  */
 
@@ -27,7 +28,12 @@ const PASSED = ".filmkit-hash";
 export async function run({ args, options, log }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
-  return checkFilm(studio, film, resolveFormats(studio, film, args.slice(1)), log, options.force === true);
+  const live = progress(log);
+  try {
+    return await checkFilm(studio, film, resolveFormats(studio, film, args.slice(1)), live, options.force === true);
+  } finally {
+    live.close();
+  }
 }
 
 /**
@@ -36,16 +42,16 @@ export async function run({ args, options, log }) {
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
  * @param {string[]} formats
- * @param {import("../index.js").Context["log"]} log
+ * @param {import("../../progress.js").Progress} live
  * @param {boolean} [force] check formats that are unchanged too
  */
-export async function checkFilm(studio, film, formats, log, force = false) {
+export async function checkFilm(studio, film, formats, live, force = false) {
   // First: every format mounts the sound, and its hash counts it.
   const sound = buildSound(studio, film);
-  if (sound) log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
-  const checked = await pool(formats, slots(), (format) => checkFormat(studio, film, format, log, force));
+  if (sound) live.log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
+  const checked = await pool(formats, slots(), (format) => checkFormat(studio, film, format, live, force));
   const failed = [...checked.filter((c) => !c.ok).map((c) => c.format), ...(sound && !sound.built ? ["sound"] : [])];
-  log(failed.length ? `✗ ${film.name}: check failed in ${failed.join(", ")}` : `✓ ${film.name}: ${formats.join(", ")}`);
+  live.log(failed.length ? `✗ ${film.name}: check failed in ${failed.join(", ")}` : `✓ ${film.name}: ${formats.join(", ")}`);
   return { film: film.name, ok: !failed.length, formats: checked, sound };
 }
 
@@ -67,11 +73,11 @@ function seamLine(seam, film, format, duration) {
  * @param {import("../../studio.js").Studio} studio
  * @param {import("../../studio.js").Film} film
  * @param {string} format
- * @param {import("../index.js").Context["log"]} log
+ * @param {import("../../progress.js").Progress} live
  * @param {boolean} force
  * @returns {Promise<FormatCheck>}
  */
-async function checkFormat(studio, film, format, log, force) {
+async function checkFormat(studio, film, format, live, force) {
   const started = Date.now();
   const hash = formatHash(studio, film, format);
   const dir = buildDir(studio, film, format);
@@ -81,23 +87,25 @@ async function checkFormat(studio, film, format, log, force) {
   let result;
   if (passed?.hash === hash) {
     result = { format, dir, ok: true, errors: [], warnings: passed.warnings, ...(passed.seam && { seam: passed.seam }) };
-    log(`${format} unchanged ✓`);
+    live.log(`${format} unchanged ✓`);
   } else {
-    log(`${format} checking`);
+    live.step(format, "checking");
     assemble(studio, film, format);
     const where = { film: film.name, format, dir, root: film.root.id ? `#${film.root.id}` : null, duration };
     result = { format, dir, ...findings(await hyperframesAsync(["check", "--json"], { cwd: dir }), where) };
     if (isLoop(film.root)) {
+      live.step(format, "measuring the seam");
       const out = join(studio.dir, "build", film.name, `seam-${format}`);
-      result.seam = measureSeam(dir, duration, out) ?? { ok: false, error: "the seam frames didn't render" };
+      result.seam = await measureSeam(dir, duration, out);
       result.ok &&= result.seam.ok;
     }
     if (result.ok) writeFileSync(join(dir, PASSED), JSON.stringify({ hash, warnings: result.warnings, seam: result.seam }) + "\n");
-    log(`${format} ${result.ok ? "✓" : "✗"} ${((Date.now() - started) / 1000).toFixed(1)} s`);
+    live.end(format);
+    live.log(`${format} ${result.ok ? "✓" : "✗"} ${((Date.now() - started) / 1000).toFixed(1)} s`);
   }
-  for (const e of result.errors) log(`  ✗ ${e.code}: ${e.message}`);
-  for (const w of result.warnings) log(`  ⚠ ${w.code}: ${w.message}`);
-  if (result.seam) log(seamLine(result.seam, film.name, format, duration));
+  for (const e of result.errors) live.log(`  ✗ ${e.code}: ${e.message}`);
+  for (const w of result.warnings) live.log(`  ⚠ ${w.code}: ${w.message}`);
+  if (result.seam) live.log(seamLine(result.seam, film.name, format, duration));
   return result;
 }
 

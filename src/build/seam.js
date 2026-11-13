@@ -7,7 +7,7 @@
 import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { ffmpegOutput } from "../ffmpeg.js";
-import { hyperframes } from "../hyperframes.js";
+import { hyperframesAsync, lastWords } from "../hyperframes.js";
 import { FilmkitError } from "../studio.js";
 
 const FLOOR = 0.4;
@@ -17,7 +17,10 @@ const FPS = 30;
 /** Frames measured at each end. */
 const ENDS = 9;
 
-/** @typedef {{ ok: boolean, step: number, median: number, limit: number }} Seam */
+/**
+ * @typedef {{ ok: boolean, step: number, median: number, limit: number }} Seam
+ * @typedef {Seam | { ok: false, error: string }} SeamCheck
+ */
 
 /**
  * A root with `data-loop` is a loop, held to the seam gate, unless it says "false".
@@ -67,23 +70,25 @@ export function seamTimes(duration) {
 }
 
 /**
- * Snapshots an assembled format's seam frames into `out` and measures them; null when the frames didn't render.
+ * Snapshots an assembled format's seam frames into `out` and measures them, or says why they couldn't be.
  * @param {string} dir  the format's build directory
  * @param {number} duration
  * @param {string} out
- * @returns {Seam | null}
+ * @returns {Promise<SeamCheck>}
  */
-export function measureSeam(dir, duration, out) {
+export async function measureSeam(dir, duration, out) {
   rmSync(out, { recursive: true, force: true });
   const at = seamTimes(duration).join(",");
-  if (!hyperframes(["snapshot", `--at=${at}`, "--no-end", "--describe=false", "-o", out], { cwd: dir, capture: true }).ok) return null;
+  const run = await hyperframesAsync(["snapshot", `--at=${at}`, "--no-end", "--describe=false", "-o", out], { cwd: dir });
+  if (!run.ok) return { ok: false, error: ["the seam frames didn't render", ...lastWords(run).slice(-1)].join(": ") };
   // HyperFrames names each frame for its place and time: frame-03-at-0.1s.png
   const frames = readdirSync(out)
     .map((f) => ({ f, n: f.match(/^frame-(\d+)-at-[\d.]+s\.png$/)?.[1] }))
     .filter(({ n }) => n)
     .sort((a, b) => Number(a.n) - Number(b.n))
     .map(({ f }) => decode(join(out, f)));
-  if (frames.length !== 2 * ENDS || frames.some((f) => !f)) return null;
+  if (frames.length !== 2 * ENDS) return { ok: false, error: `the seam needs ${2 * ENDS} frames and got ${frames.length}` };
+  if (frames.some((f) => !f)) return { ok: false, error: "ffmpeg couldn't decode a seam frame" };
   return gate(/** @type {Buffer[]} */ (frames.slice(0, ENDS)), /** @type {Buffer[]} */ (frames.slice(ENDS)));
 }
 
