@@ -4,7 +4,8 @@ This repo is an Angle Filmkit studio: {{name}}'s films, written in HTML and rend
 videos with `npx filmkit`.
 
 **Before you make or change a film, read the filmkit skill:** `.claude/skills/filmkit/SKILL.md`. It is the workflow:
-brief, research, claims, build, check, look, render, post.
+brief, research, claims, build, check, look, render, post. Before you write a film's HTML, read the HyperFrames skill
+too, `.claude/skills/hyperframes/SKILL.md`: `npx filmkit skills` installs it, matched to the HyperFrames that renders.
 
 - `filmkit.json`: the brand's name, its theme and the default formats.
 - `films/<film>/`: `brief.md` and `index.html`, the master every format is laid out from. `films/smoke` mounts every

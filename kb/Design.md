@@ -104,7 +104,7 @@ user's films.
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
 | `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
 | `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`) |
-| `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
+| `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers); the HyperFrames ones are git-ignored, made again from the pin |
 | `mcp` | the MCP server over stdio |
 
 Every command prints what it wrote, and `--json` prints it machine-readably. How it feels to use (copy, errors,

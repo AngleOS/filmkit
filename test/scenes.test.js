@@ -1,12 +1,16 @@
 // Kit scenes are documented from their own declarations, and the kit carries no brand: the theme draws the motif and
 // the logo through window.KB (D-007).
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
+import { fileURLToPath } from "node:url";
 import { runInNewContext } from "node:vm";
 import { startTags } from "../src/build/html.js";
+import { sceneCatalogue } from "../src/scenes.js";
+import { FilmkitError } from "../src/studio.js";
 import { brandJs, loadTheme } from "../src/theme.js";
 
 const kit = new URL("../kit/", import.meta.url);
@@ -92,4 +96,27 @@ test("the default lockup box is centred on the frame, as wide as its name, and n
   const long = defaultKB("Acme Corporation International").KB.lockupBox(670, 540);
   assert.equal(long.w, 670);
   assert.equal(long.left, (1920 - 670) / 2);
+});
+
+test("the scene catalogue: every kit scene with its comment as the description and its declared variables", () => {
+  const catalogue = sceneCatalogue();
+  assert.deepEqual(catalogue.map((s) => `${s.name}.html`), [...scenes].sort());
+  for (const s of catalogue) assert.ok(s.description.length > 40 && !/\s{2}|-->/.test(s.description), s.name);
+  const [title] = sceneCatalogue("title");
+  assert.match(title.description, /^A title card, or a title over another scene/);
+  const entrance = title.variables.find((v) => v.id === "entrance");
+  assert.deepEqual(entrance?.options?.map((o) => o.value), ["blur", "rise", "ink", "none"]);
+  assert.throws(() => sceneCatalogue("nope"), (e) => e instanceof FilmkitError && e.code === "no_scene" && /Scenes: bars, /.test(e.message));
+});
+
+test("filmkit scenes prints the catalogue, --json gives the scenes shape, and an unknown scene exits 2", () => {
+  /** @param {string[]} args */
+  const filmkit = (args) => spawnSync(process.execPath, [fileURLToPath(new URL("../src/cli/index.js", import.meta.url)), ...args], { encoding: "utf8" });
+  const list = filmkit(["scenes"]);
+  assert.equal(list.status, 0);
+  assert.match(list.stdout, /^bars {9}A bar chart drawn to scale: vertical bars over their labels, or horizontal bars under theirs\.\n/);
+  const one = filmkit(["scenes", "bars", "--json"]);
+  assert.deepEqual(JSON.parse(one.stdout), { ok: true, scenes: sceneCatalogue("bars") });
+  assert.match(filmkit(["scenes", "bars"]).stdout, /\n {2}direction {2}enum, default "vertical": Direction\n {13}one of vertical, horizontal\n/);
+  assert.equal(filmkit(["scenes", "nope"]).status, 2);
 });
