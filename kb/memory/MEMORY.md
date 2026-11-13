@@ -6,3 +6,4 @@
 - [Hyperframes preview watch](hyperframes-preview-watch.md) — How HyperFrames 0.8.186 Studio reloads on file changes, and why filmkit preview copies single files and kills a process group
 - [Svg clip seam](svg-clip-seam.md) — Chrome antialiases an SVG clip-path per shape, so a logo cut in two with clip-path shows its lower shapes as a hairline along the cut; mask the halves and overlap them instead
 - [Hyperframes render progress](hyperframes-render-progress.md) — HyperFrames 0.8.186 render prints @hf-progress JSON lines on a non-TTY stdout (compile, capture, encode, assemble), which filmkit's progress line reads; check and snapshot print none
+- [Ci runners](ci-runners.md) — Where filmkit's CI jobs can run and why — Chrome for Testing is x64-only on Linux, npm provenance needs a GitHub-hosted runner
