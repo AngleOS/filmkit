@@ -5,11 +5,8 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 ## In Review
 
 - [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
-- [Use the npm package now that filmkit@0.1.0 is published](https://github.com/AngleOS/filmkit/issues/135) `filmkit#135`
-
-## In Progress
-
 - [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
+- [Use the npm package now that filmkit@0.1.0 is published](https://github.com/AngleOS/filmkit/issues/135) `filmkit#135`
 
 ## Todo
 
