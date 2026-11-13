@@ -51,7 +51,7 @@ export function contrast(colour, ground) {
  * @param {string} ground
  * @param {number} required
  */
-function passing(colour, ground, required) {
+export function passing(colour, ground, required) {
   const [r, g, b] = rgba(colour);
   const end = luminance(rgba(ground)) < 0.18 ? 255 : 0;
   for (let step = 1; step <= 100; step++) {
@@ -62,7 +62,7 @@ function passing(colour, ground, required) {
 }
 
 /** @param {string} hex #rgb, #rrggbb or #rrggbbaa @returns {number[]} r, g, b from 0 to 255 and alpha from 0 to 1 */
-function rgba(hex) {
+export function rgba(hex) {
   const digits = hex.slice(1).length === 3 ? [...hex.slice(1)].map((d) => d + d).join("") : hex.slice(1);
   const [r, g, b, a = 255] = digits.match(/../g)?.map((d) => parseInt(d, 16)) ?? [];
   return [r, g, b, a / 255];

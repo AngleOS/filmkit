@@ -36,6 +36,10 @@ you can retheme them completely.
 ## Examples
 Short films made with the kit. Each one is a few dozen lines of HTML, and the data is example data.
 
+[`examples/studio`](examples/studio) is Angle Filmkit's own studio: its films with their briefs, sound, claims and
+posting copy, checked in every format by CI. [Films are code](examples/studio/films/films-are-code) is the argument
+film, built on the infographic scenes.
+
 <table>
 <tr>
 <td width="50%"><img src="docs/assets/examples/chart.gif" alt="An infographic on a light theme: 'Signups tripled this quarter.' Four bars rise in turn, their values rolling up to 1.2k, 1.9k, 2.6k and 3.7k; the last bar is in the accent colour."><br><sub><b>Infographic</b> · bars drawn to scale with rolling values, on the light Paper theme</sub></td>

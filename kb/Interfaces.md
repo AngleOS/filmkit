@@ -54,6 +54,11 @@ the MCP server share one implementation: MCP tools call the same functions the C
 // init  (`filmkit init [dir] --json`): what it wrote, and what was already there and kept
 { "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/filmkit.json", "…"], "kept": [] }
 
+// brand  (`filmkit brand [--name n] [--logo file] [--accent hex] [--ground dark|light] --json`); palette only with --accent or --ground
+{ "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/brand/logo.svg", "/abs/acme-films/brand/theme/theme.json", "/abs/acme-films/filmkit.json"],
+  "palette": { "accent": "#ff5a1f", "ground": "dark",
+    "adjusted": [{ "key": "accentOn.paper", "brand": "#ff5a1f", "used": "#cf4919", "ratio": 3.11 }] } }   // where the brand's accent is under 4.5:1 for text, the colour used
+
 // new  (`filmkit new <film> [--template t] --json`)
 { "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }
 
@@ -98,8 +103,8 @@ the MCP server share one implementation: MCP tools call the same functions the C
 | `render_film` | `{ film, formats? }` | the `render` shape; progress notifications while it renders |
 | `captions` | `{ film }` | `{ srt, vtt, lines: [{ start, end, text }] }` |
 | `stills` | `{ film, at: number }` | `{ stills: [{ format, path }], thumbnail? }` |
-| `read_claims` | `{ film? }` | `{ rows: [{ film, line, source, flag }] }` from CLAIMS.md |
-| `add_claim` | `{ film, line, source, flag?: boolean }` | `{ ok: true }` (appends a row) |
+| `read_claims` | `{ film? }` | `{ rows: [{ film, line, kind, source, flag }] }` from CLAIMS.md; `source` without its ⚑ |
+| `add_claim` | `{ film, line, source, kind?: string ("claim"), flag?: boolean }` | `{ ok: true }` (appends a row) |
 
 **Resources** (`filmkit://guide/<name>`): `look-and-motion`, `brief-template`, `claims-format`, `review-checklist`,
 `themes`, read from `skills/filmkit/references/` and `kb/`. **Prompt:** `make_film { brief }`, the workflow from the
