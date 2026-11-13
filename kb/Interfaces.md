@@ -94,8 +94,8 @@ the MCP server share one implementation: MCP tools call the same functions the C
 | `render_film` | `{ film, formats? }` | the `render` shape; progress notifications while it renders |
 | `captions` | `{ film }` | `{ srt, vtt, lines: [{ start, end, text }] }` |
 | `stills` | `{ film, at: number }` | `{ stills: [{ format, path }], thumbnail? }` |
-| `read_claims` | `{ film? }` | `{ rows: [{ film, line, source, flag }] }` from CLAIMS.md |
-| `add_claim` | `{ film, line, source, flag?: boolean }` | `{ ok: true }` (appends a row) |
+| `read_claims` | `{ film? }` | `{ rows: [{ film, line, kind, source, flag }] }` from CLAIMS.md; `source` without its ⚑ |
+| `add_claim` | `{ film, line, source, kind?: string ("claim"), flag?: boolean }` | `{ ok: true }` (appends a row) |
 
 **Resources** (`filmkit://guide/<name>`): `look-and-motion`, `brief-template`, `claims-format`, `review-checklist`,
 `themes`, read from `skills/filmkit/references/` and `kb/`. **Prompt:** `make_film { brief }`, the workflow from the

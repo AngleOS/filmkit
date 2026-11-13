@@ -5,7 +5,7 @@
   "license": "MIT",
   "type": "module",
   "bin": { "filmkit": "src/cli/index.js" },
-  "files": ["src/", "kit/", "themes/", "schema/", "templates/", "skills/", "examples/studio/films/smoke/", "docs/install-with-your-agent.md", "THIRD_PARTY.md"],
+  "files": ["src/", "kit/", "themes/", "schema/", "templates/", "skills/", "examples/studio/films/smoke/", "docs/install-with-your-agent.md", "docs/themes.md", "THIRD_PARTY.md"],
   "engines": { "node": ">=20.12" },
   "scripts": { "test": "node --test", "typecheck": "tsc -p ." },
   "dependencies": { "@clack/prompts": "1.9.0", "@modelcontextprotocol/sdk": "1.32.2", "gsap": "3.15.1", "jsonc-parser": "3.3.1", "zod": "4.6.7" },

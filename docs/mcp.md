@@ -37,11 +37,27 @@ While Filmkit isn't on npm, use `github:AngleOS/filmkit` in place of `filmkit`.
 | `render_film` | `{ film, formats? }` | `filmkit render --json`: the MP4s, their lengths and sizes, and the captions. It checks first; a failed check is a result, a failed render a tool error |
 | `captions` | `{ film }` | `filmkit captions --json`: the `.srt` and `.vtt` it wrote, and the lines |
 | `stills` | `{ film, at }` | `filmkit stills --json`: a poster PNG per format at `at` seconds, and the 16x9 thumbnail |
+| `read_claims` | `{ film? }` | `{ rows: [{ film, line, kind, source, flag }] }`: the rows of `CLAIMS.md`, or one film's. `flag` is a ⚑ row, its `source` without the ⚑ |
+| `add_claim` | `{ film, line, source, kind?, flag? }` | `{ ok: true }`: a row after the film's last one in `CLAIMS.md` (a new section when the film has none). `kind` is `claim` when not given; `flag: true` writes the ⚑ |
 
 `check_film`, `render_film` and `stills` report each step (`16x9 checking`, `16x9 capturing frame 612/1440`) as
 progress notifications when the client sends a `progressToken`, at most one a second while a step goes on. The
 `progress` value counts the notifications, so it only rises; the step is in `message`. A render takes a while, so
 give the client a long tool timeout, reset by progress where it can.
+
+## Resources and the prompt
+The guides are resources, `filmkit://guide/<name>`, in Markdown:
+
+| Resource | What it is |
+|---|---|
+| `look-and-motion` | the look and motion rules every frame follows (`skills/filmkit/references/look-and-motion.md`) |
+| `brief-template` | the brief every film starts from (`references/brief.md`) |
+| `claims-format` | `CLAIMS.md`'s rows and the rules for what a film may say (`references/claims.md`) |
+| `review-checklist` | what to look for after `check_film` passes, and when a film is done (`references/review.md`) |
+| `themes` | the studio's theme: the built-in `angle`, `default` and `paper`, a theme of its own, and the end card's credit (`docs/themes.md`) |
+
+The `make_film { brief }` prompt is the skill's workflow in five steps that name these tools and guides: brief,
+claims, build, check then look, render.
 
 A usage error (no studio, an unknown film or format) is a tool error whose text is the CLI's message, fix included.
 The shapes are a stable contract: [kb/Interfaces.md](../kb/Interfaces.md).
