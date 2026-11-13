@@ -25,12 +25,32 @@ command opens the studio. A mistake is a usage error (exit 2) that names the key
 `filmkit.json: theme.accent: "pear" should be a hex colour such as "#e3ef26"`.
 
 ## Your brand: `filmkit brand`
-`filmkit brand` sets the studio's brand from its accent, its ground and its logo, and changes only what it's given:
+`filmkit brand` sets the studio's brand from its accent, its ground, its logo and its font, and changes only what
+it's given:
 
 ```sh
 npx filmkit brand --name Acme --logo ~/Downloads/acme.svg --accent '#ff5a1f'
 npx filmkit brand --ground light   # the same accent, on white
+npx filmkit brand --font 'IBM Plex Sans'
+npx filmkit brand --from-url acme.com --ground light   # read from the website, the ground given
 ```
+
+- `--from-url`: the brand's website, read for the logo, the accent, the ground and the font; a flag given beside it
+  wins over what the site says. `brand` says what it found and what it didn't, so you can give the rest:
+  - the logo: an SVG in the page's header (the one in a link home or named logo or brand), else the site's SVG icon
+    (`<link rel=icon>`), else its Apple touch icon, else its `og:image` when that's a PNG;
+  - the accent: a CSS custom property named for the brand, primary or accent colour, else the page's `theme-color`,
+    else its pinned-tab colour, else the logo's commonest colour, passing over greys, near-black and near-white;
+  - the ground: the page's background, from `--background` or `--bg` or the `body`'s, light or dark; a dark-scheme
+    override doesn't count, as the site's own ground is the one people know;
+  - the font: the first Google Fonts family the page or its CSS loads, else the `body`'s font, else its first
+    `@font-face`, passing over code fonts. A family on Google Fonts is downloaded as `--font`'s is; one that isn't
+    can't be copied, as its licence doesn't let it ship, so the theme keeps its type and `brand` names an open font
+    like it to give as `--font`, where it knows one (Inter for Graphik or Helvetica, say).
+
+  It reads the page, the stylesheets it links (up to 8, not Google's) and the logo, once each, and no other page.
+  It asks `robots.txt` first and keeps to it, as `filmkit` or else as any agent, and sends one user agent,
+  `filmkit (+https://github.com/AngleOS/filmkit)`, so a site can tell it apart.
 
 - `--logo`: an SVG is copied as it is to `brand/logo.svg`, the mark the logo reveal and the end card draw (see
   [the studio's logo](#the-studios-logo)); a PNG is embedded in an SVG at its own size.
@@ -39,7 +59,27 @@ npx filmkit brand --ground light   # the same accent, on white
   Given one of the two, the other comes from the brand already written: its ground, and the brand's own accent, not
   one adjusted for text, so switching the ground back and forth never drifts the colour. On a first run, the accent is
   the studio's theme's, built-in, a folder or set in `filmkit.json`, else Pear.
+- `--font`: a family from [Google Fonts](https://fonts.google.com), named as it spells it, for titles and text; code
+  stays in Geist Mono. Google's fonts are all under open licences (OFL, Apache 2.0 or the Ubuntu Font Licence), so
+  `brand` downloads the family's regular, medium, semibold and bold (those it has) into `brand/theme/fonts`, as
+  `Inter-600.ttf` and so on, with its licence from [google/fonts](https://github.com/google/fonts) as `Inter-OFL.txt`,
+  and writes them into the theme's `fonts`. Titles take the semibold, or the heaviest weight there is. The files are
+  whole TrueType fonts, not subsets, so text in any script the family covers renders, and films never fetch a font
+  while they render. The font stays when `brand` runs again without `--font`; another `--font` deletes the files the
+  last one downloaded and replaces the theme's `fonts`. For a font that isn't on Google Fonts, put its files in
+  `brand/theme/fonts` and name them in the theme's `fonts` yourself (see [a theme folder](#a-theme-folder)), keeping
+  to fonts whose licence lets them ship: `--font` leaves those files alone, but a later `--font` rewrites `fonts`. (It
+  knows its own files by the family the theme's `description` records, "--font last downloaded Inter from Google
+  Fonts.", not by `fonts`, which may name a font added since.)
 - `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
+
+In a terminal, `filmkit brand` with none of these (the name aside) asks instead: the website first, then the logo, the
+accent, light or dark and the font, each the site didn't give. For a site's font that Google Fonts doesn't have, the
+font question starts from an open one like it. An empty answer keeps what the brand has. With the brand written, it
+opens a still in it, the [poster](../templates/poster/index.html) template's mark and line in 16:9, at
+`build/brand-still/still.png`, and asks whether it looks right; a no asks again, each question starting from the brand
+the still showed. Given flags, it only shows the still and asks. `--yes`, `--json` or a pipe ask nothing, so an agent
+runs it from flags alone; `setup` in a terminal asks the same questions as its brand step.
 
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
 so the brand keeps Angle's motif, type and motion (D-007), and `filmkit.json`'s `theme` becomes `"brand/theme"`.
@@ -93,6 +133,9 @@ and buttons: where the brand's own colour falls short, the theme takes the neare
   - `lockupBox(w, cy)` is the lockup's box at width `w`, centred across the frame on `cy`:
     `{ w, h, left, top, markCx, shift }`. `markCx` is the mark's centre from the box's left edge, and `shift` is how
     far the mark steps left as the wordmark wipes in. Both are in pixels.
+  - `ready()`, optional, returns a promise the mark and endcard scenes wait for before they lay the lockup out. A
+    lockup that measures its name in the display face, as `default`'s does, loads that face first: a scene lays out
+    before the theme's fonts load.
 
   Colour it with the custom properties (`--brand-mark`, `--brand-word`, `--brand-line`, `--accent`), never literals,
   so `.on-paper` restyles it. Give gradients and clip paths ids with a counter: a film can mount a scene more than

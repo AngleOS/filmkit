@@ -170,7 +170,7 @@ const CASES = {
   ],
   brand_nothing: [
     {},
-    "Say what to set for the brand: its name, logo, accent or ground. For example: filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
+    "Say what to set for the brand: its name, logo, accent, ground or font, or a website to read them from. For example: filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
     "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'",
   ],
   brand_option: [
@@ -184,6 +184,26 @@ const CASES = {
     "filmkit brand --logo brand/acme.svg",
   ],
   bad_logo: [{ file: "/s/acme.jpg" }, "/s/acme.jpg isn't an SVG or a PNG. Export the logo as an SVG, then: filmkit brand --logo logo.svg", "filmkit brand --logo logo.svg"],
+  font_unknown: [
+    { family: "Intre" },
+    'Google Fonts has no family called "Intre". Give its name as fonts.google.com spells it, as in: filmkit brand --font \'IBM Plex Sans\'',
+    "filmkit brand --font 'IBM Plex Sans'",
+  ],
+  font_fetch: [
+    { url: "https://fonts.googleapis.com/css2", reason: "HTTP 503" },
+    "filmkit brand couldn't fetch https://fonts.googleapis.com/css2: HTTP 503. Check the network, then run it again, as in: filmkit brand --font Inter",
+    "filmkit brand --font Inter",
+  ],
+  site_fetch: [
+    { url: "https://acme.test/", reason: "HTTP 403" },
+    "filmkit brand couldn't read https://acme.test/: HTTP 403. Check the address and the network, or give the brand's parts yourself, as in: filmkit brand --logo logo.svg --accent '#ff5a1f'",
+    "filmkit brand --logo logo.svg --accent '#ff5a1f'",
+  ],
+  site_robots: [
+    { url: "https://acme.test/" },
+    "https://acme.test/'s robots.txt asks filmkit not to read it. Give the brand's parts yourself, as in: filmkit brand --logo logo.svg --accent '#ff5a1f'",
+    "filmkit brand --logo logo.svg --accent '#ff5a1f'",
+  ],
   option_choice: [
     { command: "setup", option: "--ground", value: "grey", choices: ["dark", "light"] },
     'In filmkit setup, --ground is dark or light, not "grey". For example: --ground dark',

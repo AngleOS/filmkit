@@ -508,10 +508,12 @@ export const CATALOGUE = {
   },
   brand_nothing: {
     exit: 2,
-    message: () => "Say what to set for the brand: its name, logo, accent or ground.",
+    message: () => "Say what to set for the brand: its name, logo, accent, ground or font, or a website to read them from.",
     fix: () => ["For example", "filmkit brand --name Acme --logo acme.svg --accent '#ff5a1f'"],
     why: "filmkit brand changes only what it's given: --name, --logo (an SVG, or a PNG it embeds), --accent (a hex " +
-      "colour) and --ground (dark or light). The accent and the ground make the palette, brand/theme/theme.json.",
+      "colour), --ground (dark or light) and --font (a Google Fonts family), or --from-url, a website to read the logo, " +
+      "accent, ground and font from. The accent and the ground make the palette, brand/theme/theme.json. In a " +
+      "terminal, without --yes or --json, it asks for each instead.",
   },
   brand_option: {
     exit: 2,
@@ -533,6 +535,36 @@ export const CATALOGUE = {
     fix: () => ["Export the logo as an SVG, then", "filmkit brand --logo logo.svg"],
     why: "The logo's mark is drawn as SVG: an SVG is kept as it is, a PNG is embedded in one at its own size. An SVG " +
       "stays sharp at every size and can take the accent (draw it in currentColor).",
+  },
+  font_unknown: {
+    exit: 2,
+    message: ({ family }) => `Google Fonts has no family called "${family}".`,
+    fix: () => ["Give its name as fonts.google.com spells it, as in", "filmkit brand --font 'IBM Plex Sans'"],
+    why: "filmkit brand --font takes a family from Google Fonts, whose fonts are all under open licences, so their " +
+      "files can ship in the studio. It copies the regular to bold weights and the licence into brand/theme/fonts. For a " +
+      "font that isn't there, add its files and faces to brand/theme/theme.json (docs/themes.md).",
+  },
+  font_fetch: {
+    exit: 1,
+    message: ({ url, reason }) => `filmkit brand couldn't fetch ${url}: ${reason}.`,
+    fix: () => ["Check the network, then run it again, as in", "filmkit brand --font Inter"],
+    why: "filmkit brand --font downloads the family's files from Google Fonts once, into brand/theme/fonts; films " +
+      "read them from there, so rendering never needs the network.",
+  },
+  site_fetch: {
+    exit: 1,
+    message: ({ url, reason }) => `filmkit brand couldn't read ${url}: ${reason}.`,
+    fix: () => ["Check the address and the network, or give the brand's parts yourself, as in", "filmkit brand --logo logo.svg --accent '#ff5a1f'"],
+    why: "filmkit brand --from-url reads the site's page, the stylesheets it links and its logo, once, as filmkit's " +
+      "own user agent. A site that's down, or turns away requests that aren't from a browser, can't be read; the " +
+      "flags set the same things by hand.",
+  },
+  site_robots: {
+    exit: 1,
+    message: ({ url }) => `${url}'s robots.txt asks filmkit not to read it.`,
+    fix: () => ["Give the brand's parts yourself, as in", "filmkit brand --logo logo.svg --accent '#ff5a1f'"],
+    why: "filmkit brand --from-url keeps to the site's robots.txt: where it turns filmkit or every agent away from the " +
+      "page, filmkit doesn't read it. Download the logo and pick the colour by hand instead.",
   },
   unknown_code: {
     exit: 2,

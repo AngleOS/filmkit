@@ -1,0 +1,5 @@
+@font-face{font-family:'__Inter_6c3f8b';font-style:normal;font-weight:100 900;src:url(/_next/static/media/inter.woff2) format('woff2')}
+@font-face{font-family:'__Inter_Fallback_6c3f8b';src:local("Arial")}
+.__className_6c3f8b{font-family:'__Inter_6c3f8b','__Inter_Fallback_6c3f8b'}
+:root{--background:#0b0b0f;--primary:hsl(262 83% 58%)}
+body{background:var(--background)}

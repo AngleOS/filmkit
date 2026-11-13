@@ -31,7 +31,8 @@ Do this, step by step, and tell me what you did at each step:
      npx -y filmkit setup --yes --studio <dir> --name "<name>" [--brand-url <url>] [--logo <file>] [--ground dark|light]
    This also makes a first film, films/hello, from the statement template. Run
    `npx -y filmkit stills hello 1` in the studio and show me the 16:9 still. Ask whether the colours and logo
-   look right; adjust filmkit.json's theme until I say yes.
+   look right; change them with `npx -y filmkit brand --accent '<hex>'` (or `--ground`, `--logo`,
+   `--font <Google Fonts family>`) in the studio until I say yes.
 
 4. Finish the first film, the `hello` film setup made (don't make a new one). Use the filmkit MCP tools if they're
    loaded in this session; otherwise use the CLI.

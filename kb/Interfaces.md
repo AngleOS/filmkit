@@ -54,10 +54,14 @@ the MCP server share one implementation: MCP tools call the same functions the C
 // init  (`filmkit init [dir] --json`): what it wrote, and what was already there and kept
 { "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/filmkit.json", "…"], "kept": [] }
 
-// brand  (`filmkit brand [--name n] [--logo file] [--accent hex] [--ground dark|light] --json`); palette only with --accent or --ground
+// brand  (`filmkit brand [--from-url site] [--name n] [--logo file] [--accent hex] [--ground dark|light] [--font family] --json`); palette
+// whenever brand/theme is written (--accent, --ground, --font, or --name over a brand already there); font with --font, or
+// a site's font Google Fonts has; site only with --from-url: what the site gave, null where it gave nothing
 { "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/brand/logo.svg", "/abs/acme-films/brand/theme/theme.json", "/abs/acme-films/filmkit.json"],
   "palette": { "accent": "#ff5a1f", "ground": "dark",
-    "adjusted": [{ "key": "accentOn.paper", "brand": "#ff5a1f", "used": "#cf4919", "ratio": 3.11 }] } }   // where the brand's accent is under 4.5:1 for text, the colour used
+    "adjusted": [{ "key": "accentOn.paper", "brand": "#ff5a1f", "used": "#cf4919", "ratio": 3.11 }] },   // where the brand's accent is under 4.5:1 for text, the colour used
+  "font": { "family": "Inter", "weights": [400, 500, 600, 700], "licence": "Inter-OFL.txt" },   // licence null when google/fonts has none under the family's name
+  "site": { "url": "https://acme.com/", "logo": "its SVG icon", "accent": "#ff5a1f", "ground": null, "font": "Inter" } }   // logo: where it came from
 
 // new  (`filmkit new <film> [--template t] --json`)
 { "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }
