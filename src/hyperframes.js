@@ -44,20 +44,27 @@ export function hyperframesAsync(args, { cwd }) {
   });
 }
 
+/** The one-liner's exit when it found the package but no dist/skills in it. */
+const NO_SKILLS = 9;
+
 /**
  * The skills the pinned package ships (its dist/skills), written for the CLI that renders. npx puts the package's bin
  * folder on the PATH of what it runs, so a node one-liner run there finds the package beside it, on any platform.
  */
 export function hyperframesSkills() {
   const find = `const { join, delimiter } = require("node:path");
-    const dir = process.env.PATH.split(delimiter).map((d) => join(d, "..", "hyperframes", "dist", "skills"))
-      .find((d) => require("node:fs").existsSync(d));
-    if (dir) console.log(dir); else process.exit(1);`;
+    const { existsSync } = require("node:fs");
+    const pkg = process.env.PATH.split(delimiter).map((d) => join(d, "..", "hyperframes"))
+      .find((d) => existsSync(join(d, "package.json")));
+    if (!pkg) process.exit(1);
+    console.log(join(pkg, "dist", "skills"));
+    if (!existsSync(join(pkg, "dist", "skills"))) process.exit(${NO_SKILLS});`;
   const { status, stdout, error } = spawnSync("npx", ["--yes", "-p", HYPERFRAMES, "node", "-e", find], {
     stdio: ["ignore", "pipe", 2],
     encoding: "utf8",
   });
   if (error) throw npxError(error);
+  if (status === NO_SKILLS) throw fail("hyperframes_no_skills", { dir: stdout.trim() });
   if (status !== 0) throw fail("hyperframes_offline");
   return stdout.trim();
 }
