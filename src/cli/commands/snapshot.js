@@ -16,6 +16,9 @@ export async function run({ args, options, json, log }) {
   const out = join(studio.dir, "build", film.name, `snaps-${format}`);
   rmSync(out, { recursive: true, force: true });
   const flags = [["--at", options.at], ["--frames", options.frames]].flatMap(([k, v]) => (v ? [`${k}=${v}`] : []));
+  // Only the asked times (no end frame), and no Gemini description when GEMINI_API_KEY happens to be set.
+  if (options.at) flags.push("--no-end");
+  flags.push("--describe=false");
   const { ok } = hyperframes(["snapshot", "-o", out, ...flags], { cwd: assemble(studio, film, format), toStderr: json });
   const files = ok ? readdirSync(out).sort() : [];
   // HyperFrames names each frame for its time: frame-03-at-6.5s.png

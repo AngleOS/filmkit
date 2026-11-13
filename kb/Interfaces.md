@@ -78,7 +78,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
 ## MCP tools (`filmkit mcp`, server name `filmkit`, title "Angle Filmkit")
 | Tool | Input | Returns |
 |---|---|---|
-| `list_films` | none | `{ films: [{ name, formats, loop, duration }] }` |
+| `list_films` | none | `{ films: [{ name, formats, loop, duration }] }`; a film that doesn't open has `{ name, error }` |
 | `list_scenes` | `{ name? }` | the `scenes` shape |
 | `new_film` | `{ name, template?: "statement" \| "explainer" \| "product-demo" \| "hook-loop" \| "poster" }` | `{ film, files: [paths] }` |
 | `check_film` | `{ film, formats?: [..] }` | the `check` shape; `isError` stays false for a failed check (the failure is data) |
