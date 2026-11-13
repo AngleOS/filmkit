@@ -3,3 +3,4 @@
 - [Composition variables quoting](composition-variables-quoting.md) — an apostrophe in a data-composition-variables label ends the single-quoted attribute and breaks the scene's JSON
 - [Ffmpeg without drawtext](ffmpeg-without-drawtext.md) — Homebrew's ffmpeg 8 has no drawtext filter, so filmkit draws text into images itself (contact sheet labels)
 - [Gsap shorthand px](gsap-shorthand-px.md) — gsap.set leaves a bare number on padding and gap unset; pass px strings
+- [Hyperframes preview watch](hyperframes-preview-watch.md) — How HyperFrames 0.8.186 Studio reloads on file changes, and why filmkit preview copies single files and kills a process group

@@ -1,6 +1,6 @@
-// One hash of everything a format is made from: its sources' paths and contents, the format, the HyperFrames pin and
-// filmkit's version. `check` skips a format whose hash still matches its last pass, and `render` keeps an MP4 made
-// from the same hash. Contents count, not mtimes, so a fresh checkout or a copied studio still matches.
+// One hash of everything a format is made from: its sources' paths and contents, the theme's values, the format, the
+// HyperFrames pin and filmkit's version. `check` skips a format whose hash still matches its last pass, and `render`
+// keeps an MP4 made from the same hash. Contents count, not mtimes, so a fresh checkout or a copied studio still matches.
 import { createHash } from "node:crypto";
 import { lstatSync, readFileSync, readdirSync, readlinkSync, realpathSync, statSync } from "node:fs";
 import { join } from "node:path";

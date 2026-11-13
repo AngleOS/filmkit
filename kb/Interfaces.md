@@ -35,7 +35,8 @@ the MCP server share one implementation: MCP tools call the same functions the C
     { "format": "9x16", "ok": false, "errors": [{ "code": "text_box_overflow", "message": "…", "selector": "#src" }], "warnings": [],
       "seam": { "ok": true, "step": 0.21, "median": 0.12, "limit": 0.4 } }      // loops only; { ok: false, error } when its frames didn't render
   ],
-  "sound": { "built": true, "lufs": -19.0 } }
+  "sound": { "built": true, "path": "/abs/build/launch/sound.m4a", "lufs": -19.0, "truePeak": -1.2 } }
+  // sound: null for a film without sound.json; { "built": false, "error": "…" } fails the check
 
 // snapshot / contact
 { "film": "launch", "format": "9x16", "frames": [{ "t": 4.5, "path": "/abs/build/launch/snaps-9x16/frame-00-4.500.png" }] }

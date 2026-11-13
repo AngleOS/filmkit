@@ -14,8 +14,9 @@ function hook() {
   return { studio, film: openFilm(studio, "hook") };
 }
 
-test("build/<film>/<format>/ holds the film sized for the format", () => {
+test("build/<film>/<format>/ holds the film sized for the format, and leaves sound.json out", () => {
   const { studio, film } = hook();
+  writeFileSync(join(film.dir, "sound.json"), '{ "cues": [] }');
   const out = assemble(studio, film, "9x16");
   assert.equal(out, join(studio.dir, "build", "hook", "9x16"));
   const root = rootTag(readFileSync(join(out, "index.html"), "utf8")).attrs;
@@ -32,6 +33,23 @@ test("the kit, GSAP and the theme are copied in, never linked", () => {
   for (const file of ["kit/layout.js", "kit/motion.js", "kit/film.css", "kit/scenes/title.html", "kit/vendor/gsap.min.js", "kit/theme/theme.css", "kit/theme/brand.js", "kit/theme/fonts/OFL.txt"]) {
     assert.ok(lstatSync(join(out, file)).isFile(), file);
   }
+});
+
+test("the film's built sound is copied in and mounted; kit/sound/ stays out", () => {
+  const { studio, film } = hook();
+  mkdirSync(join(studio.dir, "build", "hook"), { recursive: true });
+  writeFileSync(join(studio.dir, "build", "hook", "sound.m4a"), "aac");
+  const out = assemble(studio, film, "9x16");
+  assert.equal(readFileSync(join(out, "sound.m4a"), "utf8"), "aac");
+  assert.match(readFileSync(join(out, "index.html"), "utf8"), /<audio id="sound" class="clip" src="sound\.m4a"/);
+  assert.ok(!existsSync(join(out, "kit", "sound")));
+});
+
+test("a film with no built sound mounts none", () => {
+  const { studio, film } = hook();
+  const out = assemble(studio, film, "9x16");
+  assert.ok(!existsSync(join(out, "sound.m4a")));
+  assert.doesNotMatch(readFileSync(join(out, "index.html"), "utf8"), /<audio/);
 });
 
 test("the theme's folders are copied base first, with theme.css compiled from their theme.json", () => {
