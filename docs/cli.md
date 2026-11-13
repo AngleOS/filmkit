@@ -101,7 +101,8 @@ stderr. Global options (`--json`, `--studio`) may come before or after the comma
 
 **Errors.** Every error names the thing, says what's wrong and ends with the fix, as a command where there is one:
 `No film called "launch" in this studio. Films: hello, smoke. Make it with: filmkit new launch`. They come from one
-catalogue, `src/errors.js`, each with a code; `filmkit explain <code>` says why it exists and how to fix it.
+catalogue, `src/errors.js`, each with a code; `filmkit explain <code>` says why it exists and how to fix it. A syntax
+error in `filmkit.json`, a `theme.json` or a film's `sound.json` points at its line and column.
 
 **Check findings** point at the frame: the format, the time, the element by its text, what it collides with, and the
 snapshot that shows it:

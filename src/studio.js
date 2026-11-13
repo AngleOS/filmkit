@@ -3,8 +3,10 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { sceneStarts } from "./build/captions.js";
 import { startTags } from "./build/html.js";
 import { fail } from "./errors.js";
+import { readJson } from "./json.js";
 import { validate } from "./schema.js";
 import { loadTheme } from "./theme.js";
 
@@ -32,29 +34,11 @@ export function openStudio(dir) {
   const root = dir ? resolve(dir) : findStudio(process.cwd());
   const file = join(root, "filmkit.json");
   if (!root || !existsSync(file)) throw fail("no_studio", { dir: dir ? root : process.cwd(), walked: !dir });
-  const config = readConfig(file);
+  const config = readJson(file, "config_json");
   const problems = validate(config);
   if (problems.length) throw fail("config_key", { problems, schema: join(PACKAGE, "schema", "filmkit.schema.json") });
   const theme = loadTheme(root, config.theme);
   return { dir: root, name: config.name ?? basename(root), formats: config.formats ?? FORMATS, theme, renders: resolve(root, config.renders ?? "renders") };
-}
-
-/**
- * filmkit.json's value, for the schema to check; a syntax error points at its line and column.
- * @param {string} file
- * @returns {any}
- */
-function readConfig(file) {
-  const text = readFileSync(file, "utf8");
-  try {
-    return JSON.parse(text);
-  } catch (e) {
-    const { message } = /** @type {Error} */ (e);
-    const position = +(message.match(/at position (\d+)/)?.[1] ?? text.length);
-    const before = text.slice(0, position).split("\n");
-    const error = message.replace(/ in JSON at position.*/, "").replace(/\.$/, "");
-    throw fail("config_json", { error, at: `${file}:${before.length}:${before[before.length - 1].length + 1}` });
-  }
 }
 
 /** @param {string} from @returns {string} the directory, or "" when there's none */
@@ -81,6 +65,11 @@ export function openFilm(studio, name) {
   const tags = startTags(html);
   const root = tags.find((t) => t.attrs["data-composition-id"] === "main");
   if (!root) throw fail("no_root", { film: name });
+  try {
+    sceneStarts(html);
+  } catch (e) {
+    throw fail("bad_start", { film: name, problem: /** @type {Error} */ (e).message });
+  }
   const scenes = readdirSync(join(PACKAGE, "kit", "scenes")).map((f) => f.replace(/\.html$/, ""));
   for (const tag of tags) {
     const scene = tag.attrs["data-composition-src"]?.match(/^kit\/scenes\/(.+)\.html$/)?.[1];

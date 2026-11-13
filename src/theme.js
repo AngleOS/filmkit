@@ -9,10 +9,12 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validate } from "./schema.js";
-import { FilmkitError, fail } from "./errors.js";
+import { fail } from "./errors.js";
+import { readJson } from "./json.js";
 
 // Not from studio.js's PACKAGE: studio.js imports this module, so its constants aren't set yet when this one loads.
 const THEMES = fileURLToPath(new URL("../themes", import.meta.url));
+const SCHEMA = fileURLToPath(new URL("../schema/filmkit.schema.json", import.meta.url));
 /** A built-in theme is named plainly; anything with a slash or a dot is a folder. */
 const BUILT_IN = /^[a-z0-9-]+$/;
 /** The end card's credit when a theme says only `"credit": true` (D-007). */
@@ -51,7 +53,7 @@ export function loadTheme(studio, ref = "default") {
   if (values.fonts) values.fonts = { ...values.fonts, faces };
   const dirs = layers.map((l) => l.dir).filter(Boolean);
   const problems = [...validate(values, "complete"), ...missingFaces(values, dirs)];
-  if (problems.length) throw new FilmkitError(`theme "${name}": ${problems.join("; ")}`);
+  if (problems.length) throw fail("theme_key", { theme: `theme "${name}"`, problems, schema: SCHEMA });
   const logo = /** @type {{ mark?: string } | undefined} */ (values.logo);
   const marks = [join(studio, "brand", "logo.svg"), ...(logo?.mark ? dirs.map((d) => join(d, /** @type {string} */ (logo.mark))).reverse() : [])];
   return { name, dirs, values, mark: marks.find((f) => existsSync(f)) };
@@ -72,17 +74,12 @@ function chain(ref, from, studio, seen) {
   const shown = builtIn ? `theme "${ref}"` : relative(studio, file);
   if (!existsSync(file)) {
     if (builtIn) throw fail("unknown_theme", { theme: ref, themes: readdirSync(THEMES) });
-    throw new FilmkitError(`no ${shown}`);
+    throw fail("theme_missing", { file: shown });
   }
-  if (seen.includes(dir)) throw new FilmkitError(`${shown} extends itself`);
-  let values;
-  try {
-    values = JSON.parse(readFileSync(file, "utf8"));
-  } catch (e) {
-    throw new FilmkitError(`${shown}: ${/** @type {Error} */ (e).message}`);
-  }
+  if (seen.includes(dir)) throw fail("theme_cycle", { file: shown });
+  const values = readJson(file, "theme_json", { file: shown });
   const problems = validate(values, "theme").concat(values?.constructor === Object ? [] : ["it should be an object"]);
-  if (problems.length) throw new FilmkitError(`${shown}: ${problems.join("; ")}`);
+  if (problems.length) throw fail("theme_key", { theme: shown, problems, schema: SCHEMA });
   const base = typeof values.extends === "string" ? chain(values.extends, dir, studio, [...seen, dir]) : [];
   return [...base, { dir, values }];
 }

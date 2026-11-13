@@ -49,7 +49,7 @@ export async function run({ args, options, log }) {
 export async function checkFilm(studio, film, formats, live, force = false) {
   // First: every format mounts the sound, and its hash counts it.
   const sound = buildSound(studio, film);
-  if (sound) live.log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ sound: ${sound.error}`);
+  if (sound) live.log(sound.built ? `♪ ${sound.path}: ${sound.lufs} LUFS, ${sound.truePeak} dBTP` : `✗ ${sound.code}: ${sound.error}`);
   // The theme is the same in every format, so its contrast is checked once, and warned about rather than failed: a
   // brand's colours are its own, and the rendered frames' contrast check fails the text that's really on screen.
   const warnings = themeWarnings(studio.theme);
@@ -79,7 +79,7 @@ export function themeWarnings({ values }) {
  * @param {number} duration
  */
 function seamLine(seam, film, format, duration) {
-  if ("error" in seam) return `  ✗ seam: ${seam.error}`;
+  if ("error" in seam) return `  ✗ seam_unmeasured: ${describe("seam_unmeasured", { format, why: seam.error }).message}`;
   if (seam.ok) return `  ✓ seam: step ${seam.step}, limit ${seam.limit} (median step at the ends ${seam.median})`;
   // The last frame at 30 fps, and frame 0 after it.
   const end = Math.floor((duration - 1 / 30) * 100) / 100;

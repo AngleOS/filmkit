@@ -3,7 +3,8 @@ import { join } from "node:path";
 import { assemble } from "../../build/assemble.js";
 import { MAX_FRAMES, contactTimes, tile } from "../../build/contact.js";
 import { hyperframes } from "../../hyperframes.js";
-import { FilmkitError, openFilm, openStudio, resolveFormats } from "../../studio.js";
+import { fail } from "../../errors.js";
+import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 
 export const usage = "contact <film> [formats…] [--every 2s | --at t,t,…]";
 export const summary = "a labelled contact sheet per format, build/<film>/contact-<format>.png: each scene just after it starts, or at the times given";
@@ -14,11 +15,12 @@ export async function run({ args, options, json, log }) {
   const studio = openStudio(/** @type {string | undefined} */ (options.studio));
   const film = openFilm(studio, args[0]);
   const formats = resolveFormats(studio, film, args.slice(1));
-  const times = contactTimes(film, when(/** @type {string | undefined} */ (options.every), /** @type {string | undefined} */ (options.at)));
-  const late = times.filter((t) => t >= +film.root["data-duration"]);
-  if (late.length) throw new FilmkitError(`--at ${late.join(",")}: past the end of ${film.name} (${film.root["data-duration"]} s)`);
-  if (!times.length) throw new FilmkitError(`films/${film.name} has no scenes to look at: give times with --at t,t,…`);
-  if (times.length > MAX_FRAMES) throw new FilmkitError(`${times.length} frames is too many for one sheet (at most ${MAX_FRAMES}): use a larger --every`);
+  const times = contactTimes(film, when(film.name, /** @type {string | undefined} */ (options.every), /** @type {string | undefined} */ (options.at)));
+  const duration = +film.root["data-duration"];
+  const late = times.filter((t) => t >= duration);
+  if (late.length) throw fail("past_end", { film: film.name, late, duration });
+  if (!times.length) throw fail("no_scenes", { film: film.name });
+  if (times.length > MAX_FRAMES) throw fail("too_many_frames", { film: film.name, count: times.length, max: MAX_FRAMES, every: Math.ceil(duration / MAX_FRAMES) });
   const failed = [];
   const sheets = [];
   for (const format of formats) {
@@ -37,19 +39,20 @@ export async function run({ args, options, json, log }) {
 
 /**
  * The times option, checked: `--every 2s` (or `2`), or `--at 0,1.5,3`.
+ * @param {string} film
  * @param {string | undefined} every
  * @param {string | undefined} at
  */
-function when(every, at) {
-  if (every && at) throw new FilmkitError("give --every or --at, not both");
+function when(film, every, at) {
+  if (every && at) throw fail("times_both", { film });
   if (every) {
     const step = +every.replace(/s$/, "");
-    if (!(step > 0)) throw new FilmkitError(`--every ${every}: say how often, in seconds, such as --every 2s`);
+    if (!(step > 0)) throw fail("bad_times", { film, option: "--every", value: every });
     return { every: step };
   }
   if (at) {
     const times = at.split(",").map((t) => +t.trim().replace(/s$/, ""));
-    if (times.some((t) => !(t >= 0))) throw new FilmkitError(`--at ${at}: list times in seconds, such as --at 0,2.5,6`);
+    if (times.some((t) => !(t >= 0))) throw fail("bad_times", { film, option: "--at", value: at });
     return { at: times };
   }
   return {};

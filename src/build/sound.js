@@ -7,7 +7,9 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { join } from "node:path";
 import { pad } from "../../kit/sound/pad.js";
 import { ffmpeg, ffmpegLog } from "../ffmpeg.js";
-import { FilmkitError, PACKAGE } from "../studio.js";
+import { describe, fail } from "../errors.js";
+import { readJson } from "../json.js";
+import { PACKAGE } from "../studio.js";
 import { sceneStarts } from "./captions.js";
 import { rootTag } from "./html.js";
 
@@ -26,7 +28,7 @@ const CEILING = -3;
  * @typedef {Record<string, unknown> & { t?: number, at?: number, end?: number, until?: number, scene?: string }} Row
  * @typedef {Record<string, unknown> & { canvas: { w: number, h: number }, fps: number, duration: number, bed?: number,
  *   cues: Row[] } & Required<Pick<import("../../kit/sound/pad.js").PadScore, "chords" | "blooms" | "pockets">>} Score
- * @typedef {{ built: true, path: string, lufs: number, truePeak: number } | { built: false, error: string }} Sound
+ * @typedef {{ built: true, path: string, lufs: number, truePeak: number } | { built: false, code: string, error: string, fix: string }} Sound
  */
 
 /**
@@ -42,7 +44,7 @@ export function score(html, sound) {
   /** @param {Row} row */
   const place = ({ scene, at = 0, until, ...row }) => {
     if (scene === undefined) return row;
-    if (!clips[scene]) throw new Error(`${row.id ?? JSON.stringify(row)}: no scene "${scene}" in index.html`);
+    if (!clips[scene]) throw Object.assign(new Error(`${row.id ? `"${row.id}"` : JSON.stringify(row)} is on scene "${scene}", which index.html doesn't have`), { scene });
     const start = clips[scene].start;
     return { ...row, t: round(start + at), ...(until !== undefined && { end: round(start + until) }) };
   };
@@ -82,21 +84,21 @@ export function buildSound(studio, film) {
   rmSync(path, { force: true });
   rmSync(work, { recursive: true, force: true });
   if (!sheet || !text) return null;
-  if (!sheet.cues.length && !sheet.chords.length) return { built: false, error: "sound.json places no cues or chords, so there's nothing to hear" };
+  if (!sheet.cues.length && !sheet.chords.length) return unbuilt("sound_empty", { film: film.name });
   mkdirSync(work, { recursive: true });
   writeFileSync(files.score, text);
   // `bed` is the pad's level here, but sound-sheet would read it as a drone of its own: the foley stays dry.
   const { bed, ...foleySheet } = sheet;
   writeFileSync(files.sheet, JSON.stringify(foleySheet) + "\n");
   const foley = spawnSync(process.execPath, [SHEET, files.sheet, "--out", files.foley], { stdio: ["ignore", "ignore", 2] });
-  if (foley.status !== 0) return { built: false, error: "sound-sheet couldn't render the foley" };
+  if (foley.status !== 0) return unbuilt("sound_failed", { film: film.name, why: "sound-sheet couldn't render the foley" });
   const padWav = pad(sheet);
   if (padWav) writeFileSync(files.pad, padWav);
   const mastering = master(files.foley, padWav && files.pad, bed ?? -12, files.mix);
-  if (mastering) return { built: false, error: mastering };
-  if (!ffmpeg(["-i", files.mix, "-c:a", "aac", "-b:a", "320k", path])) return { built: false, error: "ffmpeg couldn't encode sound.m4a" };
+  if (mastering) return unbuilt("sound_failed", { film: film.name, why: mastering });
+  if (!ffmpeg(["-i", files.mix, "-c:a", "aac", "-b:a", "320k", path])) return unbuilt("sound_failed", { film: film.name, why: "ffmpeg couldn't encode sound.m4a" });
   const measured = loudness(path);
-  if (!measured) return { built: false, error: "ffmpeg couldn't measure sound.m4a" };
+  if (!measured) return unbuilt("sound_failed", { film: film.name, why: "ffmpeg couldn't measure sound.m4a" });
   return { built: true, path, ...measured };
 }
 
@@ -111,16 +113,37 @@ export const soundPath = (studio, film) => join(studio.dir, "build", film.name, 
  * @param {string} source
  */
 function readScore(film, source) {
+  const sound = readJson(source, "sound_json", { film: film.name });
+  const wrong = shapeProblem(sound);
+  if (wrong) throw fail("sound_shape", { film: film.name, problem: wrong });
   let sheet;
   try {
-    sheet = score(film.html, JSON.parse(readFileSync(source, "utf8")));
+    sheet = score(film.html, sound);
   } catch (e) {
-    throw new FilmkitError(`films/${film.name}/sound.json: ${/** @type {Error} */ (e).message}`);
+    if (!(/** @type {{ scene?: string }} */ (e).scene)) throw e;
+    throw fail("sound_scene", { film: film.name, problem: /** @type {Error} */ (e).message, clips: Object.keys(sceneStarts(film.html)) });
   }
-  if (sheet.bed !== undefined && !Number.isFinite(sheet.bed)) {
-    throw new FilmkitError(`films/${film.name}/sound.json: "bed" is the pad's level under the foley in dB, a number`);
-  }
+  if (sheet.bed !== undefined && !Number.isFinite(sheet.bed)) throw fail("sound_bed", { film: film.name, bed: sheet.bed });
   return sheet;
+}
+
+/**
+ * What's wrong with sound.json's shape, for score() to read it: one object, its placed rows each a list of objects.
+ * @param {unknown} sound
+ * @returns {string | null}
+ */
+function shapeProblem(sound) {
+  const isObject = (/** @type {unknown} */ v) => v?.constructor === Object;
+  if (!isObject(sound)) return "it should be one object";
+  const rows = /** @type {Record<string, unknown>} */ (sound);
+  const bad = PLACED.find((key) => rows[key] !== undefined && !(Array.isArray(rows[key]) && rows[key].every(isObject)));
+  return bad ? `"${bad}" should be a list of objects` : null;
+}
+
+/** A sound that didn't build, and why. @param {string} code @param {import("../errors.js").Params} params @returns {Sound} */
+function unbuilt(code, params) {
+  const { message, fix } = describe(code, params);
+  return { built: false, code, error: message, fix };
 }
 
 /**
