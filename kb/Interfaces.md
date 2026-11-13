@@ -30,6 +30,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
 ```jsonc
 // check  (`filmkit check <film> [formats…] --json`)
 { "film": "launch", "ok": false,
+  "warnings": [{ "code": "theme_contrast", "message": "…", "fix": "#949b19" }],   // the theme's, once per film; fix is a colour that passes
   "formats": [
     { "format": "16x9", "ok": true,  "errors": [], "warnings": [{ "code": "line_unread", "message": "…", "selector": "#t-sub", "time": 4.1,
         "fix": "filmkit snapshot launch 16x9 --at 4.1" }] },   // time and fix where the finding has them; fix is the snapshot that shows it

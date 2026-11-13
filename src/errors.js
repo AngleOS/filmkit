@@ -48,6 +48,8 @@ const when = ({ format, time }) => `${format} at ${time} s`;
 export const snapshot = ({ film, format, time }) => `filmkit snapshot ${film} ${format} --at ${time}`;
 /** @param {string} lead @returns {(p: Params) => [string, string]} */
 const showing = (lead) => (p) => [lead, snapshot(p)];
+/** A theme's colours by what they colour, as theme_contrast names them. @type {Record<string, string>} */
+const ROLE = { text: "text", muted: "muted text", accent: "accent" };
 
 /** @type {Record<string, Entry>} */
 export const CATALOGUE = {
@@ -279,6 +281,17 @@ export const CATALOGUE = {
     why: "Text must stand out from its ground to be read on a phone in daylight: WCAG AA asks 4.5:1, or 3:1 for " +
       "large text. Use the theme's text colour for its ground (each ground has one), and keep the accent for one " +
       "word on a ground it reads on.",
+  },
+  theme_contrast: {
+    exit: 1,
+    message: (p) =>
+      `The theme's ${ROLE[p.role]} ${p.colour} on the ${p.ground} ground (${p.on}) is ${p.ratio}:1, under WCAG AA's ${p.required}:1` +
+      `${p.role === "accent" ? " for display type" : ""}.`,
+    fix: ({ key, suggested }) => [`Set ${key} in filmkit.json's "theme" to a colour that passes, such as`, suggested],
+    why: "Each of the theme's grounds is read with its own text colours: the dark grounds with text.ink, text.muted " +
+      "and the accent, paper with text.onPaper, text.mutedOnPaper and accentOn.paper. Reading text needs WCAG AA's " +
+      "4.5:1 on each, the accent word 3:1, as display type. A Pear word reads on Night and is lost on white, so " +
+      "give paper its own accent. The rendered frames are checked as well (contrast_aa_failure).",
   },
   line_unread: {
     exit: 1,

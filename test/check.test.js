@@ -86,10 +86,15 @@ const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 const offline = (args, cwd) => spawnSync(process.execPath, [CLI, ...args], { cwd, env: { ...process.env, PATH: "/nonexistent" }, encoding: "utf8" });
 const warning = { code: "film_silent", message: "no sound" };
 
-/** A studio whose hook film passed in 16x9 with these inputs. */
-function passedHook() {
+/**
+ * A studio whose hook film passed in 16x9 with these inputs.
+ * @param {Record<string, unknown>} [config] filmkit.json's values over the fixture's
+ */
+function passedHook(config = {}) {
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "filmkit-check-")));
   cpSync(new URL("fixtures/studio", import.meta.url), dir, { recursive: true });
+  const own = JSON.parse(readFileSync(join(dir, "filmkit.json"), "utf8"));
+  writeFileSync(join(dir, "filmkit.json"), JSON.stringify({ ...own, ...config }));
   const studio = openStudio(dir);
   const film = openFilm(studio, "hook");
   const hash = formatHash(studio, film, "16x9");
@@ -106,6 +111,26 @@ test("an unchanged format that passed is skipped, with the warnings it passed wi
   const { ok, formats } = JSON.parse(stdout);
   assert.equal(ok, true);
   assert.deepEqual(formats, [{ format: "16x9", dir: join(dir, "build/hook/16x9"), ok: true, errors: [], warnings: [warning] }]);
+});
+
+test("a theme whose text is under WCAG AA on a ground is warned about once, before the formats, and the film still passes", () => {
+  const { dir } = passedHook({ theme: { extends: "default", text: { muted: "#4a5a52" }, accentOn: { paper: "#e3ef26" } } });
+  const { status, stdout, stderr } = offline(["check", "hook", "16x9", "--json"], dir);
+  assert.equal(status, 0, stderr);
+  const { ok, warnings } = JSON.parse(stdout);
+  assert.equal(ok, true);
+  assert.deepEqual(warnings.map((/** @type {{ message: string }} */ w) => w.message.split(" is ")[0]), [
+    "The theme's muted text #4a5a52 on the ink ground (#07120f)",
+    "The theme's muted text #4a5a52 on the accent-dark ground (#145237)",
+    "The theme's muted text #4a5a52 on the jet ground (#2c2c2c)",
+    "The theme's accent #e3ef26 on the paper ground (#ffffff)",
+  ]);
+  assert.match(stderr, /^⚠ theme_contrast: The theme's accent #e3ef26 on the paper ground \(#ffffff\) is 1\.26:1, under WCAG AA's 3:1 for display type\. Set accentOn\.paper in filmkit\.json's "theme" to a colour that passes, such as: #949b19$/m);
+  assert.ok(stderr.indexOf("theme_contrast") < stderr.indexOf("16x9 unchanged"));
+});
+
+test("the default theme passes on its grounds, so check warns of nothing", () => {
+  assert.deepEqual(JSON.parse(offline(["check", "hook", "16x9", "--json"], passedHook().dir).stdout).warnings, []);
 });
 
 test("a changed film, another format or --force is checked again", () => {
