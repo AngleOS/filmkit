@@ -24,26 +24,14 @@ import { TOOLS } from "./tools.js";
 export const thisHost = () => ({ home: homedir(), platform: process.platform, vars: process.env });
 
 /**
- * How the server runs, from how filmkit itself was run: a checkout runs its own CLI with node; a package npx fetched
- * from GitHub (while the repo is private) runs through npx from GitHub again; otherwise, `npx -y filmkit mcp`.
+ * How the server runs, from how filmkit itself was run: a checkout runs its own CLI with node; anything npx fetched
+ * runs as `npx -y filmkit mcp`, even when it came from GitHub, so the entry starts from npm's cache.
  * @param {string} [packageDir]
  * @returns {McpCommand}
  */
 export function mcpCommand(packageDir = PACKAGE) {
-  const at = packageDir.lastIndexOf(`${sep}node_modules${sep}`);
-  if (at < 0) return { command: "node", args: [join(packageDir, "src", "cli", "index.js"), "mcp"] };
-  return { command: "npx", args: ["-y", githubSpec(join(packageDir.slice(0, at), "node_modules", ".package-lock.json")) ?? "filmkit", "mcp"] };
-}
-
-/** npm's hidden lockfile says where the package came from. @param {string} lockfile */
-function githubSpec(lockfile) {
-  try {
-    const resolved = JSON.parse(readFileSync(lockfile, "utf8")).packages?.["node_modules/filmkit"]?.resolved ?? "";
-    const repo = resolved.match(/^git\+.*github\.com[/:]([^/]+\/[^/#]+?)(?:\.git)?(?:#|$)/)?.[1];
-    return repo && `github:${repo}`;
-  } catch {
-    return undefined;
-  }
+  if (!packageDir.includes(`${sep}node_modules${sep}`)) return { command: "node", args: [join(packageDir, "src", "cli", "index.js"), "mcp"] };
+  return { command: "npx", args: ["-y", "filmkit", "mcp"] };
 }
 
 /**
