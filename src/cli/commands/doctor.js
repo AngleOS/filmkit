@@ -1,6 +1,7 @@
 import { spawnSync } from "node:child_process";
 import { HYPERFRAMES, hyperframes } from "../../hyperframes.js";
 import { FilmkitError, describe } from "../../errors.js";
+import { banner } from "../banner.js";
 
 export const usage = "doctor";
 export const summary = "what filmkit needs: Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome; exits 3 when one is missing";
@@ -15,7 +16,10 @@ export const summary = "what filmkit needs: Node ≥ 20, ffmpeg, the pinned Hype
 const missing = (name, detail, code, params) => ({ name, ok: false, detail, code, hint: describe(code, params).next });
 
 /** @param {import("../index.js").Context} ctx */
-export async function run({ log }) {
+export async function run({ log, json }) {
+  // banner() checks stdout, which is where log writes when json is false.
+  const top = banner(json);
+  if (top) log(`${top}\n`);
   const checks = [node(), ffmpegVersion(), ...hyperframesAndChrome()];
   for (const c of checks) log(`${c.ok ? "✓" : "✗"} ${c.name.padEnd(11)} ${c.detail}${c.hint ? `\n    ${c.hint}` : ""}`);
   const ok = checks.every((c) => c.ok);
