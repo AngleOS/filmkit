@@ -239,7 +239,7 @@ test("the font goes into brand/theme/fonts and the theme's fonts for titles and 
   assert.match(themeCss(theme.values), /@font-face \{ font-family: "Inter"; src: url\("fonts\/Inter-600\.ttf"\); font-weight: 600; \}/);
   writeBrand(dir, { accent: "#1a3cff" });
   assert.equal(openStudio(dir).theme.values.fonts.ui.family, "Inter", "a later run without --font keeps it");
-  assert.match(JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).description, /#1a3cff on a dark ground, in Inter from Google Fonts\.$/);
+  assert.match(JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).description, /#1a3cff on a dark ground\. --font last downloaded Inter from Google Fonts\.$/);
   const { get: lobster } = googleFonts({ "https://fonts.googleapis.com/css2?family=Lobster:wght@400;500;600;700": css2("Lobster", [400]), "https://fonts.gstatic.com/s/x/v1/400.ttf": "ttf" });
   writeFileSync(join(fonts, "Acme-Display.otf"), "the studio's own");
   writeBrand(dir, { font: await googleFont("Lobster", lobster) });

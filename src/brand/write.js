@@ -54,7 +54,7 @@ export function writeBrand(root, answers) {
     const theme = {
       extends: on === "light" ? "paper" : "default",
       label,
-      description: `${label}'s brand, from filmkit brand: the accent ${brandAccent} on a ${on} ground${downloaded ? `, in ${downloaded} from Google Fonts` : ""}.`,
+      description: `${label}'s brand, from filmkit brand: the accent ${brandAccent} on a ${on} ground.${downloaded ? ` --font last downloaded ${downloaded} from Google Fonts.` : ""}`,
       ...values,
       ...(font ? { fonts: fontsOf(font) } : stored?.fonts && { fonts: stored.fonts }),
     };
@@ -151,7 +151,7 @@ function storedAccent(stored) {
  * @returns {string | undefined}
  */
 function storedFont(stored) {
-  return stored?.description?.match(/, in (.+) from Google Fonts\.$/)?.[1];
+  return stored?.description?.match(/ --font last downloaded (.+) from Google Fonts\.$/)?.[1];
 }
 
 /**
