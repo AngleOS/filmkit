@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { cpSync, mkdtempSync, readFileSync, realpathSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { MAX_SIDE, contactTimes, labelCanvas, sheetLayout } from "../src/build/contact.js";
@@ -11,9 +11,10 @@ import { SIZES } from "../src/studio.js";
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 const FIXTURE = fileURLToPath(new URL("fixtures/studio", import.meta.url));
 const EXAMPLES = fileURLToPath(new URL("../examples/studio", import.meta.url));
+const NPX_FAILS = fileURLToPath(new URL("fixtures/npx-fails", import.meta.url));
 
-/** @param {string[]} args @param {string} cwd */
-const filmkit = (args, cwd = FIXTURE) => spawnSync(process.execPath, [CLI, ...args], { cwd, encoding: "utf8" });
+/** @param {string[]} args @param {string} cwd @param {NodeJS.ProcessEnv} [env] */
+const filmkit = (args, cwd = FIXTURE, env = process.env) => spawnSync(process.execPath, [CLI, ...args], { cwd, env, encoding: "utf8" });
 
 /** @param {string} html */
 const film = (html) => ({ name: "f", dir: "", html, root: { "data-duration": "10" } });
@@ -86,6 +87,16 @@ test("contact rejects unreadable times before it snapshots anything", () => {
     assert.equal(status, 2, String(args));
     assert.match(stderr, /** @type {RegExp} */ (message));
   }
+});
+
+test("contact holds back HyperFrames' own output, and shows its last words when the snapshot fails", { skip: process.platform === "win32" && "the fake npx is a shell script" }, () => {
+  const dir = realpathSync(mkdtempSync(join(tmpdir(), "filmkit-contact-")));
+  cpSync(FIXTURE, dir, { recursive: true });
+  const { status, stdout, stderr } = filmkit(["contact", "hook", "16x9"], dir, { ...process.env, PATH: `${NPX_FAILS}${delimiter}${process.env.PATH}` });
+  assert.equal(status, 4);
+  assert.match(stdout, /16x9 ✗ snapshot failed\n  npm error 404 Not Found/);
+  assert.match(stdout, /✗ hook: contact sheet failed in 16x9/);
+  assert.doesNotMatch(stdout + stderr, /Update available/);
 });
 
 const ffmpeg = spawnSync("ffmpeg", ["-version"]).status === 0;

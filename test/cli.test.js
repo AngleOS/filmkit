@@ -2,12 +2,14 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { cpSync, existsSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
+import { chromeDetail } from "../src/cli/commands/doctor.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 const FIXTURE = fileURLToPath(new URL("fixtures/studio", import.meta.url));
+const NPX_FAILS = fileURLToPath(new URL("fixtures/npx-fails", import.meta.url));
 
 /** @param {string[]} args @param {string} cwd @param {NodeJS.ProcessEnv} [env] */
 const filmkit = (args, cwd = FIXTURE, env = process.env) => spawnSync(process.execPath, [CLI, ...args], { cwd, env, encoding: "utf8" });
@@ -100,9 +102,24 @@ test("doctor reports each requirement and exits 3 when one is missing", () => {
   assert.deepEqual(checks.map((/** @type {{ name: string, ok: boolean, code?: string }} */ c) => [c.name, c.ok, c.code]), [
     ["Node.js", true, undefined],
     ["ffmpeg", false, "ffmpeg_missing"],
+    ["ffprobe", false, "ffprobe_missing"],
     ["HyperFrames", false, "node_missing"],
   ]);
   assert.match(checks[1].hint, /^Install it with: /);
+});
+
+test("when HyperFrames doesn't run, doctor says what npx said", { skip: process.platform === "win32" && "the fake npx is a shell script" }, () => {
+  const { status, stdout } = filmkit(["doctor", "--json"], FIXTURE, { ...process.env, PATH: `${NPX_FAILS}${delimiter}${process.env.PATH}` });
+  assert.equal(status, 3);
+  const hyperframes = JSON.parse(stdout).checks.find((/** @type {{ name: string }} */ c) => c.name === "HyperFrames");
+  assert.equal(hyperframes.code, "hyperframes_offline");
+  assert.match(hyperframes.detail, /didn't run: npm error 404 Not Found/);
+});
+
+test("doctor's Chrome is its version, not its whole path into HyperFrames' cache", () => {
+  const cache = "cache: $HOME/.cache/hyperframes/chrome/chrome-headless-shell/mac_arm-150.0.7871.124/chrome-headless-shell-mac-arm64/chrome-headless-shell";
+  assert.equal(chromeDetail(cache), "headless shell 150.0.7871.124, in HyperFrames' cache");
+  assert.equal(chromeDetail("system: /usr/bin/chromium"), "system: /usr/bin/chromium");
 });
 
 /** @param {string} clip a clip to add to the plain film @param {string[]} args */

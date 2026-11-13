@@ -5,11 +5,11 @@ import { answer as answered, asking as isAsking, p, start } from "../walkthrough
 import { run as agents } from "./agents.js";
 
 export const usage = "setup [--yes] [--agents auto|none|ids] [--name brand] [--remove]";
-export const summary = "from nothing to a first film: requirements, agent tools, a studio, the brand and films/hello; asks in a terminal unless --yes (--brand-url, --logo, --ground, --no-brand, --no-first-film)";
+export const summary = "from nothing to a first film: requirements, agent tools, a studio, the brand and films/hello; asks in a terminal unless --yes (--brand-url, --logo, --accent, --ground, --no-brand, --no-first-film)";
 const string = { type: /** @type {const} */ ("string") };
 const flag = { type: /** @type {const} */ ("boolean") };
 export const options = {
-  yes: { ...flag, short: "y" }, agents: string, name: string, "brand-url": string, logo: string, ground: string,
+  yes: { ...flag, short: "y" }, agents: string, name: string, "brand-url": string, logo: string, accent: string, ground: string,
   "no-brand": flag, "no-first-film": flag, remove: flag,
 };
 
@@ -22,7 +22,7 @@ export async function run(ctx) {
   const ground = str(options.ground);
   if (ground && !GROUNDS.includes(ground)) throw fail("option_choice", { command: "setup", option: "--ground", value: ground, choices: GROUNDS });
   const asking = isAsking(ctx);
-  const brand = options["no-brand"] ? null : { url: str(options["brand-url"]), logo: str(options.logo), ground, yes: !asking };
+  const brand = options["no-brand"] ? null : { url: str(options["brand-url"]), logo: str(options.logo), accent: str(options.accent), ground, yes: !asking };
   if (!asking) {
     const result = await setup({ ask: fromFlags(options), brand, open: false }, { log, heading: (t) => log(`▸ ${t}`), json });
     if (result.ok && result.studio) log(next(result.studio.name));

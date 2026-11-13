@@ -31,6 +31,6 @@ export async function brandStudio({ options, log }) {
   for (const a of palette?.adjusted ?? []) {
     log(`  ${a.key} is ${a.used}: ${a.brand} is ${a.ratio}:1 on ${a.key === "accent" ? "the ground" : "paper"}, under the 4.5:1 text needs`);
   }
-  log(`  wrote ${result.files.map((f) => relative(root, f)).join(", ")}`);
+  if (result.files.length) log(`  wrote ${result.files.map((f) => relative(root, f)).join(", ")}`);
   return { ok: true, ...result };
 }

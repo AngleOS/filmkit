@@ -1,10 +1,10 @@
 import { spawnSync } from "node:child_process";
-import { HYPERFRAMES, hyperframes } from "../../hyperframes.js";
+import { HYPERFRAMES, hyperframes, lastWords } from "../../hyperframes.js";
 import { FilmkitError, describe } from "../../errors.js";
 import { banner } from "../banner.js";
 
 export const usage = "doctor";
-export const summary = "what filmkit needs: Node ≥ 20.12, ffmpeg, the pinned HyperFrames and its Chrome; exits 3 when one is missing";
+export const summary = "what filmkit needs: Node ≥ 20.12, ffmpeg and ffprobe, the pinned HyperFrames and its Chrome; exits 3 when one is missing";
 
 /** @typedef {{ name: string, ok: boolean, detail: string, code?: string, hint?: string }} Check */
 
@@ -27,7 +27,7 @@ export async function run({ log, json }) {
 }
 
 /** Each requirement, checked. setup runs these too. */
-export const requirements = () => [node(), ffmpegVersion(), ...hyperframesAndChrome()];
+export const requirements = () => [node(), onPath("ffmpeg", "ffmpeg_missing"), onPath("ffprobe", "ffprobe_missing"), ...hyperframesAndChrome()];
 
 /**
  * Node 20.12 or newer: setup's prompts use its util.styleText.
@@ -44,11 +44,16 @@ function node() {
   return { name: "Node.js", ok: true, detail: process.version };
 }
 
-/** @returns {Check} */
-function ffmpegVersion() {
-  const { status, stdout } = spawnSync("ffmpeg", ["-version"], { encoding: "utf8" });
-  if (status !== 0) return missing("ffmpeg", "not on the PATH", "ffmpeg_missing");
-  return { name: "ffmpeg", ok: true, detail: stdout.split("\n")[0].replace(/ Copyright.*/, "").trim() };
+/**
+ * ffmpeg or ffprobe, by its version line. HyperFrames' render reads each film's media with ffprobe: Homebrew's ffmpeg
+ * brings both, but a PATH with ffmpeg alone would pass doctor and setup, then fail at the render.
+ * @param {string} tool @param {string} code
+ * @returns {Check}
+ */
+function onPath(tool, code) {
+  const { status, stdout } = spawnSync(tool, ["-version"], { encoding: "utf8" });
+  if (status !== 0) return missing(tool, "not on the PATH", code);
+  return { name: tool, ok: true, detail: stdout.split("\n")[0].replace(/ Copyright.*/, "").trim() };
 }
 
 /**
@@ -57,16 +62,35 @@ function ffmpegVersion() {
  * @returns {Check[]}
  */
 function hyperframesAndChrome() {
-  let report;
+  let run;
   try {
-    report = JSON.parse(hyperframes(["doctor", "--json"], { cwd: process.cwd(), capture: true }).stdout);
+    run = hyperframes(["doctor", "--json"], { cwd: process.cwd(), capture: true });
   } catch (e) {
     return [missing("HyperFrames", `${HYPERFRAMES} didn't run`, e instanceof FilmkitError && e.code ? e.code : "hyperframes_offline")];
+  }
+  let report;
+  try {
+    report = JSON.parse(run.stdout);
+  } catch {
+    // npx's own words say why: offline, a registry error, a cache it can't write.
+    const said = lastWords(run).join(" ");
+    return [missing("HyperFrames", `${HYPERFRAMES} didn't run${said ? `: ${said}` : ""}`, "hyperframes_offline")];
   }
   /** @type {Check | undefined} */
   const chrome = report.checks?.find((/** @type {Check} */ c) => c.name === "Chrome");
   return [
     { name: "HyperFrames", ok: true, detail: HYPERFRAMES },
-    chrome?.ok ? { ...chrome, name: "Chrome" } : missing("Chrome", chrome?.detail ?? "HyperFrames' doctor didn't report Chrome", "chrome_missing"),
+    chrome?.ok
+      ? { name: "Chrome", ok: true, detail: chromeDetail(chrome.detail) }
+      : missing("Chrome", chrome?.detail ?? "HyperFrames' doctor didn't report Chrome", "chrome_missing"),
   ];
+}
+
+/**
+ * Chrome in a line: HyperFrames' doctor gives the whole path into its cache, and the version says as much.
+ * @param {string} detail  as HyperFrames' doctor has it: `cache: $HOME/.cache/hyperframes/chrome/…/chrome-headless-shell`
+ */
+export function chromeDetail(detail) {
+  const version = detail.match(/\d+(?:\.\d+){3}/)?.[0];
+  return detail.startsWith("cache:") && version ? `headless shell ${version}, in HyperFrames' cache` : detail;
 }

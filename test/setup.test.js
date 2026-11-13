@@ -44,7 +44,7 @@ async function setupYes(/** @type {Record<string, any>} */ flags, steps = stubs(
   /** @type {string[]} */
   const lines = [];
   try {
-    const brand = flags["no-brand"] ? null : { url: flags["brand-url"], yes: true };
+    const brand = flags["no-brand"] ? null : { url: flags["brand-url"], logo: flags.logo, accent: flags.accent, ground: flags.ground, yes: true };
     const out = { log: (/** @type {unknown[]} */ ...l) => void lines.push(l.join(" ")), heading: () => {}, json: true };
     return { home, lines, result: await setup({ ask: fromFlags(flags), brand, open: false }, out, steps) };
   } finally {
@@ -63,7 +63,7 @@ test("setup --yes makes the studio in the brand's name and the first film, check
   assert.match(readFileSync(join(studio, "films/hello/index.html"), "utf8"), /Acme Rockets/);
   assert.match(readFileSync(join(studio, "CLAIMS.md"), "utf8"), /^## hello$/m);
   assert.deepEqual(calls.agents, [[]], "--agents auto: every tool installed");
-  assert.deepEqual(calls.brand, [{ studio, name: "Acme Rockets", "from-url": "https://acme.test", logo: undefined, ground: undefined, yes: true }]);
+  assert.deepEqual(calls.brand, [{ studio, name: "Acme Rockets", "from-url": "https://acme.test", logo: undefined, accent: undefined, ground: undefined, yes: true }]);
   assert.deepEqual([calls.check, calls.contact, calls.open], [[["hello"]], [["hello", "16x9"]], []]);
   assert.equal(result.film.contact.sheets[0].path, "/sheet.png");
 });
@@ -109,19 +109,27 @@ test("a first film that fails its check fails setup, with no contact sheet", asy
   assert.deepEqual([result.ok, result.exit, calls.contact], [false, 1, []]);
 });
 
-test("setup's brand step writes the brand without brand's own next step: the first film comes next", async () => {
+test("setup's brand step is filmkit brand, the palette from --accent, without brand's own next step", async () => {
   const { steps } = stubs({ brand: STEPS.brand });
-  const { home, result, lines } = await setupYes({ name: "Acme", agents: "none", "no-first-film": true }, steps);
+  const { home, result, lines } = await setupYes({ name: "Acme", accent: "#ff5a1f", ground: "dark", agents: "none", "no-first-film": true }, steps);
   assert.equal(result.brand.ok, true);
-  assert.ok(existsSync(join(home, "acme-films", "brand")));
+  assert.equal(JSON.parse(readFileSync(join(home, "acme-films/brand/theme/theme.json"), "utf8")).extends, "default");
+  assert.equal(JSON.parse(readFileSync(join(home, "acme-films/filmkit.json"), "utf8")).theme, "brand/theme");
   assert.ok(!lines.some((l) => l.startsWith("Next:")), lines.join("\n"));
 });
 
-test("without filmkit brand in this version, the studio keeps the default theme", async () => {
-  const { steps } = stubs({ brand: async () => null });
+test("with only --studio, the brand step takes the studio's own name", async () => {
+  const { home } = await setupYes({ studio: "films-here", name: "Acme", "no-brand": true, "no-first-film": true });
+  const { steps } = stubs({ brand: STEPS.brand });
+  const { result } = await setupYes({ studio: join(home, "films-here"), ground: "light", agents: "none", "no-first-film": true }, steps);
+  assert.deepEqual([result.ok, result.brand.name, result.brand.palette.ground], [true, "Acme", "light"]);
+});
+
+test("with no brand flags, setup leaves the default theme and says how to make it the brand's", async () => {
+  const { steps, calls } = stubs();
   const { result, lines } = await setupYes({ name: "Acme", "no-first-film": true }, steps);
-  assert.deepEqual([result.ok, result.brand, result.film], [true, null, null]);
-  assert.ok(lines.includes("· the default theme: filmkit brand isn't in this version yet"));
+  assert.deepEqual([result.ok, result.brand, calls.brand], [true, null, []]);
+  assert.ok(lines.includes("· the default theme: make it yours with filmkit brand --accent <hex> --logo <file>"));
 });
 
 test("the studio's default folder is the brand's name, made plain", () => {

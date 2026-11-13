@@ -64,6 +64,7 @@ const CASES = {
   ],
   node_old: [{ version: "v18.19.0", platform: "linux" }, "Node v18.19.0 is older than 20.12. Install Node ≥ 20.12 with: https://nodejs.org/en/download", "https://nodejs.org/en/download"],
   ffmpeg_missing: [{ platform: "win32" }, "ffmpeg isn't on the PATH. Install it with: winget install --id Gyan.FFmpeg -e", "winget install --id Gyan.FFmpeg -e"],
+  ffprobe_missing: [{ platform: "darwin" }, "ffprobe isn't on the PATH. It comes with ffmpeg: install that with: brew install ffmpeg", "brew install ffmpeg"],
   hyperframes_offline: [
     {},
     `npx couldn't fetch ${HYPERFRAMES}. It downloads once, on first use: connect to the network and run: filmkit doctor`,

@@ -295,6 +295,14 @@ export const CATALOGUE = {
     why: "Filmkit uses the ffmpeg on the PATH for the work HyperFrames doesn't do itself, such as the stills' " +
       "thumbnail and the seam's frames. Install it with your package manager (brew, winget or apt), then `filmkit doctor` checks it.",
   },
+  ffprobe_missing: {
+    exit: 3,
+    message: () => "ffprobe isn't on the PATH.",
+    fix: ({ platform }) => ["It comes with ffmpeg: install that with", install("ffmpeg", platform)],
+    why: "HyperFrames' render reads each film's media with ffprobe, which most ffmpeg packages bring with them. " +
+      "With ffmpeg on the PATH but not ffprobe, a film checks but doesn't render: install ffmpeg's full package, " +
+      "then `filmkit doctor` checks it.",
+  },
   hyperframes_offline: {
     exit: 3,
     message: () => `npx couldn't fetch ${HYPERFRAMES}.`,
