@@ -12,11 +12,12 @@ export function ffmpeg(args) {
 }
 
 /**
- * Runs ffmpeg with `-` as its output and returns what it wrote, or null when it failed.
+ * Runs ffmpeg with `-` as its output and returns what it wrote, or null when it failed. Its errors are held back: it
+ * runs inside a check, under the progress lines, which a stray line on the terminal would break.
  * @param {string[]} args
  */
 export function ffmpegOutput(args) {
-  const { ok, stdout } = run(["-v", "error", "-y", ...args], "pipe", 2);
+  const { ok, stdout } = run(["-v", "error", "-y", ...args], "pipe", "pipe");
   return ok ? stdout : null;
 }
 

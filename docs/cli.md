@@ -62,6 +62,13 @@ the HyperFrames pin and filmkit's version) and skips a format whose hash matches
 made from the same hash (`build/<film>/render-<format>.json`), so an interrupted render redoes only what's missing or
 stale. Renders run one at a time, as each already uses every core. `--force` redoes everything.
 
+**Progress.** In a terminal, `check`, `render` and `stills` keep one line per running format on stderr, redrawn every
+second: its step, its frames, the time so far and, once the frame rate settles, the time left, such as
+`9x16  capturing  ▓▓▓░░░░░  frame 612/1440  0:52  1:10 left`. Results print above those lines as each format
+finishes. Anywhere else (a pipe, CI, an agent's shell) each step prints one line as it starts: `16x9 checking`,
+`16x9 measuring the seam`, `16x9 rendering`, `16x9 capturing 1440 frames`. HyperFrames' own render
+output is held back; when a render fails, its last lines print under `16x9 ✗ render failed`.
+
 **Loops.** A film whose root has `data-loop="true"` is a hook loop: it plays again from frame 0 as soon as it ends, so
 its last frame has to flow into its first. `check` runs the seam gate on it in each format. It snapshots the first 9 and
 the last 9 frames (30 fps) as PNGs into `build/<film>/seam-<format>/`, decodes them with ffmpeg at 480 px on the long

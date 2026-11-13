@@ -27,17 +27,22 @@ export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
 
 /**
  * Runs the pinned HyperFrames CLI in `cwd` alongside others, with its stdout and stderr captured rather than mixed
- * into the terminal.
+ * into the terminal. `onLine` hears each line of its stdout as it comes.
  * @param {string[]} args
- * @param {{ cwd: string }} options
+ * @param {{ cwd: string, onLine?: (line: string) => void }} options
  * @returns {Promise<{ ok: boolean, stdout: string, stderr: string }>}
  */
-export function hyperframesAsync(args, { cwd }) {
+export function hyperframesAsync(args, { cwd, onLine }) {
   return new Promise((resolve, reject) => {
     const child = spawn("npx", ["--yes", HYPERFRAMES, ...args], { cwd, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
-    child.stdout.setEncoding("utf8").on("data", (chunk) => (stdout += chunk));
+    child.stdout.setEncoding("utf8").on("data", (chunk) => {
+      const unheard = stdout.lastIndexOf("\n") + 1;
+      stdout += chunk;
+      const end = stdout.lastIndexOf("\n");
+      if (onLine && end >= unheard) stdout.slice(unheard, end).split("\n").forEach((line) => onLine(line));
+    });
     child.stderr.setEncoding("utf8").on("data", (chunk) => (stderr += chunk));
     child.on("error", (error) => reject(npxError(error)));
     child.on("close", (status) => resolve({ ok: status === 0, stdout, stderr }));
@@ -49,13 +54,14 @@ const NO_SKILLS = 9;
 
 /**
  * The skills the pinned package ships (its dist/skills), written for the CLI that renders. npx puts the package's bin
- * folder on the PATH of what it runs, so a node one-liner run there finds the package beside it, on any platform.
+ * folder on the PATH of what it runs, so a node one-liner run there finds the package beside it, on any platform; it
+ * takes the copy at the pinned version, should another hyperframes be on the PATH too.
  */
 export function hyperframesSkills() {
   const find = `const { join, delimiter } = require("node:path");
     const { existsSync } = require("node:fs");
     const pkg = process.env.PATH.split(delimiter).map((d) => join(d, "..", "hyperframes"))
-      .find((d) => existsSync(join(d, "package.json")));
+      .find((d) => existsSync(join(d, "package.json")) && require(join(d, "package.json")).version === ${JSON.stringify(HYPERFRAMES.split("@")[1])});
     if (!pkg) process.exit(1);
     console.log(join(pkg, "dist", "skills"));
     if (!existsSync(join(pkg, "dist", "skills"))) process.exit(${NO_SKILLS});`;
@@ -67,6 +73,17 @@ export function hyperframesSkills() {
   if (status === NO_SKILLS) throw fail("hyperframes_no_skills", { dir: stdout.trim() });
   if (status !== 0) throw fail("hyperframes_offline");
   return stdout.trim();
+}
+
+/**
+ * Why a run failed, in HyperFrames' own last words: its output is held back while the progress line runs.
+ * @param {{ stdout: string, stderr: string }} run
+ */
+export function lastWords({ stdout, stderr }) {
+  /** @param {string} text */
+  const said = (text) => text.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("@hf-") && !l.startsWith("█"));
+  const words = said(stderr);
+  return (words.length ? words : said(stdout)).slice(-3);
 }
 
 /** @param {Error} error */
