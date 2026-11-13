@@ -22,6 +22,7 @@ jobs:
     runs-on: [self-hosted, ci, Linux]
     timeout-minutes: 10
     strategy:
+      fail-fast: false # each Node's verdict, not one cancelled by the other's failure
       matrix:
         node: [20, 26]
     steps:
