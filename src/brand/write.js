@@ -50,15 +50,16 @@ export function writeBrand(root, answers) {
     const brandAccent = (accent ?? [storedAccent(stored), themeAccent(root, current.theme)].find((a) => a && HEX.test(a)) ?? PEAR).toLowerCase();
     const on = ground ?? (stored ? (stored.extends === "paper" ? "light" : "dark") : proposeGround(brandAccent));
     const { values, adjusted } = palette(brandAccent, on);
+    const downloaded = font?.family ?? storedFont(stored);
     const theme = {
       extends: on === "light" ? "paper" : "default",
       label,
-      description: `${label}'s brand, from filmkit brand: the accent ${brandAccent} on a ${on} ground.`,
+      description: `${label}'s brand, from filmkit brand: the accent ${brandAccent} on a ${on} ground${downloaded ? `, in ${downloaded} from Google Fonts` : ""}.`,
       ...values,
       ...(font ? { fonts: fontsOf(font) } : stored?.fonts && { fonts: stored.fonts }),
     };
     mkdirSync(join(root, THEME), { recursive: true });
-    if (font) files.push(...writeFont(join(root, THEME, "fonts"), font, stored?.fonts?.ui?.family));
+    if (font) files.push(...writeFont(join(root, THEME, "fonts"), font, storedFont(stored)));
     writeFileSync(file, JSON.stringify(theme, null, 2) + "\n");
     files.push(file);
     edits = pointAtBrand(edits, current.theme);
@@ -123,7 +124,7 @@ function fontsOf({ family, faces }) {
  * The font's files and its licence, in place of those --font saved for the last one. Files added by hand stay.
  * @param {string} dir
  * @param {import("./fonts.js").Font} font
- * @param {string} [last] the family the brand had
+ * @param {string} [last] the family the last --font downloaded
  */
 function writeFont(dir, { family, faces, licence }, last) {
   mkdirSync(dir, { recursive: true });
@@ -141,6 +142,16 @@ function writeFont(dir, { family, faces, licence }, last) {
  */
 function storedAccent(stored) {
   return stored?.description?.match(/the accent (#[0-9a-f]{3,6}) on a/)?.[1] ?? stored?.accent;
+}
+
+/**
+ * The family the last --font downloaded, as the brand theme's description names it. Not its `fonts`, which may since
+ * name a font added by hand, whose files --font leaves alone.
+ * @param {{ description?: string } | undefined} stored
+ * @returns {string | undefined}
+ */
+function storedFont(stored) {
+  return stored?.description?.match(/, in (.+) from Google Fonts\.$/)?.[1];
 }
 
 /**

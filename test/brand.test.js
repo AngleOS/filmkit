@@ -239,6 +239,7 @@ test("the font goes into brand/theme/fonts and the theme's fonts for titles and 
   assert.match(themeCss(theme.values), /@font-face \{ font-family: "Inter"; src: url\("fonts\/Inter-600\.ttf"\); font-weight: 600; \}/);
   writeBrand(dir, { accent: "#1a3cff" });
   assert.equal(openStudio(dir).theme.values.fonts.ui.family, "Inter", "a later run without --font keeps it");
+  assert.match(JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).description, /#1a3cff on a dark ground, in Inter from Google Fonts\.$/);
   const { get: lobster } = googleFonts({ "https://fonts.googleapis.com/css2?family=Lobster:wght@400;500;600;700": css2("Lobster", [400]), "https://fonts.gstatic.com/s/x/v1/400.ttf": "ttf" });
   writeFileSync(join(fonts, "Acme-Display.otf"), "the studio's own");
   writeBrand(dir, { font: await googleFont("Lobster", lobster) });
@@ -255,4 +256,19 @@ test("a mistyped option fails before the font is downloaded", async (t) => {
   await assert.rejects(run({ ground: "grey" }), { code: "option_choice" });
   await assert.rejects(run({ logo: join(dir, "nope.svg") }), { code: "logo_missing" });
   assert.equal(fetched.mock.callCount(), 0);
+});
+
+test("a font added by hand over the one --font downloaded keeps its files when --font runs again, whatever they're called", async () => {
+  const dir = studio();
+  const { get } = googleFonts({ [INTER]: css2("Inter", [400, 500, 600, 700]), ...INTER_FILES });
+  writeBrand(dir, { font: await googleFont("Inter", get) });
+  const fonts = join(dir, "brand", "theme", "fonts");
+  writeFileSync(join(fonts, "AcmeDisplay-400.otf"), "the studio's own");
+  const file = join(dir, "brand", "theme", "theme.json");
+  const theme = JSON.parse(readFileSync(file, "utf8"));
+  const acme = { family: "Acme Display", weight: 400 };
+  writeFileSync(file, JSON.stringify({ ...theme, fonts: { ...theme.fonts, display: acme, ui: acme, faces: [{ ...acme, file: "AcmeDisplay-400.otf" }] } }));
+  const { get: lobster } = googleFonts({ "https://fonts.googleapis.com/css2?family=Lobster:wght@400;500;600;700": css2("Lobster", [400]), "https://fonts.gstatic.com/s/x/v1/400.ttf": "ttf" });
+  writeBrand(dir, { font: await googleFont("Lobster", lobster) });
+  assert.deepEqual(readdirSync(fonts).sort(), ["AcmeDisplay-400.otf", "Lobster-400.ttf"]);
 });

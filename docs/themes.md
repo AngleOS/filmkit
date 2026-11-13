@@ -50,7 +50,8 @@ npx filmkit brand --font 'IBM Plex Sans'
   while they render. The font stays when `brand` runs again without `--font`; another `--font` deletes the files the
   last one downloaded and replaces the theme's `fonts`. For a font that isn't on Google Fonts, put its files in
   `brand/theme/fonts` and name them in the theme's `fonts` yourself (see [a theme folder](#a-theme-folder)), keeping
-  to fonts whose licence lets them ship: `--font` leaves those files alone, but a later `--font` rewrites `fonts`.
+  to fonts whose licence lets them ship: `--font` leaves those files alone, but a later `--font` rewrites `fonts`. (It
+  knows its own files by the family the theme's `description` names, "in Inter from Google Fonts", not by `fonts`.)
 - `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
 
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
