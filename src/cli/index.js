@@ -5,6 +5,7 @@
 import { existsSync, readdirSync } from "node:fs";
 import { parseArgs } from "node:util";
 import { FilmkitError, fail } from "../errors.js";
+import { banner } from "./banner.js";
 
 /**
  * @typedef {{ args: string[], options: Record<string, string | boolean | undefined>, json: boolean,
@@ -40,7 +41,7 @@ async function main() {
   const at = commandIndex(argv);
   const name = argv[at];
   if (at < 0 || name === "help" || argv.includes("--help") || argv.includes("-h")) {
-    console.log(await help());
+    console.log([banner(argv.includes("--json")), await help()].filter(Boolean).join("\n\n"));
     return at < 0 && !argv.includes("--help") && !argv.includes("-h") ? 2 : 0;
   }
   const file = new URL(`${name}.js`, COMMANDS);

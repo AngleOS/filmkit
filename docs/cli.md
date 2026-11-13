@@ -92,6 +92,8 @@ scene gets no files. With `burn` the scene also draws them into the picture, in 
 `sound` is `null` for a silent film; `captions` and `stills` as the MCP tools of the same name; `doctor` as
 `{ ok, checks: [{ name, ok, detail, code?, hint? }] }`), with absolute paths; progress and HyperFrames' own output go to
 stderr. Global options (`--json`, `--studio`) may come before or after the command. Nothing prompts.
+`--help` and `doctor` open with the Angle banner, `╱◣ ANGLE FILMKIT` in Pear, but only in a colour terminal: never with
+`--json`, on a pipe (even with `FORCE_COLOR` set, as agent harnesses do), or when `NO_COLOR` or `FORCE_COLOR=0` is set.
 
 **Exit codes.** `0` ok, `1` the film failed a check, `2` a usage error (no studio, an unknown film, format or option),
 `3` a missing requirement (`doctor` says which), `4` a render, snapshot, contact sheet or still failed. A failure prints
