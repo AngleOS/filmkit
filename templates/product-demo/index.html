@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- {{film}}: a product demo, from filmkit's product-demo template. The promise over the product's window, the
+         user's action typed into a composer, the product's answer streaming in with the feature named under it, then
+         the end card. The beats and what to change are in brief.md. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="21.5" data-width="1920" data-height="1080">
+      <div id="window" data-composition-id="window" data-composition-src="kit/scenes/ui.html" data-start="0" data-duration="3.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"url":"app.example.com"}'></div>
+      <div id="promise" data-composition-id="promise" data-composition-src="kit/scenes/title.html" data-start="0" data-duration="3.5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"text":"{{name}}, in one *line.*","entrance":"none","place":"top","ground":"none"}'></div>
+      <div id="ask" data-composition-id="ask" data-composition-src="kit/scenes/composer.html" data-start="3.5" data-duration="4.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"prompt":"Make a launch film from brief.md"}'></div>
+      <div id="answer" data-composition-id="answer" data-composition-src="kit/scenes/chat.html" data-start="8" data-duration="7" data-track-index="1" data-track-kind="graphics" data-variable-values='{"prompt":"Make a launch film from brief.md","reply":"Three steps: I read the brief and its sources, build the beats from the kit’s scenes, then check all four formats before I render."}'></div>
+      <div id="feature" data-composition-id="feature" data-composition-src="kit/scenes/lower-third.html" data-start="11.5" data-duration="3.5" data-track-index="2" data-track-kind="graphics" data-variable-values='{"name":"{{name}} · Feature name","role":"What it does, in a few words","out":3.2}'></div>
+      <div id="endcard" data-composition-id="endcard" data-composition-src="kit/scenes/endcard.html" data-start="15" data-duration="6.5" data-track-index="1" data-track-kind="graphics" data-variable-values='{"line":"Now available","cta":"example.com"}'></div>
+      <div id="captions" data-composition-id="captions" data-composition-src="kit/scenes/captions.html" data-start="0" data-duration="21.5" data-track-index="4" data-track-kind="captions" data-variable-values='{"lines":"0.0-3.4 {{name}}, in one line.\n3.8-7.8 Make a launch film from brief.md.\n8.5-14.8 Three steps: I read the brief and its sources, build the beats from the kit’s scenes, then check all four formats before I render."}'></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

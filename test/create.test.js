@@ -61,8 +61,8 @@ test("init won't make a studio over another one", () => {
   assert.throws(() => initStudio(dir), { code: "studio_exists", message: /is already a studio\. Make a film in it with: filmkit new <film>/ });
 });
 
-test("the film templates are statement and poster", () => {
-  assert.deepEqual(templates(), ["poster", "statement"]);
+test("the film templates are the five in kb/Templates.md", () => {
+  assert.deepEqual(templates(), ["explainer", "hook-loop", "poster", "product-demo", "statement"]);
 });
 
 for (const template of templates()) {
@@ -70,12 +70,13 @@ for (const template of templates()) {
     const s = studio();
     const { files } = newFilm(s, "launch", template);
     const dir = join(s.dir, "films", "launch");
-    assert.deepEqual(files, [join(dir, "brief.md"), join(dir, "index.html"), join(s.dir, "CLAIMS.md")]);
+    const own = ["brief.md", "index.html", "sound.json"].filter((f) => existsSync(join(PACKAGE, "templates", template, f)));
+    assert.deepEqual(files, [...own.map((f) => join(dir, f)), join(s.dir, "CLAIMS.md")]);
     const html = readFileSync(join(dir, "index.html"), "utf8");
     const brief = readFileSync(join(dir, "brief.md"), "utf8");
     for (const text of [html, brief]) assert.doesNotMatch(text, /\{\{/);
     assert.match(brief, /^# Brief: launch\n/);
-    assert.match(html, /Acme, in one \*line\.\*/);
+    assert.match(html, /Acme,( |\\n)in one \*line\.\*/);
     assert.equal(openFilm(s, "launch").root["data-composition-id"], "main");
     for (const tag of startTags(html).filter((t) => t.attrs["data-composition-src"])) {
       assert.ok(existsSync(join(PACKAGE, tag.attrs["data-composition-src"])), tag.source);
@@ -89,6 +90,25 @@ for (const template of templates()) {
     assert.match(section, /\| Acme, in one line\. \|/);
   });
 }
+
+test("a template over 15 s has sound scored to its own scenes, and the hook loop is a silent 9:16 loop", () => {
+  for (const template of templates()) {
+    const dir = join(PACKAGE, "templates", template);
+    const html = readFileSync(join(dir, "index.html"), "utf8");
+    const hosts = new Map(startTags(html).filter((t) => t.attrs.id).map((t) => [t.attrs.id, Number(t.attrs["data-duration"])]));
+    const scored = existsSync(join(dir, "sound.json"));
+    assert.equal(scored, Number(rootTag(html).attrs["data-duration"]) > 15, template);
+    if (!scored) continue;
+    const sound = JSON.parse(readFileSync(join(dir, "sound.json"), "utf8"));
+    for (const row of [...sound.cues, ...sound.chords, ...sound.blooms, ...sound.pockets]) {
+      const length = hosts.get(row.scene);
+      assert.ok(length, `${template}: no scene "${row.scene}"`);
+      assert.ok(row.at < length && (row.until ?? 0) <= length, `${template}: ${row.id ?? row.scene} at ${row.at} runs past its scene`);
+    }
+  }
+  const loop = rootTag(readFileSync(join(PACKAGE, "templates/hook-loop/index.html"), "utf8")).attrs;
+  assert.deepEqual([loop["data-formats"], loop["data-loop"], loop["data-duration"]], ["9x16", "true", "8"]);
+});
 
 test("new fills in a brand name that needs escaping, and the scene variables still parse", () => {
   const s = studio(`Jo's "Q&A" <Co>`);
@@ -104,7 +124,7 @@ test("new says what's wrong with the name, the template or an existing film", ()
   newFilm(s, "launch", "statement");
   assert.throws(() => newFilm(s, undefined, "statement"), { code: "new_unnamed" });
   assert.throws(() => newFilm(s, "Launch Film", "statement"), { code: "bad_film_name", fix: "filmkit new launch-film" });
-  assert.throws(() => newFilm(s, "x", "documentary"), { code: "unknown_template", message: /no template called "documentary"\. Templates: poster, statement\./ });
+  assert.throws(() => newFilm(s, "x", "documentary"), { code: "unknown_template", message: /no template called "documentary"\. Templates: explainer, hook-loop, poster, product-demo, statement\./ });
   assert.throws(() => newFilm(s, "launch", "poster"), { code: "film_exists", message: /^films\/launch already exists\./ });
   assert.throws(() => newFilm(s, "smoke", "poster"), { code: "film_exists" });
 });
