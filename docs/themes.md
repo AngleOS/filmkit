@@ -36,8 +36,10 @@ npx filmkit brand --ground light   # the same accent, on white
   [the studio's logo](#the-studios-logo)); a PNG is embedded in an SVG at its own size.
 - `--accent` (a hex; quote it, since `#` starts a comment in a shell) and `--ground` (`dark` or `light`) make the
   palette. Without `--ground` it's the one the accent reads on best: dark for a bright accent, light for a deep one.
-  Given one of the two, the other comes from the brand already written (its accent, Pear at first).
-- `--name`: the studio's `name` in `filmkit.json`, set beside the mark.
+  Given one of the two, the other comes from the brand already written: its ground, and the brand's own accent, not
+  one adjusted for text, so switching the ground back and forth never drifts the colour. On a first run, the accent is
+  the one `filmkit.json` sets over its theme, else Pear.
+- `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
 
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
 so the brand keeps Angle's motif, type and motion (D-007), and `filmkit.json`'s `theme` becomes `"brand/theme"`.

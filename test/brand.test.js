@@ -83,16 +83,34 @@ test("brand writes the logo, brand/theme and filmkit.json's name and theme, and 
   assert.equal(opened.theme.mark, join(dir, "brand", "logo.svg"));
 });
 
-test("a later run changes only what it's given: the ground keeps the accent, and the name keeps the palette", () => {
+test("a later run changes only what it's given: the ground keeps the accent, the accent the ground, and the name the palette", () => {
   const dir = studio();
   writeBrand(dir, { accent: "#ff5a1f" });
   writeBrand(dir, { ground: "light" });
   const theme = JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8"));
   assert.equal(theme.extends, "paper");
   assert.match(theme.description, /the accent #ff5a1f on a light ground/);
-  const named = writeBrand(dir, { name: "Acme" });
-  assert.deepEqual(named.files.map((f) => f.slice(dir.length + 1)), ["filmkit.json"]);
-  assert.equal(JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).extends, "paper");
+  writeBrand(dir, { accent: "#1a3cff" });
+  assert.equal(JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).extends, "paper", "the accent keeps the ground");
+  const named = writeBrand(dir, { name: "Acme Co" });
+  assert.deepEqual(named.files.map((f) => f.slice(dir.length + 1)), ["brand/theme/theme.json", "filmkit.json"]);
+  const renamed = JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8"));
+  assert.deepEqual([renamed.extends, renamed.label, renamed.description], ["paper", "Acme Co", "Acme Co's brand, from filmkit brand: the accent #1a3cff on a light ground."]);
+});
+
+test("switching the ground back and forth starts from the brand's own accent each time, not the one adjusted for text", () => {
+  const dir = studio();
+  const first = writeBrand(dir, { accent: "#ff5a1f", ground: "light" });
+  assert.equal(first.palette?.adjusted[0].used, "#c14417");
+  const back = writeBrand(dir, { ground: "dark" });
+  assert.deepEqual([back.palette?.accent, JSON.parse(readFileSync(join(dir, "brand", "theme", "theme.json"), "utf8")).accent], ["#ff5a1f", "#ff5a1f"]);
+});
+
+test("a first run with only the ground takes the accent filmkit.json set over its theme, else Pear", () => {
+  const dir = studio();
+  writeFileSync(join(dir, "filmkit.json"), JSON.stringify({ name: "Acme", theme: { extends: "default", accent: "#1a3cff" } }));
+  assert.equal(writeBrand(dir, { ground: "light" }).palette?.accent, "#1a3cff");
+  assert.equal(writeBrand(studio(), { ground: "dark" }).palette?.accent, "#e3ef26");
 });
 
 test("single values over the old theme stay, over the brand's, all but the colours the brand sets", () => {

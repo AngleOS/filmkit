@@ -11,6 +11,8 @@ import { GROUNDS, palette, proposeGround } from "./palette.js";
 /** filmkit.json's "theme" once the brand is written: the folder brand/theme. */
 export const THEME = "brand/theme";
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
+/** Angle's accent, which `default` has: the palette's accent when nothing names another. */
+const PEAR = "#e3ef26";
 
 /**
  * @typedef {{ name?: string, logo?: string, accent?: string, ground?: string }} Answers `logo` a file, from the cwd
@@ -20,7 +22,7 @@ const HEX = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /**
  * The brand, into the studio at `root`. Only what's given changes: a palette needs the accent or the ground, and takes
- * the other from the studio's theme (its accent, the ground that accent reads on).
+ * the other from the brand already written, else from the studio's theme (its accent, the ground that accent reads on).
  * @param {string} root
  * @param {Answers} answers
  * @returns {Written}
@@ -37,11 +39,13 @@ export function writeBrand(root, { name, logo, accent, ground }) {
   if (logo) files.push(writeLogo(root, logo));
   let edits = readFileSync(config, "utf8");
   if (name) edits = edit(edits, ["name"], name);
+  const file = join(root, THEME, "theme.json");
+  const stored = existsSync(file) ? readJson(file, "theme_json", { file }) : undefined;
   /** @type {Written["palette"]} */
   let written;
-  if (accent || ground) {
-    const brandAccent = (accent ?? currentAccent(root)).toLowerCase();
-    const on = ground ?? proposeGround(brandAccent);
+  if (accent || ground || (name && stored)) {
+    const brandAccent = (accent ?? storedAccent(stored) ?? current.theme?.accent ?? PEAR).toLowerCase();
+    const on = ground ?? (stored ? (stored.extends === "paper" ? "light" : "dark") : proposeGround(brandAccent));
     const { values, adjusted } = palette(brandAccent, on);
     const theme = {
       extends: on === "light" ? "paper" : "default",
@@ -49,7 +53,6 @@ export function writeBrand(root, { name, logo, accent, ground }) {
       description: `${label}'s brand, from filmkit brand: the accent ${brandAccent} on a ${on} ground.`,
       ...values,
     };
-    const file = join(root, THEME, "theme.json");
     mkdirSync(join(root, THEME), { recursive: true });
     writeFileSync(file, JSON.stringify(theme, null, 2) + "\n");
     files.push(file);
@@ -85,12 +88,13 @@ function writeLogo(root, from) {
 }
 
 /**
- * The accent of the brand theme already written, else Angle's Pear, which `default` has.
- * @param {string} root
+ * The brand's own accent, as the brand theme already written names it in its description: its `accent` may be the
+ * nearest colour to it that reads, and a palette made from that would drift further from the brand's at each run.
+ * @param {{ description?: string, accent?: string } | undefined} stored
+ * @returns {string | undefined}
  */
-function currentAccent(root) {
-  const file = join(root, THEME, "theme.json");
-  return existsSync(file) ? (readJson(file, "theme_json", { file }).accent ?? "#e3ef26") : "#e3ef26";
+function storedAccent(stored) {
+  return stored?.description?.match(/the accent (#[0-9a-f]{3,6}) on a/)?.[1] ?? stored?.accent;
 }
 
 /**
