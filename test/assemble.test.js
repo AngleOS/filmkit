@@ -52,6 +52,18 @@ test("a film with no built sound mounts none", () => {
   assert.doesNotMatch(readFileSync(join(out, "index.html"), "utf8"), /<audio/);
 });
 
+test("the theme's folders are copied base first, with theme.css compiled from their theme.json", () => {
+  const { studio, film } = hook();
+  mkdirSync(join(studio.dir, "brand", "theme"), { recursive: true });
+  writeFileSync(join(studio.dir, "brand", "theme", "theme.json"), JSON.stringify({ extends: "angle", accent: "#ff5a1f" }));
+  writeFileSync(join(studio.dir, "brand", "theme", "brand.js"), "// the studio's own\n");
+  writeFileSync(join(studio.dir, "filmkit.json"), JSON.stringify({ theme: "brand/theme" }));
+  const out = assemble(openStudio(studio.dir), film, "16x9");
+  assert.match(readFileSync(join(out, "kit/theme/theme.css"), "utf8"), /--accent: #ff5a1f;/);
+  assert.equal(readFileSync(join(out, "kit/theme/brand.js"), "utf8"), "// the studio's own\n");
+  assert.ok(existsSync(join(out, "kit/theme/fonts/Geist-Regular.woff2")));
+});
+
 test("assembling again starts clean", () => {
   const { studio, film } = hook();
   const out = assemble(studio, film, "1x1");
