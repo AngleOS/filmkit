@@ -58,7 +58,7 @@ test("init keeps what's already there and adds only the .gitignore lines it lack
 test("init won't make a studio over another one", () => {
   const dir = empty();
   initStudio(dir);
-  assert.throws(() => initStudio(dir), /is already a studio\. Make a film in it with: filmkit new <film>/);
+  assert.throws(() => initStudio(dir), { code: "studio_exists", message: /is already a studio\. Make a film in it with: filmkit new <film>/ });
 });
 
 test("the film templates are statement and poster", () => {
@@ -102,11 +102,11 @@ test("new fills in a brand name that needs escaping, and the scene variables sti
 test("new says what's wrong with the name, the template or an existing film", () => {
   const s = studio();
   newFilm(s, "launch", "statement");
-  assert.throws(() => newFilm(s, undefined, "statement"), /name the film: filmkit new <film>/);
-  assert.throws(() => newFilm(s, "Launch Film", "statement"), /can't be a film's name: use lowercase letters, digits and dashes/);
-  assert.throws(() => newFilm(s, "x", "documentary"), /no template "documentary" \(templates: poster, statement\)/);
-  assert.throws(() => newFilm(s, "launch", "poster"), /films\/launch already exists/);
-  assert.throws(() => newFilm(s, "smoke", "poster"), /films\/smoke already exists/);
+  assert.throws(() => newFilm(s, undefined, "statement"), { code: "new_unnamed" });
+  assert.throws(() => newFilm(s, "Launch Film", "statement"), { code: "bad_film_name", fix: "filmkit new launch-film" });
+  assert.throws(() => newFilm(s, "x", "documentary"), { code: "unknown_template", message: /no template called "documentary"\. Templates: poster, statement\./ });
+  assert.throws(() => newFilm(s, "launch", "poster"), { code: "film_exists", message: /^films\/launch already exists\./ });
+  assert.throws(() => newFilm(s, "smoke", "poster"), { code: "film_exists" });
 });
 
 test("the CLI: init then new, with --json results, statement by default, and usage errors exiting 2", () => {

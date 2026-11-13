@@ -62,7 +62,7 @@ test("filmkit.json overrides single values of a theme, the default one when it n
 });
 
 test("a theme that can't be found, or that breaks the schema, says what's wrong", () => {
-  assert.throws(() => loadTheme(studio(), "nope"), /no theme "nope" \(angle, default, paper, or a folder with a theme\.json\)/);
+  assert.throws(() => loadTheme(studio(), "nope"), { code: "unknown_theme", message: /no theme called "nope"\. Themes: angle, default, paper, or a folder with a theme\.json\./ });
   assert.throws(() => loadTheme(studio(), "./brand/theme"), /no brand\/theme\/theme\.json/);
   const bad = (/** @type {object} */ json) => () => loadTheme(studio({ "t/theme.json": json }), "./t");
   assert.throws(bad({ extends: "angle", accent: "pear" }), /t\/theme\.json: accent: "pear" should be a hex colour such as "#e3ef26"/);
