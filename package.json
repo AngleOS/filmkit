@@ -8,7 +8,7 @@
   "files": ["src/", "kit/", "themes/", "schema/", "templates/", "skills/", "examples/studio/films/smoke/", "THIRD_PARTY.md"],
   "engines": { "node": ">=20" },
   "scripts": { "test": "node --test", "typecheck": "tsc -p ." },
-  "dependencies": { "@modelcontextprotocol/sdk": "1.32.2", "gsap": "3.14.2", "jsonc-parser": "3.3.1", "zod": "4.6.7" },
+  "dependencies": { "@modelcontextprotocol/sdk": "1.32.2", "gsap": "3.15.1", "jsonc-parser": "3.3.1", "zod": "4.6.7" },
   "devDependencies": { "@types/node": "20.19.43", "typescript": "7.0.2" },
   "repository": { "type": "git", "url": "git+https://github.com/AngleOS/filmkit.git" }
 }
