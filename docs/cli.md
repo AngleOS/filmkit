@@ -41,7 +41,7 @@ command works on the film's own (its root's `data-formats`, such as a vertical h
 (`kit/layout.js`, `kit/motion.js`, `kit/chart.js`, `kit/icons.js`, `kit/film.css`, `kit/scenes/`), GSAP as `kit/vendor/gsap.min.js` and the theme as
 `kit/theme/`, with the root composition's `data-width` and `data-height` set for the format. A film's head loads
 `kit/vendor/gsap.min.js`, `kit/theme/theme.css` and `kit/film.css`, and its body ends with `kit/layout.js`,
-`kit/motion.js`, `kit/chart.js` (for the infographic scenes), `kit/icons.js` (for `grid` icons and `cards`) and `kit/theme/brand.js`: see
+`kit/motion.js`, `kit/chart.js` (for the infographic scenes), `kit/icons.js` (for `cards` and the icons in `grid` and `mesh`) and `kit/theme/brand.js`: see
 `examples/studio/films/infographics`.
 
 **Preview.** `preview` assembles `build/<film>/preview/` once and starts HyperFrames Studio on it, opening the browser
