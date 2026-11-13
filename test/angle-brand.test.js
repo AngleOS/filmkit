@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { test } from "node:test";
 import vm from "node:vm";
+import { loadTheme, themeCss } from "../src/theme.js";
 
 // brand.js runs in the browser; a stub document is enough to see what it draws.
 function loadBrand() {
@@ -43,7 +45,7 @@ test("the lockup and the lines take their colours from the ground's brand variab
 });
 
 test("the angle theme's paper ground switches the brand colours", () => {
-  const css = readFileSync(new URL("../themes/angle/theme.css", import.meta.url), "utf8");
+  const css = themeCss(loadTheme(tmpdir(), "angle").values);
   const onPaper = css.slice(css.indexOf(".on-paper"));
   for (const v of ["--brand-mark", "--brand-word", "--brand-line"]) {
     assert.match(css.slice(0, css.indexOf(".on-paper")), new RegExp(`${v}:`));

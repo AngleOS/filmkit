@@ -93,7 +93,7 @@ user's films.
 | `check <film> [formats…]` | theme valid, scenes valid, sound built, `hyperframes check` per format in parallel, and the seam gate for loops; skips formats unchanged since they passed (`--force` checks all); non-zero exit on failure |
 | `snapshot <film> [format] --at t,t,…` | PNG frames, so agents can look |
 | `contact <film> [formats…] [--every 2s \| --at t,t,…]` | one labelled contact sheet per format (each scene just after it starts, by default), the quickest full review |
-| `preview <film> [format]` | HyperFrames Studio |
+| `preview <film> [format]` | HyperFrames Studio, live: reloads on save of the film, kit or theme; `f` switches format |
 | `render <film> [formats…]` | `renders/<film>-<format>.mp4` at delivery quality, plus `.srt` and `.vtt`; keeps MP4s still current (`--force` redoes all) |
 | `stills <film> <t>` | a poster PNG per format and a 1280×720 thumbnail |
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
@@ -151,7 +151,10 @@ A theme is a folder: `theme.json` (grounds, accent, text, fonts, logo, motif, cr
 and an optional `brand.js` that sets `window.KB = { motif(svg), lockup(svg), lockupBox(w, cy) }`. The built-ins are
 `angle` (the full brand; the reference implementation is `themes/angle/`), `default` (Angle's look with the studio's
 logo) and `paper`. A studio's `filmkit.json` names a built-in theme, or points to its own folder, and can override
-single values. End cards carry "Made with Angle Filmkit" unless `"credit": false`.
+single values (`{ "extends": "angle", "accent": "#ff5a1f" }`); a `theme.json` can extend another theme the same way.
+`filmkit.json` and `theme.json` are validated against `schema/filmkit.schema.json`. `theme.json`'s `grounds` use the
+names scenes take (`ink`, `accent-dark`, `paper`, and any others), and the build compiles the merged values to
+`kit/theme/theme.css` (`docs/themes.md`). End cards carry "Made with Angle Filmkit" unless `"credit": false`.
 
 ### 8. Install, setup and onboarding (D-008)
 The goal is that someone with an agent goes from nothing to a first film in their brand **in one command, or one

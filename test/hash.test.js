@@ -25,13 +25,17 @@ test("each format has its own hash", () => {
   assert.notEqual(formatHash(studio, film, "16x9"), formatHash(studio, film, "9x16"));
 });
 
-test("a changed theme invalidates", () => {
+test("a changed theme invalidates: a file in one of its folders, or a value", () => {
   const { studio, film } = hook();
-  const themeDir = mkdtempSync(join(tmpdir(), "filmkit-theme-"));
-  cpSync(studio.themeDir, themeDir, { recursive: true });
-  const before = formatHash({ ...studio, themeDir }, film, "16x9");
-  writeFileSync(join(themeDir, "theme.css"), ":root { --ink: red; }\n", { flag: "a" });
-  assert.notEqual(formatHash({ ...studio, themeDir }, film, "16x9"), before);
+  const dir = mkdtempSync(join(tmpdir(), "filmkit-theme-"));
+  cpSync(studio.theme.dirs[0], dir, { recursive: true });
+  const theme = { ...studio.theme, dirs: [dir] };
+  const before = formatHash({ ...studio, theme }, film, "16x9");
+  writeFileSync(join(dir, "brand.js"), "// changed\n", { flag: "a" });
+  const edited = formatHash({ ...studio, theme }, film, "16x9");
+  assert.notEqual(edited, before);
+  const accent = { ...theme, values: { ...theme.values, accent: "oklch(0.6 0.2 30)" } };
+  assert.notEqual(formatHash({ ...studio, theme: accent }, film, "16x9"), edited);
 });
 
 test("a changed, added or renamed film file invalidates, sound.json included", () => {

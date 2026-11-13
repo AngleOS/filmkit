@@ -1,6 +1,4 @@
-/* The angle theme as the custom properties the kit reads (see themes/default/theme.css); theme.json, tokens.css and
-   brand.js carry the rest of the brand. Geist and Geist Mono are © 2023 Vercel, SIL Open Font License 1.1
-   (fonts/OFL.txt). */
+/* The Angle theme, compiled by filmkit from theme.json: change that, not this file. */
 @font-face { font-family: "Geist"; src: url("fonts/Geist-Regular.woff2"); font-weight: 400; }
 @font-face { font-family: "Geist"; src: url("fonts/Geist-Medium.woff2"); font-weight: 500; }
 @font-face { font-family: "Geist"; src: url("fonts/Geist-SemiBold.woff2"); font-weight: 600; }
@@ -9,11 +7,10 @@
 @font-face { font-family: "Geist Mono"; src: url("fonts/GeistMono-Medium.woff2"); font-weight: 500; }
 
 :root {
-  /* Grounds: Night, Castleton and paper. */
   --ink: #07120f;
   --accent-dark: #145237;
+  --jet: #2c2c2c;
   --paper: #ffffff;
-  /* Pear. */
   --accent: #e3ef26;
   --foreground: #eef3ec;
   --muted-foreground: #a9bdb2;
@@ -22,11 +19,10 @@
   --font-mono: "Geist Mono", monospace;
   --title-weight: 600;
   --title-tracking: -0.035em;
-  /* The lockup and the lines motif (brand.js). */
+  --title-leading: 1.02;
   --brand-mark: #e3ef26;
   --brand-word: #ffffff;
   --brand-line: #e3ef26;
-  /* Code: the syntax colours of the code scene. */
   --code-keyword: #ffc9c2;
   --code-string: #cfe6ff;
   --code-title: #e6d0ff;
@@ -34,7 +30,6 @@
   --code-attr: #ffd4a8;
 }
 
-/* Text on paper: Pear doesn't read on white, so the accent is Castleton. */
 .on-paper {
   --foreground: #07120f;
   --muted-foreground: #56665e;

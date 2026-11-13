@@ -2,9 +2,11 @@
 // all drawn from the theme so any brand can rebuild its own product on screen.
 import assert from "node:assert/strict";
 import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 import { startTags } from "../src/build/html.js";
+import { loadTheme, themeCss } from "../src/theme.js";
 
 const kit = new URL("../kit/", import.meta.url);
 const read = (/** @type {string} */ file) => readFileSync(new URL(file, kit), "utf8");
@@ -37,7 +39,7 @@ test("the composer's cursor is a kit asset", () => {
 
 test("both built-in themes colour code on dark and on paper", () => {
   for (const theme of ["default", "angle"]) {
-    const css = readFileSync(new URL(`../themes/${theme}/theme.css`, import.meta.url), "utf8");
+    const css = themeCss(loadTheme(tmpdir(), theme).values);
     for (const block of [css.match(/:root\s*{[^}]*}/)?.[0], css.match(/\.on-paper\s*{[^}]*}/)?.[0]]) {
       for (const token of ["keyword", "string", "title", "number", "attr"]) assert.match(block ?? "", new RegExp(`--code-${token}:`), `${theme} ${token}`);
     }
