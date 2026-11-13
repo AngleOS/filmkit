@@ -100,7 +100,7 @@ test("contact builds a labelled sheet of the smoke film within 2048 px", { skip:
   const { ok, sheets } = JSON.parse(stdout);
   assert.equal(ok, true);
   assert.deepEqual(sheets.map((/** @type {{ format: string, path: string }} */ s) => [s.format, s.path]), [["9x16", join(dir, "build/smoke/contact-9x16.png")]]);
-  assert.deepEqual(sheets[0].times, [0.7, 3.2, 5.7, 8.2, 10.7, 11.2, 13.7, 16.7, 20.2]);
+  assert.deepEqual(sheets[0].times, [0.7, 3.2, 5.7, 8.2, 10.7, 11.2, 13.7, 17.9, 21.4, 26.4, 30.4, 33.4, 36.9, 39.9, 43.4]);
   const png = readFileSync(sheets[0].path);
   assert.equal(png.subarray(1, 4).toString(), "PNG");
   const [width, height] = [png.readUInt32BE(16), png.readUInt32BE(20)];
