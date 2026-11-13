@@ -103,7 +103,7 @@ user's films.
 | `scenes [name]` | the scene catalogue, with variables, generated from the scenes themselves |
 | `doctor` | node, ffmpeg, Chrome for HyperFrames, and the HyperFrames pin |
 | `agents [tools…]` | registers the MCP server and the skill in each agent tool it finds; `--remove`, `--dry-run`, `--mcp-command` (§8) |
-| `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`) |
+| `explain [code]` | why an error or check rule exists and how to fix it, from the error catalogue (`src/errors.js`), or for a HyperFrames rule from the pinned HyperFrames' skill references |
 | `skills` | installs the filmkit skill and the pinned HyperFrames skills into `.claude/skills` (and `AGENTS.md` pointers) |
 | `mcp` | the MCP server over stdio |
 

@@ -1,6 +1,9 @@
 // HyperFrames renders every film, run through npx at one pinned version: the pin is what makes a re-render identical.
 // Move it only for a fix that matters, then check every example film in every format.
 import { spawn, spawnSync } from "node:child_process";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { fail } from "./errors.js";
 
 export const HYPERFRAMES = "hyperframes@0.8.186";
@@ -69,3 +72,26 @@ export function startHyperframes(args, { cwd }) {
   };
   return { child, stop };
 }
+
+/**
+ * Where npx keeps the pinned HyperFrames package once it has fetched it, or null before then.
+ * @param {string} [cache] npm's cache directory
+ * @returns {string | null}
+ */
+export function pinnedPackage(cache = process.env.npm_config_cache ?? defaultCache()) {
+  const npx = join(cache, "_npx");
+  if (!existsSync(npx)) return null;
+  const version = HYPERFRAMES.split("@")[1];
+  for (const entry of readdirSync(npx)) {
+    const dir = join(npx, entry, "node_modules/hyperframes");
+    try {
+      if (JSON.parse(readFileSync(join(dir, "package.json"), "utf8")).version === version) return dir;
+    } catch {
+      // another package's folder
+    }
+  }
+  return null;
+}
+
+const defaultCache = () =>
+  process.platform === "win32" ? join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData/Local"), "npm-cache") : join(homedir(), ".npm");
