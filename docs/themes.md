@@ -24,6 +24,37 @@ A theme is the brand as data. The kit reads only its custom properties and its `
 command opens the studio. A mistake is a usage error (exit 2) that names the key and what it should be:
 `filmkit.json: theme.accent: "pear" should be a hex colour such as "#e3ef26"`.
 
+## Your brand: `filmkit brand`
+`filmkit brand` sets the studio's brand from its accent, its ground and its logo, and changes only what it's given:
+
+```sh
+npx filmkit brand --name Acme --logo ~/Downloads/acme.svg --accent '#ff5a1f'
+npx filmkit brand --ground light   # the same accent, on white
+```
+
+- `--logo`: an SVG is copied as it is to `brand/logo.svg`, the mark the logo reveal and the end card draw (see
+  [the studio's logo](#the-studios-logo)); a PNG is embedded in an SVG at its own size.
+- `--accent` (a hex; quote it, since `#` starts a comment in a shell) and `--ground` (`dark` or `light`) make the
+  palette. Without `--ground` it's the one the accent reads on best: dark for a bright accent, light for a deep one.
+  Given one of the two, the other comes from the brand already written (its accent, Pear at first).
+- `--name`: the studio's `name` in `filmkit.json`, set beside the mark.
+
+The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,
+so the brand keeps Angle's motif, type and motion (D-007), and `filmkit.json`'s `theme` becomes `"brand/theme"`.
+Single values `filmkit.json` set over its old theme, such as `"credit": false`, stay over the brand's, but its colours
+give way to the brand's. The palette's colours are worked out from the accent:
+
+| Ground | `ink` (main) | `accent-dark` (second) | `paper` | Text |
+|---|---|---|---|---|
+| dark | a near-black in the accent's hue | a deep shade of the accent | white | a near-white in the accent's hue |
+| light | white | a pale tint of the accent | an off-white in the accent's hue | a near-black in the accent's hue |
+
+Every colour is moved until it passes WCAG AA on each ground it's read on, so the theme passes `check`'s contrast
+check as written. Text in the accent is held to 4.5:1, reading text's ratio, since the accent also colours captions
+and buttons: where the brand's own colour falls short, the theme takes the nearest that passes, and `brand` says so
+(`accentOn.paper is #cf4919: #ff5a1f is 3.11:1 on paper, under the 4.5:1 text needs`). Change any value afterwards in
+`brand/theme/theme.json`, or run `brand` again.
+
 ## A theme folder
 - **`theme.json`**, the values the kit reads:
   - `extends`: the theme this one is based on, a built-in name or a folder (from this one). Its values are the base,
