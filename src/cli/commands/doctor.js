@@ -4,7 +4,7 @@ import { FilmkitError, describe } from "../../errors.js";
 import { banner } from "../banner.js";
 
 export const usage = "doctor";
-export const summary = "what filmkit needs: Node ≥ 20, ffmpeg, the pinned HyperFrames and its Chrome; exits 3 when one is missing";
+export const summary = "what filmkit needs: Node ≥ 20.12, ffmpeg, the pinned HyperFrames and its Chrome; exits 3 when one is missing";
 
 /** @typedef {{ name: string, ok: boolean, detail: string, code?: string, hint?: string }} Check */
 
@@ -20,15 +20,27 @@ export async function run({ log, json }) {
   // banner() checks stdout, which is where log writes when json is false.
   const top = banner(json);
   if (top) log(`${top}\n`);
-  const checks = [node(), ffmpegVersion(), ...hyperframesAndChrome()];
+  const checks = requirements();
   for (const c of checks) log(`${c.ok ? "✓" : "✗"} ${c.name.padEnd(11)} ${c.detail}${c.hint ? `\n    ${c.hint}` : ""}`);
   const ok = checks.every((c) => c.ok);
   return { ok, checks, ...(!ok && { exit: 3 }) };
 }
 
+/** Each requirement, checked. setup runs these too. */
+export const requirements = () => [node(), ffmpegVersion(), ...hyperframesAndChrome()];
+
+/**
+ * Node 20.12 or newer: setup's prompts use its util.styleText.
+ * @param {string} [version] as process.versions.node has it
+ */
+export function nodeSupported(version = process.versions.node) {
+  const [major, minor] = version.split(".").map(Number);
+  return major > 20 || (major === 20 && minor >= 12);
+}
+
 /** @returns {Check} */
 function node() {
-  if (+process.versions.node.split(".")[0] < 20) return missing("Node.js", process.version, "node_old", { version: process.version });
+  if (!nodeSupported()) return missing("Node.js", process.version, "node_old", { version: process.version });
   return { name: "Node.js", ok: true, detail: process.version };
 }
 

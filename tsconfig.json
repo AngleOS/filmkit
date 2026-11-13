@@ -1,4 +1,4 @@
-// `npm run typecheck`: JSDoc types over the CLI (src/, Node ≥ 20) and the kit (kit/, the browser). No emit: both run
+// `npm run typecheck`: JSDoc types over the CLI (src/, Node ≥ 20.12) and the kit (kit/, the browser). No emit: both run
 // as written.
 {
   "compilerOptions": {
