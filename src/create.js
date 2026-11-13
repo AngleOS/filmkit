@@ -2,15 +2,22 @@
 // own files; every other folder with an index.html is a film template. {{name}} (the brand, from filmkit.json) and
 // {{film}} are filled in as a template is copied, and its claims.md becomes the film's section of the studio's
 // CLAIMS.md, each placeholder row flagged ⚑, so a film can't be posted with a template's words.
-import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { appendFileSync, cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, extname, join, resolve } from "node:path";
 import { fail } from "./errors.js";
+import { HYPERFRAMES } from "./hyperframes.js";
 import { FORMATS, PACKAGE } from "./studio.js";
 
 const TEMPLATES = join(PACKAGE, "templates");
 /** The smoke film mounts every kit scene, so a new studio checks the kit in its own theme from the start. */
 const SMOKE = join(PACKAGE, "examples", "studio", "films", "smoke");
 const SKILL = join(PACKAGE, "skills", "filmkit");
+/** For an AGENTS.md that doesn't point to the HyperFrames skills yet. */
+const SKILLS_POINTER = `## Skills
+
+Read \`.claude/skills/filmkit/SKILL.md\` before you make or change a film, and \`.claude/skills/hyperframes/SKILL.md\`
+before you write its HTML. \`npx filmkit skills\` installs them, matched to the HyperFrames that renders.
+`;
 /** What a studio keeps out of git: both are rebuilt by the CLI. */
 const IGNORED = ["build/", "renders/"];
 // A film's name goes into file names (renders/<film>-<format>.mp4) and commands, so it stays plain.
@@ -34,7 +41,9 @@ export function initStudio(dir, name) {
   if (existsSync(join(root, "filmkit.json"))) throw fail("studio_exists", { dir: root });
   const vars = { name: name || basename(root) };
   /** @type {string[]} */
-  const files = [], kept = [];
+  const files = [];
+  /** @type {string[]} */
+  const kept = [];
   /** @param {string} path @param {(to: string) => void} make */
   const add = (path, make) => {
     const to = join(root, path);
@@ -51,14 +60,52 @@ export function initStudio(dir, name) {
     add(file, (to) => writeFileSync(to, fill(readFileSync(join(TEMPLATES, "studio", file), "utf8"), vars)));
   }
   add(".claude/skills/filmkit", (to) => cpSync(SKILL, to, { recursive: true }));
+  (ignore(root, IGNORED) ? files : kept).push(join(root, ".gitignore"));
+  return { studio: root, name: vars.name, files, kept };
+}
+
+/**
+ * The filmkit skill, and the skills the pinned HyperFrames ships (from `hyperframesSkills`, its dist/skills folder),
+ * into the studio's .claude/skills/, each replacing its older copy; the studio's other skills are left alone. The
+ * HyperFrames skills are git-ignored, since `filmkit skills` makes them again from the pin, and AGENTS.md gets a
+ * pointer to them when it has none.
+ * @param {import("./studio.js").Studio} studio
+ * @param {string} hyperframesSkills
+ * @returns {{ skills: { name: string, from: string, path: string }[], files: string[] }}
+ */
+export function installSkills(studio, hyperframesSkills) {
+  const hyperframes = readdirSync(hyperframesSkills).filter((n) => existsSync(join(hyperframesSkills, n, "SKILL.md"))).sort();
+  if (!hyperframes.length) throw fail("hyperframes_no_skills", { dir: hyperframesSkills });
+  const sources = [{ name: "filmkit", from: "filmkit", dir: SKILL }, ...hyperframes.map((name) => ({ name, from: HYPERFRAMES, dir: join(hyperframesSkills, name) }))];
+  const skills = sources.map(({ name, from, dir }) => {
+    const path = join(studio.dir, ".claude", "skills", name);
+    rmSync(path, { recursive: true, force: true });
+    cpSync(dir, path, { recursive: true });
+    return { name, from, path };
+  });
+  /** @type {string[]} */
+  const files = [];
+  if (ignore(studio.dir, hyperframes.map((name) => `.claude/skills/${name}/`))) files.push(join(studio.dir, ".gitignore"));
+  const agents = join(studio.dir, "AGENTS.md");
+  const text = existsSync(agents) ? readFileSync(agents, "utf8") : "";
+  if (!text.includes(".claude/skills/hyperframes/")) {
+    appendFileSync(agents, (text && !text.endsWith("\n") ? "\n" : "") + (text ? "\n" : "") + SKILLS_POINTER);
+    files.push(agents);
+  }
+  return { skills, files };
+}
+
+/**
+ * Adds the lines the studio's .gitignore lacks (a line without its trailing slash counts), and says whether it did.
+ * @param {string} root
+ * @param {string[]} wanted
+ */
+function ignore(root, wanted) {
   const gitignore = join(root, ".gitignore");
   const lines = existsSync(gitignore) ? readFileSync(gitignore, "utf8").split(/\r?\n/) : [];
-  const missing = IGNORED.filter((line) => !lines.includes(line) && !lines.includes(line.slice(0, -1)));
-  if (missing.length) {
-    appendFileSync(gitignore, (lines.length && lines.at(-1) !== "" ? "\n" : "") + missing.join("\n") + "\n");
-    files.push(gitignore);
-  } else kept.push(gitignore);
-  return { studio: root, name: vars.name, files, kept };
+  const missing = wanted.filter((line) => !lines.includes(line) && !lines.includes(line.slice(0, -1)));
+  if (missing.length) appendFileSync(gitignore, (lines.length && lines.at(-1) !== "" ? "\n" : "") + missing.join("\n") + "\n");
+  return missing.length > 0;
 }
 
 /**

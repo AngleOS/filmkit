@@ -152,6 +152,13 @@ export const CATALOGUE = {
     why: "Kit scenes are copied into every build from the installed filmkit, so a film can mount only the ones it " +
       "ships. The film's own scenes go in its compositions/ folder.",
   },
+  no_scene: {
+    exit: 2,
+    message: ({ scene }) => `The kit has no scene called "${scene}".`,
+    fix: ({ scenes }) => ["Scenes", scenes.join(", ")],
+    why: "`filmkit scenes` lists the scenes this filmkit ships, read from the scenes themselves, and " +
+      "`filmkit scenes <name>` shows one with its variables. A film's own scenes are in its compositions/ folder.",
+  },
   no_time: {
     exit: 2,
     message: () => "Say when, in seconds.",
@@ -186,6 +193,14 @@ export const CATALOGUE = {
     why: "Filmkit runs HyperFrames at one pinned version, so a re-render is identical. npx downloads that version " +
       "the first time and runs it from its cache after, so the first run needs the network: run `filmkit doctor` " +
       "once you're online.",
+  },
+  hyperframes_no_skills: {
+    exit: 3,
+    message: ({ dir }) => `${HYPERFRAMES} has no skills in ${dir}.`,
+    fix: () => ["Delete npx's cache (the _npx folder in `npm config get cache`) and run", "filmkit skills"],
+    why: "`filmkit skills` copies the skills the pinned HyperFrames ships in its package, so they match the CLI " +
+      "that renders. An empty folder means npx's copy of the package is incomplete: npx fetches it again once " +
+      "its cache is gone.",
   },
   chrome_missing: {
     exit: 3,
