@@ -27,17 +27,22 @@ export function hyperframes(args, { cwd, toStderr = false, capture = false }) {
 
 /**
  * Runs the pinned HyperFrames CLI in `cwd` alongside others, with its stdout and stderr captured rather than mixed
- * into the terminal.
+ * into the terminal. `onLine` hears each line of its stdout as it comes.
  * @param {string[]} args
- * @param {{ cwd: string }} options
+ * @param {{ cwd: string, onLine?: (line: string) => void }} options
  * @returns {Promise<{ ok: boolean, stdout: string, stderr: string }>}
  */
-export function hyperframesAsync(args, { cwd }) {
+export function hyperframesAsync(args, { cwd, onLine }) {
   return new Promise((resolve, reject) => {
     const child = spawn("npx", ["--yes", HYPERFRAMES, ...args], { cwd, stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
-    child.stdout.setEncoding("utf8").on("data", (chunk) => (stdout += chunk));
+    child.stdout.setEncoding("utf8").on("data", (chunk) => {
+      const unheard = stdout.lastIndexOf("\n") + 1;
+      stdout += chunk;
+      const end = stdout.lastIndexOf("\n");
+      if (onLine && end >= unheard) stdout.slice(unheard, end).split("\n").forEach((line) => onLine(line));
+    });
     child.stderr.setEncoding("utf8").on("data", (chunk) => (stderr += chunk));
     child.on("error", (error) => reject(npxError(error)));
     child.on("close", (status) => resolve({ ok: status === 0, stdout, stderr }));

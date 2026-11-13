@@ -7,7 +7,7 @@
 import { readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { ffmpegOutput } from "../ffmpeg.js";
-import { hyperframes } from "../hyperframes.js";
+import { hyperframesAsync } from "../hyperframes.js";
 import { FilmkitError } from "../studio.js";
 
 const FLOOR = 0.4;
@@ -71,12 +71,12 @@ export function seamTimes(duration) {
  * @param {string} dir  the format's build directory
  * @param {number} duration
  * @param {string} out
- * @returns {Seam | null}
+ * @returns {Promise<Seam | null>}
  */
-export function measureSeam(dir, duration, out) {
+export async function measureSeam(dir, duration, out) {
   rmSync(out, { recursive: true, force: true });
   const at = seamTimes(duration).join(",");
-  if (!hyperframes(["snapshot", `--at=${at}`, "--no-end", "--describe=false", "-o", out], { cwd: dir, capture: true }).ok) return null;
+  if (!(await hyperframesAsync(["snapshot", `--at=${at}`, "--no-end", "--describe=false", "-o", out], { cwd: dir })).ok) return null;
   // HyperFrames names each frame for its place and time: frame-03-at-0.1s.png
   const frames = readdirSync(out)
     .map((f) => ({ f, n: f.match(/^frame-(\d+)-at-[\d.]+s\.png$/)?.[1] }))
