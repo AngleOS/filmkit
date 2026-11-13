@@ -28,6 +28,7 @@ test("the film, the kit and the theme are watched where assemble() puts them", (
   assert.deepEqual(sources(studio, film), [
     { dir: film.dir, to: "" },
     { dir: join(PACKAGE, "kit"), to: "kit" },
+    { dir: join(PACKAGE, "themes", "angle"), to: join("kit", "theme") },
     { dir: join(PACKAGE, "themes", "default"), to: join("kit", "theme") },
   ]);
 });
@@ -101,4 +102,30 @@ test("watching copies each save into the build, and show() resizes the master", 
   assert.equal(readFileSync(join(out, card), "utf8"), "<template>saved</template>");
   live.show("1x1");
   assert.equal(size(out), "1080x1080");
+});
+
+test("a theme folder's saved brand.js is compiled into the build's again", { timeout: 5000 }, async (t) => {
+  const { studio, film } = preview();
+  mkdirSync(join(studio.dir, "brand", "theme"), { recursive: true });
+  writeFileSync(join(studio.dir, "brand", "theme", "theme.json"), JSON.stringify({ extends: "default" }));
+  writeFileSync(join(studio.dir, "filmkit.json"), JSON.stringify({ name: "Acme", theme: "brand/theme" }));
+  const themed = openStudio(studio.dir);
+  const out = assemble(themed, film, "9x16", join(studio.dir, "build", "hook", "themed"));
+  /** @type {(path: string) => void} */
+  let changed = () => {};
+  const live = watchSources(themed, film, out, "9x16", {
+    onChange: (path) => changed(path),
+    onError: (path, error) => assert.fail(`${path}: ${error.message}`),
+  });
+  t.after(() => live.close());
+  const brand = join("kit", "theme", "brand.js");
+  const saved = new Promise((resolve) => (changed = (path) => path === brand && resolve(path)));
+  const save = () => writeFileSync(join(studio.dir, "brand", "theme", "brand.js"), "// the studio's own\n");
+  save();
+  const resave = setInterval(save, 200);
+  t.after(() => clearInterval(resave));
+  await saved;
+  const compiled = readFileSync(join(out, brand), "utf8");
+  assert.match(compiled, /^window\.KB = \{"name":"Acme",/);
+  assert.ok(compiled.endsWith("\n// the studio's own\n"));
 });

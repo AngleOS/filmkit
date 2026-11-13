@@ -5,10 +5,11 @@
 import { cpSync, existsSync, readFileSync, rmSync, watch } from "node:fs";
 import { join } from "node:path";
 import { PACKAGE } from "../studio.js";
-import { OWN, writeMaster } from "./assemble.js";
+import { compileTheme, OWN, writeMaster } from "./assemble.js";
 
 /** How long the sources stay quiet before a batch is copied: one save is often several events (write, rename). */
 const QUIET_MS = 50;
+const THEME = join("kit", "theme");
 
 /** @typedef {{ dir: string, to: string }} Source  a source directory, and where it lands in the build */
 
@@ -21,7 +22,7 @@ const QUIET_MS = 50;
 export const sources = (studio, film) => [
   { dir: film.dir, to: "" },
   { dir: join(PACKAGE, "kit"), to: "kit" },
-  { dir: studio.themeDir, to: join("kit", "theme") },
+  ...studio.theme.dirs.map((dir) => ({ dir, to: THEME })),
 ];
 
 /**
@@ -70,6 +71,8 @@ export function watchSources(studio, film, out, format, { onChange, onError }) {
         onError(join(source.to, name), /** @type {Error} */ (e));
       }
     }
+    // A theme folder's brand.js, copied in, replaces the compiled one: compile it again over the copy.
+    if ([...pending.values()].some(([source]) => source.to === THEME)) compileTheme(studio, join(out, THEME));
     pending.clear();
   };
   const watchers = sources(studio, film).map((source) =>
