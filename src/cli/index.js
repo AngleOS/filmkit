@@ -4,7 +4,7 @@
 // went wrong (kb/Interfaces.md): 1 a failed check, 2 a usage error, 3 a missing requirement, 4 a failed render.
 import { existsSync, readdirSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { FilmkitError, RequirementError } from "../studio.js";
+import { FilmkitError, fail } from "../errors.js";
 
 /**
  * @typedef {{ args: string[], options: Record<string, string | boolean | undefined>, json: boolean,
@@ -44,27 +44,35 @@ async function main() {
     return at < 0 && !argv.includes("--help") && !argv.includes("-h") ? 2 : 0;
   }
   const file = new URL(`${name}.js`, COMMANDS);
-  if (!/^[a-z-]+$/.test(name) || !existsSync(file)) throw new FilmkitError(`unknown command "${name}"\n\n${await help()}`);
+  if (!/^[a-z-]+$/.test(name) || !existsSync(file)) throw fail("unknown_command", { command: name });
   /** @type {Command} */
   const command = await import(file.href);
-  const { values, positionals } = parseArgs({
-    args: argv.filter((_, i) => i !== at),
-    options: { ...GLOBAL, ...command.options },
-    allowPositionals: true,
-  });
+  const { values, positionals } = parseOptions(name, command, argv.filter((_, i) => i !== at));
   const json = values.json === true;
   const { exit = 1, ...result } = await command.run({ args: positionals, options: values, json, log: json ? console.error : console.log });
   if (json) console.log(JSON.stringify(result, null, 2));
   return result.ok ? 0 : exit;
 }
 
+/** @param {string} name @param {Command} command @param {string[]} args */
+function parseOptions(name, command, args) {
+  try {
+    return parseArgs({ args, options: { ...GLOBAL, ...command.options }, allowPositionals: true });
+  } catch (e) {
+    const option = /** @type {NodeJS.ErrnoException} */ (e).code === "ERR_PARSE_ARGS_UNKNOWN_OPTION" && /** @type {Error} */ (e).message.match(/'([^']+)'/)?.[1];
+    throw option ? fail("unknown_option", { command: name, option }) : e;
+  }
+}
+
 main().then(
   (code) => process.exit(code),
   (error) => {
-    const usage = error instanceof FilmkitError || error.code?.startsWith("ERR_PARSE_ARGS");
-    const known = usage || error instanceof RequirementError;
-    console.error(`filmkit: ${known ? error.message : error.stack}`);
-    if (process.argv.includes("--json")) console.log(JSON.stringify({ ok: false, error: error.message }));
-    process.exit(usage ? 2 : error instanceof RequirementError ? 3 : 1);
+    const ours = error instanceof FilmkitError;
+    const usage = !ours && error.code?.startsWith("ERR_PARSE_ARGS");
+    console.error(`filmkit: ${ours || usage ? error.message : error.stack}`);
+    if (process.argv.includes("--json")) {
+      console.log(JSON.stringify({ ok: false, error: error.message, ...(ours && error.code && { code: error.code, fix: error.fix }) }));
+    }
+    process.exit(ours ? error.exit : usage ? 2 : 1);
   },
 );

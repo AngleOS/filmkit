@@ -9,7 +9,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validate } from "./schema.js";
-import { FilmkitError } from "./studio.js";
+import { FilmkitError, fail } from "./errors.js";
 
 // Not from studio.js's PACKAGE: studio.js imports this module, so its constants aren't set yet when this one loads.
 const THEMES = fileURLToPath(new URL("../themes", import.meta.url));
@@ -71,7 +71,8 @@ function chain(ref, from, studio, seen) {
   const file = join(dir, "theme.json");
   const shown = builtIn ? `theme "${ref}"` : relative(studio, file);
   if (!existsSync(file)) {
-    throw new FilmkitError(builtIn ? `no theme "${ref}" (${readdirSync(THEMES).join(", ")}, or a folder with a theme.json)` : `no ${shown}`);
+    if (builtIn) throw fail("unknown_theme", { theme: ref, themes: readdirSync(THEMES) });
+    throw new FilmkitError(`no ${shown}`);
   }
   if (seen.includes(dir)) throw new FilmkitError(`${shown} extends itself`);
   let values;
