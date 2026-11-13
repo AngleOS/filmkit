@@ -2,9 +2,9 @@
 # Angle Filmkit installer for macOS and Linux (D-008).
 #
 #   curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh
-#   curl -fsSL …/install.sh | sh -s -- --yes --agents auto --brand-url https://example.com
+#   curl -fsSL …/install.sh | sh -s -- --yes --agents auto --name Acme --brand-url https://acme.com
 #
-# It checks Node ≥ 20 and ffmpeg, installs what's missing with the system's package manager (it asks first, unless
+# It checks Node ≥ 20.12 and ffmpeg, installs what's missing with the system's package manager (it asks first, unless
 # --yes), then runs `filmkit setup` with the same arguments. Setup registers Filmkit's MCP server with your agent tools,
 # makes a studio, sets up your brand and makes a first film.
 #
@@ -14,7 +14,7 @@
 set -eu
 
 FILMKIT_PKG=${FILMKIT_PKG:-github:AngleOS/filmkit}
-NODE_MAJOR_MIN=20
+NODE_MIN=20.12
 YES=0
 for a in "$@"; do [ "$a" = "--yes" ] || [ "$a" = "-y" ] && YES=1; done
 
@@ -63,18 +63,19 @@ install_pkg() {  # install_pkg <what> <brew> <apt> <dnf> <pacman>
   esac
 }
 
-node_ok() { have node && [ "$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)" -ge "$NODE_MAJOR_MIN" ]; }
+# 20.12 brings util.styleText, which setup's prompts use.
+node_ok() { have node && [ "$(node -p 'const [a, b] = process.versions.node.split(".").map(Number); +(a > 20 || (a === 20 && b >= 12))' 2>/dev/null)" = 1 ]; }
 
 say ""
 say "  ${P}${B}◢◣ ANGLE${R} ${P}FILMKIT${R}"
 say "  ${D}Your agent makes the film.${R}"
 say ""
 
-step "Node ≥ $NODE_MAJOR_MIN"
+step "Node ≥ $NODE_MIN"
 if node_ok; then
   say "  ${D}node $(node -v)${R}"
 else
-  ask "Node $NODE_MAJOR_MIN or newer isn't installed. Install it now?" || die "Filmkit needs Node $NODE_MAJOR_MIN+ (https://nodejs.org)."
+  ask "Node $NODE_MIN or newer isn't installed. Install it now?" || die "Filmkit needs Node $NODE_MIN+ (https://nodejs.org)."
   case $(pm) in
     apt) # Debian/Ubuntu's own node is often too old: use NodeSource's current LTS.
       have curl || install_pkg curl curl curl curl curl
@@ -82,7 +83,7 @@ else
       sudo_if_needed apt-get install -y nodejs ;;
     *) install_pkg node node nodejs nodejs nodejs ;;
   esac
-  node_ok || die "Node is still older than $NODE_MAJOR_MIN after installing; install it from https://nodejs.org"
+  node_ok || die "Node is still older than $NODE_MIN after installing; install it from https://nodejs.org"
 fi
 
 step "ffmpeg"

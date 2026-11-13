@@ -59,10 +59,10 @@ const CASES = {
   no_time: [{ film: "hook" }, "Say when, in seconds. For example: filmkit stills hook 2.5", "filmkit stills hook 2.5"],
   node_missing: [
     { platform: "darwin" },
-    "npx isn't on the PATH, so HyperFrames can't run. Install Node ≥ 20 (it brings npx) with: brew install node",
+    "npx isn't on the PATH, so HyperFrames can't run. Install Node ≥ 20.12 (it brings npx) with: brew install node",
     "brew install node",
   ],
-  node_old: [{ version: "v18.19.0", platform: "linux" }, "Node v18.19.0 is older than 20. Install Node ≥ 20 with: https://nodejs.org/en/download", "https://nodejs.org/en/download"],
+  node_old: [{ version: "v18.19.0", platform: "linux" }, "Node v18.19.0 is older than 20.12. Install Node ≥ 20.12 with: https://nodejs.org/en/download", "https://nodejs.org/en/download"],
   ffmpeg_missing: [{ platform: "win32" }, "ffmpeg isn't on the PATH. Install it with: winget install --id Gyan.FFmpeg -e", "winget install --id Gyan.FFmpeg -e"],
   hyperframes_offline: [
     {},
@@ -167,6 +167,16 @@ const CASES = {
     { unknown: ["emacs"], tools: ["claude-code", "codex"] },
     'Filmkit can\'t register in "emacs". Tools: claude-code, codex. Register in every one that\'s installed with: filmkit agents',
     "filmkit agents",
+  ],
+  option_choice: [
+    { command: "setup", option: "--ground", value: "grey", choices: ["dark", "light"] },
+    'In filmkit setup, --ground is dark or light, not "grey". For example: --ground dark',
+    "--ground dark",
+  ],
+  prompt_missing: [
+    { page: "/p/docs/install-with-your-agent.md" },
+    "/p/docs/install-with-your-agent.md has no ````text block, so there's no prompt to print. Copy it from: https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md",
+    "https://github.com/AngleOS/filmkit/blob/master/docs/install-with-your-agent.md",
   ],
   unknown_code: [{ code: "nope" }, 'There\'s no error or rule called "nope". See them all with: filmkit explain', "filmkit explain"],
 };
