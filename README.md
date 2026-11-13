@@ -38,7 +38,8 @@ Short films made with the kit. Each one is a few dozen lines of HTML, and the da
 
 [`examples/studio`](examples/studio) is Angle Filmkit's own studio: its films with their briefs, sound, claims and
 posting copy, checked in every format by CI. [Films are code](examples/studio/films/films-are-code) is the argument
-film, built on the infographic scenes.
+film, built on the infographic scenes; [Brief in, film out](examples/studio/films/brief-in-film-out) is the product
+demo, built on the terminal, chat and UI scenes.
 
 <table>
 <tr>

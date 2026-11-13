@@ -23,7 +23,7 @@
       const $ = (id) => document.getElementById(id);
       AL.ground($("root"), v.ground);
       const top = pick({ L: 220, V: safe.top + 40 });
-      gsap.set($("ch-user"), { right: W - column.left - column.width, top, maxWidth: pick({ L: 900, V: column.width - 120 }) });
+      gsap.set($("ch-user"), { right: W - column.left - column.width, top, maxWidth: `${pick({ L: 900, V: column.width - 120 })}px` });
       gsap.set($("ch-reply"), { left: column.left, top: top + pick({ L: 150, S: 170, V: 210 }), width: column.width });
       $("ch-user").textContent = v.prompt;
 

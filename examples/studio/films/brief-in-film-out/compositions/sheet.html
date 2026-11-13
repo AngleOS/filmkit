@@ -1,0 +1,102 @@
+<template>
+  <!-- The contact sheet in the ui scene's window (AL.app("stage").body): a row of frames per format, as contact_sheet
+       returns one sheet per format. The agent rings a 9:16 frame, the cursor opens it, and the frame shows a chart's
+       source line in the caption block; the line moves up clear of the captions and the note reads fixed. Frames are
+       drawn as blocks, so nothing in them is type under 28 px, and they stop above the film's own captions
+       (AL.chart's floor). -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .sh-frame { position: absolute; background: var(--ink); border: 2px solid var(--fk-border); border-radius: 6px; overflow: hidden; }
+    .sh-frame i { position: absolute; border-radius: 3px; background: var(--foreground); }
+    .sh-frame i.bar { background: var(--muted-foreground); }
+    .sh-frame i.lit { background: var(--accent); }
+    .sh-frame i.src { background: var(--muted-foreground); }
+    .sh-frame i.cap { background: var(--fk-muted); }
+    .sh-frame b { position: absolute; left: 5%; top: 67%; width: 90%; height: 13%; border: 4px solid var(--accent); border-radius: 8px; opacity: 0; }
+    .sh-label { position: absolute; font: 500 28px var(--font-mono); color: var(--muted-foreground); line-height: 1; }
+    #sh-ring { position: absolute; border: 4px solid var(--accent); border-radius: 10px; }
+    #sh-note { position: absolute; font: 500 28px var(--font-ui); white-space: nowrap; }
+    #sh-note > div { position: absolute; left: 0; top: 0; display: flex; gap: 12px; align-items: center; }
+    #sh-bad { color: var(--foreground); }
+    #sh-good { color: var(--accent); }
+  </style>
+  <div id="root" data-composition-id="sheet">
+    <div id="sh-rows"></div>
+    <div id="sh-ring"></div>
+    <div id="sh-note"><div id="sh-bad"><span>source line under caption box</span></div><div id="sh-good"><span>fixed: source line under caption box</span></div></div>
+    <img id="sh-cursor" class="fk-cursor" src="kit/assets/cursor.svg" alt="" />
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const { pick, chart, mode } = AL;
+      const $ = (id) => document.getElementById(id);
+      const B = AL.app("stage").body;
+      const pad = pick({ L: 40, S: 28, V: 24 }), gap = pick({ L: 16, V: 12 }), lw = 110, note = 64;
+      const box = { left: B.left + pad, top: B.top + pad, width: B.width - 2 * pad, height: chart.top + chart.height - B.top - 2 * pad };
+
+      // A row per format, in check's order, four frames each, all rows one height and as tall as the box allows.
+      const formats = [["16x9", 16 / 9], ["9x16", 9 / 16], ["1x1", 1], ["4x5", 4 / 5]];
+      const rh = Math.min((box.height - 3 * gap) / 4, (box.width - lw - 3 * gap) / (4 * (16 / 9)));
+      const left = box.left + (box.width - lw - 4 * rh * (16 / 9) - 3 * gap) / 2, top = box.top + (box.height - 4 * rh - 3 * gap) / 2;
+
+      // A frame's blocks as percentages of it, so a frame keeps them as it grows: a title, a shape, two caption lines.
+      /** @param {number} x @param {number} y @param {number} w @param {number} h @param {string} kind */
+      const block = (x, y, w, h, kind = "") => `<i class="${kind}" style="left:${x}%;top:${y}%;width:${w}%;height:${h}%"></i>`;
+      const caption = block(12, 70, 76, 3, "cap") + block(20, 74, 60, 3, "cap");
+      const plain = block(8, 16, 70, 4) + block(8, 22, 42, 4) + block(30, 36, 40, 8, "lit") + caption;
+      // The flagged frame: a chart whose source line sits in the caption block.
+      const bars = [12, 18, 24, 32].map((h, i) => block(12 + i * 20, 62 - h, 14, h, i === 3 ? "bar lit" : "bar")).join("");
+      const flagged = block(8, 16, 75, 3.5) + block(8, 20.5, 45, 3.5) + bars + block(20, 71.5, 60, 1.8, "src") + caption + "<b></b>";
+
+      let html = "";
+      formats.forEach(([name, aspect], r) => {
+        const y = top + r * (rh + gap);
+        html += `<div class="sh-label" style="left:${left}px;top:${y + rh / 2 - 14}px">${name}</div>`;
+        for (let c = 0; c < 4; c++) {
+          const fw = rh * aspect, x = left + lw + c * (fw + gap);
+          const mine = name === "9x16" && c === 2;
+          html += `<div class="sh-frame${mine ? " sh-flagged" : ""}" style="left:${x}px;top:${y}px;width:${fw}px;height:${rh}px">${mine ? flagged : plain}</div>`;
+        }
+      });
+      $("sh-rows").innerHTML = html;
+      const frame = /** @type {HTMLElement} */ (document.querySelector(".sh-flagged"));
+      const others = [...document.querySelectorAll(".sh-frame:not(.sh-flagged), .sh-label")];
+      const small = { left: frame.offsetLeft, top: frame.offsetTop, width: rh * (9 / 16), height: rh };
+      gsap.set($("sh-ring"), { left: small.left - 8, top: small.top - 8, width: small.width + 16, height: small.height + 16 });
+
+      // Opened, the frame is as tall as the box (less the note under it in 9:16), its note beside it elsewhere, and
+      // narrower where the two would overrun the window (4:5).
+      $("sh-bad").insertAdjacentHTML("afterbegin", KI.svg("triangle-alert", 32));
+      $("sh-good").insertAdjacentHTML("afterbegin", KI.svg("check", 32));
+      const noteW = $("sh-good").offsetWidth;
+      const bw = Math.min((box.height - (mode === "V" ? note : 0)) * (9 / 16), mode === "V" ? box.width : box.width - 40 - noteW), bh = bw * (16 / 9);
+      const big = mode === "V"
+        ? { left: box.left + (box.width - bw) / 2, top: box.top, width: bw, height: bh }
+        : { left: box.left + (box.width - bw - 40 - noteW) / 2, top: box.top, width: bw, height: bh };
+      if (mode === "V") {
+        gsap.set($("sh-note"), { left: box.left, top: big.top + bh + 20 });
+        gsap.set([$("sh-bad"), $("sh-good")], { width: box.width, justifyContent: "center" });
+      } else gsap.set($("sh-note"), { left: big.left + bw + 40, top: big.top + bh * 0.72 - 18 });
+      const target = [small.left + small.width / 2, small.top + small.height / 2];
+      gsap.set($("sh-cursor"), { x: target[0] + 170, y: AL.H + 100 });
+
+      KM.arrive(tl, $("sh-rows"), 0.3);
+      tl.fromTo($("sh-ring"), { opacity: 0, scale: 1.3 }, { opacity: 1, scale: 1, duration: 0.5, ease: "expo.out" }, 1.1);
+      KM.cursorIn(tl, $("sh-cursor"), target[0], target[1], 2.0);
+      KM.press(tl, frame, $("sh-cursor"), 2.1);
+      // The frame opens where the sheet was: the rest of the sheet clears, and the cursor leaves.
+      tl.to([...others, $("sh-ring")], { opacity: 0, duration: 0.25, ease: "power2.in" }, 2.3);
+      tl.to(frame, { ...big, duration: 0.7, ease: "expo.inOut" }, 2.3);
+      KM.cursorOut(tl, $("sh-cursor"), 2.4);
+      tl.set($("sh-cursor"), { display: "none" }, 2.85);
+      tl.to(frame.querySelector("b"), { opacity: 1, duration: 0.3, ease: "none" }, 3.1);
+      tl.fromTo($("sh-bad"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 3.15);
+      // The fix: the source line moves up to the chart's floor, clear of the captions, and the ring clears.
+      tl.to(frame.querySelector(".src"), { y: -0.075 * bh, duration: 0.6, ease: "expo.out" }, 4.5);
+      tl.to([frame.querySelector("b"), $("sh-bad")], { opacity: 0, duration: 0.25, ease: "power2.in" }, 4.7);
+      tl.fromTo($("sh-good"), { opacity: 0 }, { opacity: 1, duration: 0.3, ease: "none" }, 4.85);
+      window.__timelines["sheet"] = tl;
+    })();
+  </script>
+</template>

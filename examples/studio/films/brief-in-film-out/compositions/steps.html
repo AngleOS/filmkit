@@ -1,0 +1,45 @@
+<template>
+  <!-- The agent's tool steps, under the chat scene's reply as an agent's chat shows its tool calls: new_film, then
+       check_film passing each format in check's own order. Tool and argument names are the MCP server's
+       (src/mcp/server.js). Placed from the chat scene's own layout, which it can't measure across mounts. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .st-step { position: absolute; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 20px 28px; border: 2px solid var(--fk-border); border-left: 6px solid var(--accent); border-radius: 16px; background: var(--fk-card); color: var(--muted-foreground); font: 400 28px var(--font-ui); }
+    .st-tool { color: var(--foreground); font: 500 30px var(--font-mono); }
+    .st-ok { display: inline-flex; color: var(--accent); }
+    .st-formats { display: flex; flex-wrap: wrap; gap: 12px; flex-basis: 100%; }
+    .st-formats .fk-badge { gap: 8px; font-family: var(--font-mono); color: var(--muted-foreground); }
+    .st-formats .fk-badge svg { color: var(--accent); }
+  </style>
+  <div id="root" data-composition-id="steps">
+    <div id="st-new" class="st-step"><span class="st-tool">new_film</span><span>name: launch, template: statement</span><span class="st-ok"></span></div>
+    <div id="st-check" class="st-step"><span class="st-tool">check_film</span><span>film: launch</span>
+      <div class="st-formats"><span class="fk-badge outline">16x9</span><span class="fk-badge outline">9x16</span><span class="fk-badge outline">1x1</span><span class="fk-badge outline">4x5</span></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const { pick, safe, column } = AL;
+      const $ = (id) => document.getElementById(id);
+      // The chat scene's reply top, and the room its one line (two in the narrower frames) takes.
+      const reply = pick({ L: 220, V: safe.top + 40 }) + pick({ L: 150, S: 170, V: 210 });
+      const top = reply + pick({ L: 49, V: 98 }) + 48;
+      gsap.set($("st-new"), { left: column.left, top, maxWidth: `${column.width}px` });
+      gsap.set($("st-check"), { left: column.left, top: top + 124, maxWidth: `${column.width}px` });
+      $("st-new").querySelector(".st-ok").innerHTML = KI.svg("check", 32);
+      const badges = [...document.querySelectorAll(".st-formats .fk-badge")];
+      badges.forEach((el) => el.insertAdjacentHTML("afterbegin", KI.svg("check", 26)));
+      const ticks = badges.map((el) => el.querySelector("svg"));
+
+      KM.arrive(tl, $("st-new"), 1.4);
+      tl.fromTo($("st-new").querySelector(".st-ok"), { opacity: 0, scale: 0.6 }, { opacity: 1, scale: 1, duration: 0.3, ease: "back.out(2)" }, 2.1);
+      KM.arrive(tl, $("st-check"), 2.5);
+      // A format passes: its tick shows and its name goes to full colour. GSAP can't tween to a var(), so it's read.
+      const ink = getComputedStyle($("root")).getPropertyValue("--foreground").trim();
+      tl.fromTo(ticks, { opacity: 0 }, { opacity: 1, duration: 0.15, stagger: 0.35, ease: "none" }, 3.1);
+      tl.to(badges, { color: ink, duration: 0.15, stagger: 0.35, ease: "none" }, 3.1);
+      window.__timelines["steps"] = tl;
+    })();
+  </script>
+</template>

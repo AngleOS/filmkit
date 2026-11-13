@@ -1,0 +1,82 @@
+<template>
+  <!-- The render: the four formats side by side to scale, each playing the film's title laid out for its own frame
+       while a bar under it fills as it renders; then the files render_film writes, renders/<film>-<format>.mp4 and
+       <film>.srt and .vtt (src/cli/commands/render.js, src/build/captions.js). Frames and files stay in AL.chart's box,
+       above the film's own captions. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    .rn-frame { position: absolute; border: 3px solid var(--fk-border); border-radius: 12px; background: var(--ink); overflow: hidden; }
+    .rn-title { position: absolute; color: var(--foreground); text-wrap: balance; }
+    .rn-bar { position: absolute; left: 0; bottom: 0; width: 100%; height: 8px; background: var(--accent); transform-origin: 0 50%; }
+    .rn-label { position: absolute; font: 500 28px var(--font-mono); color: var(--muted-foreground); text-align: center; }
+    #rn-files { position: absolute; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    #rn-files .fk-badge { font-family: var(--font-mono); }
+  </style>
+  <div id="root" data-composition-id="render">
+    <div class="rn-frame"><div class="rn-title display"></div><div class="rn-bar"></div></div>
+    <div class="rn-frame"><div class="rn-title display"></div><div class="rn-bar"></div></div>
+    <div class="rn-frame"><div class="rn-title display"></div><div class="rn-bar"></div></div>
+    <div class="rn-frame"><div class="rn-title display"></div><div class="rn-bar"></div></div>
+    <div class="rn-label"><span>16:9</span></div>
+    <div class="rn-label"><span>9:16</span></div>
+    <div class="rn-label"><span>1:1</span></div>
+    <div class="rn-label"><span>4:5</span></div>
+    <div id="rn-files">
+      <span class="fk-badge outline">launch-16x9.mp4</span><span class="fk-badge outline">launch-9x16.mp4</span>
+      <span class="fk-badge outline">launch-1x1.mp4</span><span class="fk-badge outline">launch-4x5.mp4</span>
+      <span class="fk-badge">launch.srt</span><span class="fk-badge">launch.vtt</span>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const { chart, pick } = AL;
+      const $ = (id) => document.getElementById(id);
+      const frames = [...document.querySelectorAll(".rn-frame")], labels = document.querySelectorAll(".rn-label");
+      // Each format's size, and its title's place as fractions of it, as in films-are-code's four frames; 16:9's stands
+      // on its floor instead, so at the 28 px minimum its extra lines grow up, not out of the frame.
+      const layouts = [
+        { w: 1920, h: 1080, x: 0.06, y: 0, floor: 0.12, width: 0.8, size: 120, align: "left" },
+        { w: 1080, h: 1920, x: 0.06, y: 0.34, width: 0.78, size: 130, align: "center" },
+        { w: 1080, h: 1080, x: 0.08, y: 0.34, width: 0.84, size: 96, align: "center" },
+        { w: 1080, h: 1350, x: 0.08, y: 0.36, width: 0.84, size: 100, align: "center" },
+      ];
+      // The files take the box's floor (one row in 16:9, two elsewhere); the frames stand on one baseline above them, or
+      // two rows of two where that draws them larger.
+      const gap = pick({ L: 48, S: 28, V: 24 }), label = 56, files = pick({ L: 1, V: 2 }) * 56 + 24;
+      const room = chart.height - files;
+      const fit = (/** @type {number[][]} */ rows) => {
+        const across = Math.min(...rows.map((r) => (chart.width - (r.length - 1) * gap) / r.reduce((a, i) => a + layouts[i].w, 0)));
+        const tall = rows.reduce((a, r) => a + Math.max(...r.map((i) => layouts[i].h)), 0);
+        return { rows, u: Math.min(across, (room - rows.length * label - (rows.length - 1) * gap) / tall) };
+      };
+      const { rows, u } = [fit([[0, 1, 2, 3]]), fit([[0, 2], [3, 1]])].sort((a, b) => b.u - a.u)[0];
+      const high = rows.reduce((a, r) => a + Math.max(...r.map((i) => layouts[i].h)) * u + label, 0) + (rows.length - 1) * gap;
+      let y = chart.top + (room - high) / 2;
+      for (const row of rows) {
+        const base = y + Math.max(...row.map((i) => layouts[i].h)) * u;
+        let x = chart.left + (chart.width - row.reduce((a, i) => a + layouts[i].w * u, 0) - (row.length - 1) * gap) / 2;
+        for (const i of row) {
+          const l = layouts[i], w = l.w * u, h = l.h * u;
+          gsap.set(frames[i], { left: x, top: base - h, width: w, height: h });
+          const title = frames[i].querySelector(".rn-title");
+          title.innerHTML = KM.wordSpans("Your agent makes the *film.*");
+          gsap.set(title, { left: w * l.x, ...(l.floor ? { bottom: h * l.floor } : { top: h * l.y }), width: w * l.width, fontSize: Math.max(28, Math.round(l.size * u)), textAlign: l.align });
+          gsap.set(labels[i], { left: x - 40, width: w + 80, top: base + 12 });
+          x += w + gap;
+        }
+        y = base + label + gap;
+      }
+      gsap.set($("rn-files"), { left: chart.left, width: chart.width, top: chart.top + chart.height - files + 24 });
+
+      KM.arrive(tl, frames, 0.3);
+      tl.fromTo(labels, { opacity: 0 }, { opacity: 1, duration: 0.3, stagger: 0.06, ease: "none" }, 0.5);
+      // Every format plays the same film at once; each bar fills as its MP4 renders, and its file lands as it does.
+      frames.forEach((f) => KM.words(tl, f.querySelectorAll(".word"), 0.8));
+      tl.fromTo(frames.map((f) => f.querySelector(".rn-bar")), { scaleX: 0 }, { scaleX: 1, duration: 2.4, stagger: 0.15, ease: "none" }, 0.6);
+      const made = $("rn-files").querySelectorAll(".fk-badge");
+      tl.fromTo(made, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.4, stagger: 0.15, ease: "expo.out" }, 3.0);
+      window.__timelines["render"] = tl;
+    })();
+  </script>
+</template>

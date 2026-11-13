@@ -40,6 +40,22 @@ test("kit code names no colour: every colour comes from the theme", () => {
   }
 });
 
+// GSAP takes a number's unit from the property's computed value; where that is a keyword (max-width's none, gap's
+// normal, padding's empty shorthand) a bare number is dropped without an error. The chat scene's bubble lost its
+// max-width in 9:16 this way.
+test("scenes give GSAP sizes whose default is a keyword as px strings, never bare numbers", () => {
+  const films = new URL("../examples/studio/films/", import.meta.url);
+  const own = readdirSync(films).flatMap((film) => {
+    const dir = new URL(`${film}/compositions/`, films);
+    try { return readdirSync(dir).map((f) => new URL(f, dir)); } catch { return []; }
+  });
+  const bare = /\b(?:max|min)(?:Width|Height)\s*:\s*(?![\s"'`])|\b(?:padding|margin|gap|inset)\s*:\s*[\d(]/;
+  for (const file of [...scenes.map((f) => new URL(`scenes/${f}`, kit)), ...own]) {
+    const scripts = readFileSync(file, "utf8").split("<script>").slice(1).join("");
+    assert.doesNotMatch(scripts, bare, file.pathname);
+  }
+});
+
 /**
  * The default theme's compiled brand.js (angle's lines, then its own lockup) for a studio named `name`, run against
  * just enough DOM to build its SVG. The display face sets each letter 6 units wide at 10.
