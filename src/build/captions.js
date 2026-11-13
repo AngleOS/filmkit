@@ -95,7 +95,7 @@ export function readCaptions(film) {
  * @returns {{ srt: string | null, vtt: string | null, lines: CaptionLine[] }}
  */
 export function writeCaptions(studio, film, lines = readCaptions(film)) {
-  const renders = join(studio.dir, "renders");
+  const renders = studio.renders;
   const paths = { srt: join(renders, `${film.name}.srt`), vtt: join(renders, `${film.name}.vtt`) };
   for (const path of Object.values(paths)) rmSync(path, { force: true });
   if (!lines.length) return { srt: null, vtt: null, lines };

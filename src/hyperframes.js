@@ -50,7 +50,27 @@ export function hyperframesAsync(args, { cwd, onLine }) {
 }
 
 /** @param {Error} error */
-function npxError(error) {
+export function npxError(error) {
   const missing = /** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT";
   return missing ? new RequirementError("npx not found: install Node ≥ 20 (https://nodejs.org)") : error;
+}
+
+/**
+ * Starts the pinned HyperFrames CLI in `cwd` and leaves it running, its stdout piped to the caller. It runs in its own
+ * process group so that stop() ends HyperFrames itself: npx doesn't pass a signal on to the CLI it started.
+ * @param {string[]} args
+ * @param {{ cwd: string }} options
+ */
+export function startHyperframes(args, { cwd }) {
+  const group = process.platform !== "win32";
+  const child = spawn("npx", ["--yes", HYPERFRAMES, ...args], { cwd, stdio: ["ignore", "pipe", "inherit"], detached: group });
+  const stop = () => {
+    try {
+      if (group && child.pid) process.kill(-child.pid, "SIGTERM");
+      else child.kill();
+    } catch {
+      // it has already exited
+    }
+  };
+  return { child, stop };
 }

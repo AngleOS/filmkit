@@ -4,6 +4,8 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { basename, dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { rootTag } from "./build/html.js";
+import { validate } from "./schema.js";
+import { loadTheme } from "./theme.js";
 
 /** The package's own directory, where kit/ and themes/ live. */
 export const PACKAGE = fileURLToPath(new URL("..", import.meta.url));
@@ -18,8 +20,8 @@ export class FilmkitError extends Error {}
 export class RequirementError extends Error {}
 
 /**
- * @typedef {{ dir: string, name: string, formats: string[], theme: string, themeDir: string }} Studio
- *   `name` is the brand or product the films are for, which templates fill in
+ * @typedef {{ dir: string, name: string, formats: string[], theme: import("./theme.js").Theme, renders: string }} Studio
+ *   `name` is the brand or product the films are for, which templates fill in; `renders` is the folder renders go to
  * @typedef {{ name: string, dir: string, html: string, root: Record<string, string> }} Film
  */
 
@@ -38,12 +40,10 @@ export function openStudio(dir) {
   } catch (e) {
     throw new FilmkitError(`filmkit.json: ${/** @type {Error} */ (e).message}`);
   }
-  const theme = config.theme ?? "default";
-  const themeDir = join(PACKAGE, "themes", theme);
-  if (!existsSync(join(themeDir, "theme.css"))) {
-    throw new FilmkitError(`filmkit.json: no theme "${theme}" (${readdirSync(join(PACKAGE, "themes")).join(", ")})`);
-  }
-  return { dir: root, name: config.name ?? basename(root), formats: checkFormats(config.formats ?? FORMATS, "filmkit.json formats"), theme, themeDir };
+  const problems = validate(config);
+  if (problems.length) throw new FilmkitError(`filmkit.json: ${problems.join("; ")}`);
+  const theme = loadTheme(root, config.theme);
+  return { dir: root, name: config.name ?? basename(root), formats: config.formats ?? FORMATS, theme, renders: resolve(root, config.renders ?? "renders") };
 }
 
 /** @param {string} from @returns {string} the directory, or "" when there's none */
