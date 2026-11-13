@@ -1,0 +1,97 @@
+name: ci
+
+# One check for the ruleset to require: `ci-ok` (last job), green only when every other job succeeded. `types` fails
+# when a job is missing from ci-ok's `needs`. Self-hosted runners only (ephemeral Linux containers with shared caches
+# on /cache), so no setup-node `cache:`: it would tar the cache up and down on every job.
+on:
+  pull_request:
+  push:
+    branches: [master]
+    paths-ignore: ['kb/**']
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # On the oldest Node the package supports (engines) and the current LTS.
+  test:
+    runs-on: [self-hosted, ci, Linux]
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false # each Node's verdict, not one cancelled by the other's failure
+      matrix:
+        node: [20, 26]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm test
+
+  types:
+    runs-on: [self-hosted, ci, Linux]
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: ci-ok needs every job
+        run: |
+          jobs=$(awk '/^jobs:/ {in_jobs=1; next} in_jobs && /^  [A-Za-z0-9_-]+:/ {sub(/^  /, ""); sub(/:.*/, ""); print}' .github/workflows/ci.yml | grep -vx 'ci-ok' | sort)
+          needs=$(awk '/^  ci-ok:/ {f=1} f && /^    needs:/ {gsub(/.*\[|\].*|,/, " "); print; exit}' .github/workflows/ci.yml | tr -s ' ' '\n' | grep . | sort)
+          missing=$(comm -23 <(echo "$jobs") <(echo "$needs"))
+          [ -z "$missing" ] || { echo "::error file=.github/workflows/ci.yml::not in ci-ok's needs: ${missing//$'\n'/ }"; exit 1; }
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - run: npm ci
+      - run: npm run typecheck
+
+  # Every example film checked in each of its formats (HyperFrames' lint, runtime, layout, motion and contrast passes
+  # in Chrome), then a two-second film rendered end to end in a temp directory, not uploaded. X64: HyperFrames
+  # downloads Chrome for Testing, which has no Linux ARM64 build.
+  films:
+    runs-on: [self-hosted, ci, Linux, X64]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+      - run: npm ci
+      - name: ffmpeg
+        run: |
+          command -v ffmpeg > /dev/null && exit 0
+          apt="sudo apt-get ${PKG_CACHE_APT:+-o Acquire::http::Proxy=$PKG_CACHE_APT}"
+          $apt update -qq && DEBIAN_FRONTEND=noninteractive $apt install -y -qq --no-install-recommends ffmpeg
+      - name: check the example films
+        run: |
+          failed=0
+          for film in examples/studio/films/*/; do
+            node src/cli/index.js check "$(basename "$film")" --studio examples/studio || failed=1
+          done
+          exit "$failed"
+      - name: render two seconds
+        run: |
+          studio=$(mktemp -d)
+          cp -R test/fixtures/render/. "$studio"
+          node src/cli/index.js render two-seconds --studio "$studio"
+
+  # The one check a ruleset requires: green when every job above succeeded, red otherwise. PRs only (nothing gates a
+  # push), and `!cancelled()` rather than `always()`: a run superseded by a newer push needs no verdict.
+  ci-ok:
+    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: [test, types, films]
+    runs-on: [self-hosted, ci, Linux]
+    timeout-minutes: 5
+    steps:
+      - env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "needed jobs: $RESULTS"
+          for result in $RESULTS; do
+            [ "$result" = success ] || { echo "::error::a required job didn't succeed"; exit 1; }
+          done

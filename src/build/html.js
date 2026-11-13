@@ -15,7 +15,7 @@ const NAMED = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'" };
 /** @param {string} s */
 const decode = (s) =>
   s.replace(ENTITY, (_, e) =>
-    e[0] !== "#" ? NAMED[/** @type {keyof NAMED} */ (e.toLowerCase())]
+    e[0] !== "#" ? NAMED[/** @type {keyof typeof NAMED} */ (e.toLowerCase())]
       : String.fromCodePoint(e[1].toLowerCase() === "x" ? parseInt(e.slice(2), 16) : +e.slice(1)));
 
 /** @param {string} html */

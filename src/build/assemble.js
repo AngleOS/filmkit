@@ -58,7 +58,7 @@ export function compileTheme(studio, dir) {
  * @param {string} format
  */
 export function writeMaster(out, html, format) {
-  const [width, height] = SIZES[/** @type {keyof SIZES} */ (format)];
+  const [width, height] = SIZES[/** @type {keyof typeof SIZES} */ (format)];
   const sized = setRootSize(html, width, height);
   writeFileSync(join(out, "index.html"), existsSync(join(out, "sound.m4a")) ? mountAudio(sized, "sound.m4a") : sized);
 }
