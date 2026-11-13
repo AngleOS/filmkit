@@ -40,7 +40,8 @@ piece. The brand comes from the studio's theme (`filmkit.json`); never hard-code
 - **Cards carry one short line each,** with their own source line under it; three at most. A timeline's ticks sit
   evenly, or to scale (by the year in each) as far as their labels allow.
 - **A mesh is a network, not a map:** its nodes are placed by the kit, and the pulse runs from the bottom-left node to
-  the top-right one. A meter fills from `from`, so a level can fall as well as rise.
+  the top-right one; give it 4.5 s at least, so the pulse lands before the cut. A meter fills from `from`, so a level
+  can fall as well as rise.
 - **Values are drawn to scale** from zero; a reference line (a cap, a goal) is drawn before the bars rise to it.
 
 ## Motion

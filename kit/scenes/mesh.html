@@ -1,8 +1,9 @@
 <template>
   <!-- Nodes lighting and connecting: a field of nodes (plain, or each an icon) arrives and lights in a wave from one
        corner, each link drawing as its ends light; then a pulse in the accent runs the shortest way along the links
-       from the bottom-left node to the top-right one, which lights in the accent. Sits in AL.chart, under a title
-       placed at the top. -->
+       from the bottom-left node to the top-right one, which lights in the accent. Give it 4.5 s at least: the wave
+       takes 1.6 s, the pulse up to 1.6 s more, and the end node's label lands by 4.4 s. Sits in AL.chart, under a
+       title placed at the top. -->
   <style>
     #root { position: absolute; inset: 0; overflow: hidden; }
     #me-svg { position: absolute; inset: 0; width: 100%; height: 100%; }

@@ -18,7 +18,7 @@
   </style>
   <div id="root" data-composition-id="meter" data-composition-variables='[
     {"id":"value","type":"number","label":"The value it fills to","default":72},
-    {"id":"from","type":"number","label":"The value it fills from (above the value, it falls)","default":0},
+    {"id":"from","type":"number","label":"The value it fills from, on the scale (above the value, it falls)","default":0},
     {"id":"min","type":"number","label":"The scale’s low end","default":0},
     {"id":"max","type":"number","label":"The scale’s high end","default":100},
     {"id":"style","type":"enum","label":"Style","default":"gauge","options":[{"value":"gauge","label":"Gauge: a half circle"},{"value":"level","label":"Level: a horizontal track"}]},
@@ -55,10 +55,12 @@
       const height = chart.height - room;
       const small = pick({ L: 30, S: 28, V: 32 }), smallH = R(small * 1.3), labelSize = pick({ L: 36, S: 32, V: 38 });
       const [start, end] = [KC.share(v.from, v.min, v.max), KC.share(v.value, v.min, v.max)];
+      // The number starts where the fill does: on the scale, so a `from` below `min` starts at the scale's low end.
+      const begin = v.min + start * (v.max - v.min);
       $("mt-label").textContent = v.label;
       $("mt-lo").textContent = fmt(v.min);
       $("mt-hi").textContent = fmt(v.max);
-      $("mt-num").textContent = fmt(v.from);
+      $("mt-num").textContent = fmt(begin);
       gsap.set([$("mt-lo"), $("mt-hi")], { fontSize: small });
       gsap.set($("mt-label"), { fontSize: labelSize, whiteSpace: "nowrap" });
       // Text centred on x, kept inside the box's width.
@@ -81,7 +83,7 @@
           $(id).setAttribute("stroke-width", stroke);
         }
         // The number sits in the bowl, as large as its widest frame fits between the arc's inner edges.
-        const numSize = KC.fit([fmt(v.value), fmt(v.from), fmt(v.max)], 2 * (r - stroke / 2) * 0.8, R(r * 0.5));
+        const numSize = KC.fit([fmt(v.value), fmt(begin), fmt(v.max)], 2 * (r - stroke / 2) * 0.8, R(r * 0.5));
         gsap.set($("mt-num"), { left: 0, width, top: cy - R(numSize * 1.1), fontSize: numSize, textAlign: "center" });
         centre($("mt-lo"), $("mt-lo").textContent, small, cx - r, cy + 12, width);
         centre($("mt-hi"), $("mt-hi").textContent, small, cx + r, cy + 12, width);
@@ -98,7 +100,7 @@
         gsap.set($("mt-svg"), { display: "none" });
         gsap.set($("mt-num"), { right: 0, top: 0, fontSize: numSize });
         // What it measures sets smaller, down to 28 px, to fit beside the number at its widest.
-        const numW = Math.max(...[v.value, v.from, v.max].map((x) => KC.textWidth(fmt(x), numSize)));
+        const numW = Math.max(...[v.value, begin, v.max].map((x) => KC.textWidth(fmt(x), numSize)));
         const size = KC.fit([v.label], width - numW - 32, labelSize);
         gsap.set($("mt-label"), { left: 0, top: headH - R(size * 1.3) - 6, fontSize: size });
         gsap.set($("mt-bar"), { left: 0, top: headH + 16, width, height: track });
@@ -113,7 +115,7 @@
       // The meter arrives, then fills as its number rolls, on one ease so the number reads what the fill shows.
       KM.arrive(tl, $("mt-box"), 0.1);
       fill({ duration: 1.2, ease: "expo.out" }, 0.6);
-      KC.roll(tl, $("mt-num"), v.from, v.value, 0.6, 1.2, fmt, "expo.out");
+      KC.roll(tl, $("mt-num"), begin, v.value, 0.6, 1.2, fmt, "expo.out");
       tl.fromTo($("mt-source"), { opacity: 0 }, { opacity: 1, duration: 0.4, ease: "none" }, 0.6);
       if (v.out > 0) KM.out(tl, [$("mt-box"), $("mt-source")], v.out);
       window.__timelines["meter"] = tl;

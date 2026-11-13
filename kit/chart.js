@@ -134,7 +134,9 @@
     return Math.hypot(p.x - a.x - t * dx, p.y - a.y - t * dy);
   };
   // A mesh's links, [i, j] with i < j, once each: a spanning tree, so a route joins any two nodes, and each node to
-  // its `near` nearest, unless that link would pass within `clear` px of another node's centre (through its ring).
+  // its `near` nearest, unless that link would pass within `clear` px of another node's centre (through its ring). The
+  // tree's own links clear the nodes when they sit more than 1.16 × `clear` apart (scatter's do): a node that near a
+  // link is nearer one of its ends, so the tree takes that shorter link instead.
   const links = (nodes, near = 3, clear = 0) => {
     const dist = (i, j) => Math.hypot(nodes[i].x - nodes[j].x, nodes[i].y - nodes[j].y);
     const seen = new Set(), out = [];
