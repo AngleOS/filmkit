@@ -49,6 +49,17 @@ export function hyperframesAsync(args, { cwd, onLine }) {
   });
 }
 
+/**
+ * Why a run failed, in HyperFrames' own last words: its output is held back while the progress line runs.
+ * @param {{ stdout: string, stderr: string }} run
+ */
+export function lastWords({ stdout, stderr }) {
+  /** @param {string} text */
+  const said = (text) => text.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("@hf-") && !l.startsWith("█"));
+  const words = said(stderr);
+  return (words.length ? words : said(stdout)).slice(-3);
+}
+
 /** @param {Error} error */
 export function npxError(error) {
   const missing = /** @type {NodeJS.ErrnoException} */ (error).code === "ENOENT";

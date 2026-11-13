@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { readCaptions, writeCaptions } from "../../build/captions.js";
-import { hyperframesAsync } from "../../hyperframes.js";
+import { hyperframesAsync, lastWords } from "../../hyperframes.js";
 import { progress, renderStage } from "../../progress.js";
 import { openFilm, openStudio, resolveFormats } from "../../studio.js";
 import { checkFilm, lastPass } from "./check.js";
@@ -83,15 +83,4 @@ function renderedFrom(made, path) {
   } catch {
     return null;
   }
-}
-
-/**
- * Why a render failed, in HyperFrames' own last words: its output is held back while the progress line runs.
- * @param {{ stdout: string, stderr: string }} run
- */
-export function lastWords({ stdout, stderr }) {
-  /** @param {string} text */
-  const said = (text) => text.split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("@hf-") && !l.startsWith("█"));
-  const words = said(stderr);
-  return (words.length ? words : said(stdout)).slice(-3);
 }

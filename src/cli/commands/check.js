@@ -17,7 +17,7 @@ const PASSED = ".filmkit-hash";
 
 /**
  * @typedef {{ code: string, message: string, selector?: string }} Finding
- * @typedef {import("../../build/seam.js").Seam | { ok: false, error: string }} SeamCheck
+ * @typedef {import("../../build/seam.js").SeamCheck} SeamCheck
  * @typedef {{ format: string, dir: string, ok: boolean, errors: Finding[], warnings: Finding[], seam?: SeamCheck }} FormatCheck
  */
 
@@ -80,7 +80,7 @@ async function checkFormat(studio, film, format, live, force) {
     if (isLoop(film.root)) {
       live.step(format, "measuring the seam");
       const out = join(studio.dir, "build", film.name, `seam-${format}`);
-      result.seam = (await measureSeam(dir, Number(film.root["data-duration"]), out)) ?? { ok: false, error: "the seam frames didn't render" };
+      result.seam = await measureSeam(dir, Number(film.root["data-duration"]), out);
       result.ok &&= result.seam.ok;
     }
     if (result.ok) writeFileSync(join(dir, PASSED), JSON.stringify({ hash, warnings: result.warnings, seam: result.seam }) + "\n");

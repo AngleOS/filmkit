@@ -11,20 +11,22 @@ export function ffmpeg(args) {
 }
 
 /**
- * Runs ffmpeg with `-` as its output and returns what it wrote, or null when it failed.
+ * Runs ffmpeg with `-` as its output and returns what it wrote, or null when it failed. Its errors are held back: it
+ * runs inside a check, under the progress lines, which a stray line on the terminal would break.
  * @param {string[]} args
  */
 export function ffmpegOutput(args) {
-  const { ok, stdout } = run(args, "pipe");
+  const { ok, stdout } = run(args, "pipe", "pipe");
   return ok ? stdout : null;
 }
 
 /**
  * @param {string[]} args
  * @param {2 | "pipe"} stdout
+ * @param {2 | "pipe"} [stderr]
  */
-function run(args, stdout) {
-  const result = spawnSync("ffmpeg", ["-nostdin", "-v", "error", "-y", ...args], { stdio: ["ignore", stdout, 2], maxBuffer: 256 * 1024 * 1024 });
+function run(args, stdout, stderr = 2) {
+  const result = spawnSync("ffmpeg", ["-nostdin", "-v", "error", "-y", ...args], { stdio: ["ignore", stdout, stderr], maxBuffer: 256 * 1024 * 1024 });
   if (/** @type {NodeJS.ErrnoException | undefined} */ (result.error)?.code === "ENOENT") throw new RequirementError("ffmpeg not on the PATH: install it (https://ffmpeg.org/download.html)");
   if (result.error) throw result.error;
   return { ok: result.status === 0, stdout: result.stdout };

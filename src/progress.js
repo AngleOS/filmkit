@@ -1,6 +1,6 @@
 // Nothing goes silent for long (kb/Experience.md § Progress and speed). In a terminal each running format has one
-// line on stderr, redrawn every second: its step, its frames, the time so far and, once the frame rate is known, the
-// time left. Anywhere else (a pipe, a CI log, an agent's shell) a redrawn line is noise, so each step prints one line
+// line on stderr, redrawn every second (and when its step changes, not on every frame a render reports): its step, its
+// frames, the time so far and, once the frame rate is known, the time left. Anywhere else (a pipe, a CI log, an agent's shell) a redrawn line is noise, so each step prints one line
 // as it starts, through the command's log.
 
 /**
@@ -54,7 +54,7 @@ export function progress(log, { stream = process.stderr, now = Date.now } = {}) 
         return;
       }
       ticking ??= setInterval(draw, 1000).unref();
-      draw();
+      if (moved) draw();
     },
     /** @param {string} name */
     end(name) {

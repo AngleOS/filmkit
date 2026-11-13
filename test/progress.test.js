@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { lastWords } from "../src/cli/commands/render.js";
+import { lastWords } from "../src/hyperframes.js";
 import { line, progress, renderStage } from "../src/progress.js";
 
 /** A clock the test moves, and the lines and terminal writes a progress makes. @param {boolean} isTTY */
@@ -46,6 +46,17 @@ test("in a terminal, the running formats are lines on stderr, redrawn below each
   assert.ok(written().endsWith("\r\x1b[1A\x1b[J"));
 });
 
+test("in a terminal, new frames wait for the next second's redraw; a new step is drawn at once", () => {
+  const { live, written } = harness(true);
+  live.step("16x9", "capturing", { done: 1, total: 240 });
+  const drawn = written();
+  live.step("16x9", "capturing", { done: 2, total: 240 });
+  assert.equal(written(), drawn);
+  live.step("16x9", "encoding", { done: 2, total: 240 });
+  assert.match(written().slice(drawn.length), /16x9 {2}encoding/);
+  live.close();
+});
+
 test("a line is cut to the terminal's width, so a redraw never wraps", () => {
   const { live, written } = harness(true);
   live.step("16x9", "a step with a name far longer than sixty columns can show on one line");
@@ -68,13 +79,13 @@ test("renderStage reads HyperFrames' progress lines and nothing else", () => {
   assert.equal(renderStage("@hf-progress {broken"), null);
 });
 
-test("a failed render's last words come from its stderr, else its stdout without the progress", () => {
+test("a failed run's last words come from its stderr, else its stdout without the progress", () => {
   assert.deepEqual(lastWords({ stdout: "◆ Rendering\n", stderr: "a\nb\nc\nError: no space left\n" }), ["b", "c", "Error: no space left"]);
   assert.deepEqual(lastWords({ stdout: "◆ Rendering\n  ███░░  12%  Capturing\n@hf-progress {}\n✗ Chrome crashed\n", stderr: "" }), ["◆ Rendering", "✗ Chrome crashed"]);
 });
 
 // A stand-in for `npx --yes hyperframes@… <command> …`: check passes; render reports two frames and writes its MP4,
-// unless FAKE_RENDER_FAILS is set.
+// unless FAKE_RENDER_FAILS is set; snapshot fails.
 const NPX = `#!/bin/sh
 case "$3" in
   check) echo '{"ok":true}' ;;
@@ -86,6 +97,7 @@ case "$3" in
     echo '@hf-progress {"code":"capture","done":2,"total":2,"pct":80}'
     echo '@hf-progress {"code":"encode","done":2,"total":2,"pct":90}'
     printf mp4 > "$out" ;;
+  snapshot) echo "Error: Chrome crashed" >&2; exit 1 ;;
   *) exit 9 ;;
 esac
 `;
@@ -114,4 +126,10 @@ test("with --json, stdout holds only the result, and a failed render says why", 
   assert.equal(status, 4, stderr);
   assert.deepEqual(JSON.parse(stdout), { film: "plain", ok: false, renders: [], captions: { srt: null, vtt: null }, failed: ["16x9"] });
   assert.match(stderr, /^16x9 ✗ render failed\n {2}Error: no space left on device$/m);
+});
+
+test("a seam whose frames didn't render says why, in HyperFrames' words", () => {
+  const { status, stdout, stderr } = withFakeHyperframes(["check", "hook", "--json"]);
+  assert.equal(status, 1, stderr);
+  assert.deepEqual(JSON.parse(stdout).formats[0].seam, { ok: false, error: "the seam frames didn't render: Error: Chrome crashed" });
 });
