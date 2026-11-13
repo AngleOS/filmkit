@@ -2,8 +2,8 @@
 
 `filmkit mcp` runs Angle Filmkit's MCP server over stdio, so any agent that speaks MCP can make, check, look at and
 render films. Its tools run the same code as the CLI commands, on the studio the server starts in (the nearest
-directory with a `filmkit.json`, walking up), or the one `--studio <dir>` names. They never prompt, and stdout carries only the
-protocol: what a command would print goes to stderr, which the client keeps in its log.
+directory with a `filmkit.json`, walking up), or the one `--studio <dir>` names. They never prompt, and stdout
+carries only the protocol: what a command would print goes to stderr, which the client keeps in its log.
 
 ## Setup
 `filmkit agents` registers it in every agent tool it finds ([agents/](agents/README.md)). By hand:
