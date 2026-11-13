@@ -1,9 +1,8 @@
 import { registerAgents } from "../../agents/register.js";
 import { studioDir, setup } from "../../setup.js";
 import { fail } from "../../errors.js";
-import { banner } from "../banner.js";
+import { answer as answered, asking as isAsking, p, start } from "../walkthrough.js";
 import { run as agents } from "./agents.js";
-import { nodeSupported } from "./doctor.js";
 
 export const usage = "setup [--yes] [--agents auto|none|ids] [--name brand] [--remove]";
 export const summary = "from nothing to a first film: requirements, agent tools, a studio, the brand and films/hello; asks in a terminal unless --yes (--brand-url, --logo, --ground, --no-brand, --no-first-film)";
@@ -16,32 +15,21 @@ export const options = {
 
 /** @typedef {import("../index.js").Context["options"]} Options */
 
-/** The prompt library, loaded only for the walkthrough: --help loads every command, and this one needs Node 20.12. */
-/** @type {typeof import("@clack/prompts")} */
-let p;
-
 /** @param {import("../index.js").Context} ctx */
 export async function run(ctx) {
   const { options, json, log } = ctx;
   if (options.remove) return agents({ ...ctx, args: [], options: { remove: true } });
   const ground = str(options.ground);
   if (ground && !GROUNDS.includes(ground)) throw fail("option_choice", { command: "setup", option: "--ground", value: ground, choices: GROUNDS });
-  // The one command besides brand and tour that may ask (D-008), and only a person at a terminal. On a Node too old
-  // for the prompts, it runs from the flags, and its requirements step says which Node to install.
-  const asking = !options.yes && !json && Boolean(process.stdin.isTTY && process.stdout.isTTY) && nodeSupported();
+  const asking = isAsking(ctx);
   const brand = options["no-brand"] ? null : { url: str(options["brand-url"]), logo: str(options.logo), ground, yes: !asking };
   if (!asking) {
     const result = await setup({ ask: fromFlags(options), brand, open: false }, { log, heading: (t) => log(`▸ ${t}`), json });
     if (result.ok && result.studio) log(next(result.studio.name));
     return result;
   }
-  p = await import("@clack/prompts");
-  p.intro(banner(false) || "ANGLE FILMKIT");
-  const result = await setup({ ask: inTerminal(options), brand, open: true }, {
-    log: (...lines) => p.log.message(lines.join(" "), { spacing: 0 }),
-    heading: (t) => p.log.step(t),
-    json,
-  });
+  const out = await start();
+  const result = await setup({ ask: inTerminal(options), brand, open: true }, { ...out, json });
   if (!result.ok) p.cancel("Setup stopped: fix the step above, then run filmkit setup again.");
   else p.outro(result.studio ? next(result.studio.name) : "Done.");
   return result;
@@ -113,12 +101,5 @@ function inTerminal(options) {
   };
 }
 
-/**
- * A prompt's answer; Ctrl+C or Esc ends setup where it is.
- * @template T @param {T} value @returns {Exclude<T, symbol>}
- */
-function answer(value) {
-  if (!p.isCancel(value)) return /** @type {Exclude<T, symbol>} */ (value);
-  p.cancel("Setup stopped. Run filmkit setup again to carry on: it keeps what's done.");
-  process.exit(130);
-}
+/** @template T @param {T} value */
+const answer = (value) => answered(value, "setup");

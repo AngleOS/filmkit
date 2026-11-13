@@ -70,7 +70,8 @@ It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you t
 - **setting up your brand:** from your website, or by answering a few questions;
 - **making a first film.**
 
-`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it.
+`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it. In the studio, `filmkit tour`
+walks through the first film one command at a time, explaining each.
 
 > Filmkit isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
 
