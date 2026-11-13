@@ -204,7 +204,7 @@ test("a Google Fonts family comes as one whole file per weight, asked for as fil
   const font = await googleFont("Inter", get);
   assert.equal(font.family, "Inter");
   assert.deepEqual(font.faces.map((f) => [f.weight, f.file, Buffer.from(f.bytes).toString()]), [400, 500, 600, 700].map((w) => [w, `Inter-${w}.ttf`, `ttf ${w}`]));
-  assert.deepEqual(font.licence, { file: "OFL.txt", text: "SIL Open Font License" });
+  assert.deepEqual(font.licence, { file: "Inter-OFL.txt", text: "SIL Open Font License" });
   assert.ok(requests.every((r) => r.agent === "filmkit (+https://github.com/AngleOS/filmkit)"));
 });
 
@@ -215,7 +215,7 @@ test("a family with fewer weights comes in those it has, and its licence is look
     "https://raw.githubusercontent.com/google/fonts/main/apache/robotoslab/LICENSE.txt": "Apache License",
   });
   const font = await googleFont("Roboto Slab", get);
-  assert.deepEqual([font.faces.map((f) => f.file), font.licence?.file], [["RobotoSlab-400.ttf"], "LICENSE.txt"]);
+  assert.deepEqual([font.faces.map((f) => f.file), font.licence?.file], [["RobotoSlab-400.ttf"], "RobotoSlab-LICENSE.txt"]);
   const { get: unlicensed } = googleFonts({ [INTER]: css2("Inter", [400]), "https://fonts.gstatic.com/s/x/v1/400.ttf": "ttf" });
   assert.equal((await googleFont("Inter", unlicensed)).licence, undefined);
 });
@@ -226,13 +226,13 @@ test("a family Google Fonts doesn't have, or a network that's down, says so", as
   await assert.rejects(googleFont("Inter", down), { code: "font_fetch", message: /couldn't fetch .*: Error: getaddrinfo ENOTFOUND/ });
 });
 
-test("the font goes into brand/theme/fonts and the theme's fonts for titles and text, and stays until another replaces it", async () => {
+test("the font goes into brand/theme/fonts and the theme's fonts for titles and text, and stays until another replaces it, leaving fonts added by hand", async () => {
   const dir = studio();
   const { get } = googleFonts({ [INTER]: css2("Inter", [400, 500, 600, 700]), ...INTER_FILES, "https://raw.githubusercontent.com/google/fonts/main/ofl/inter/OFL.txt": "OFL" });
   const written = writeBrand(dir, { font: await googleFont("Inter", get) });
   const fonts = join(dir, "brand", "theme", "fonts");
   assert.deepEqual(written.files.map((f) => f.slice(dir.length + 1)), [
-    ...[400, 500, 600, 700].map((w) => `brand/theme/fonts/Inter-${w}.ttf`), "brand/theme/fonts/OFL.txt", "brand/theme/theme.json", "filmkit.json",
+    ...[400, 500, 600, 700].map((w) => `brand/theme/fonts/Inter-${w}.ttf`), "brand/theme/fonts/Inter-OFL.txt", "brand/theme/theme.json", "filmkit.json",
   ]);
   const theme = openStudio(dir).theme;
   assert.deepEqual([theme.values.fonts.display.family, theme.values.fonts.display.weight, theme.values.fonts.ui.family, theme.values.fonts.mono.family], ["Inter", 600, "Inter", "Geist Mono"]);
@@ -240,8 +240,19 @@ test("the font goes into brand/theme/fonts and the theme's fonts for titles and 
   writeBrand(dir, { accent: "#1a3cff" });
   assert.equal(openStudio(dir).theme.values.fonts.ui.family, "Inter", "a later run without --font keeps it");
   const { get: lobster } = googleFonts({ "https://fonts.googleapis.com/css2?family=Lobster:wght@400;500;600;700": css2("Lobster", [400]), "https://fonts.gstatic.com/s/x/v1/400.ttf": "ttf" });
+  writeFileSync(join(fonts, "Acme-Display.otf"), "the studio's own");
   writeBrand(dir, { font: await googleFont("Lobster", lobster) });
-  assert.deepEqual(readdirSync(fonts), ["Lobster-400.ttf"]);
+  assert.deepEqual(readdirSync(fonts).sort(), ["Acme-Display.otf", "Lobster-400.ttf"]);
   assert.deepEqual(openStudio(dir).theme.values.fonts.display, { family: "Lobster", weight: 400, tracking: "-0.035em", leading: 1.02 });
-  assert.ok(!existsSync(join(fonts, "OFL.txt")));
+  assert.ok(!existsSync(join(fonts, "Inter-OFL.txt")));
+});
+
+test("a mistyped option fails before the font is downloaded", async (t) => {
+  const dir = studio();
+  const fetched = t.mock.method(globalThis, "fetch", async () => new Response("", { status: 500 }));
+  const run = (/** @type {Record<string, string>} */ options) => brand({ args: [], options: { studio: dir, font: "Inter", ...options }, json: false, log: () => {} });
+  await assert.rejects(run({ accent: "orange" }), { code: "brand_option" });
+  await assert.rejects(run({ ground: "grey" }), { code: "option_choice" });
+  await assert.rejects(run({ logo: join(dir, "nope.svg") }), { code: "logo_missing" });
+  assert.equal(fetched.mock.callCount(), 0);
 });

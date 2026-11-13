@@ -11,6 +11,8 @@ const AGENT = "filmkit (+https://github.com/AngleOS/filmkit)";
 const WEIGHTS = [400, 500, 600, 700];
 /** Where google/fonts keeps a family's licence, by licence. */
 const LICENCE_FILES = ["ofl/OFL.txt", "apache/LICENSE.txt", "ufl/UFL.txt"];
+/** What follows the family's name in a file googleFont saves: a weight, or one of those licences. */
+const SAVED = /^-(\d+\.\w+|OFL\.txt|LICENSE\.txt|UFL\.txt)$/;
 
 /**
  * @typedef {{ weight: number, file: string, bytes: Uint8Array }} Face `file` a name in brand/theme/fonts
@@ -40,7 +42,7 @@ export async function googleFont(family, get = fetch) {
   for (const { weight, src } of blocks) {
     const file = await request(get, src);
     if (!file.ok) throw fail("font_fetch", { url: src, reason: `HTTP ${file.status}` });
-    faces.push({ weight, file: `${name.replace(/\s+/g, "")}-${weight}${src.match(/\.\w+$/)?.[0] ?? ".ttf"}`, bytes: new Uint8Array(await file.arrayBuffer()) });
+    faces.push({ weight, file: `${fileName(name)}-${weight}${src.match(/\.\w+$/)?.[0] ?? ".ttf"}`, bytes: new Uint8Array(await file.arrayBuffer()) });
   }
   return { family: name, faces, licence: await licence(get, name) };
 }
@@ -55,10 +57,23 @@ async function licence(get, family) {
   for (const path of LICENCE_FILES) {
     const [dir, file] = path.split("/");
     const answer = await request(get, `${LICENCES}/${dir}/${slug}/${file}`);
-    if (answer.ok) return { file, text: await answer.text() };
+    // Named for the family: the build copies each theme folder over its base's, and the base's fonts/OFL.txt is the
+    // licence of the mono font it still ships.
+    if (answer.ok) return { file: `${fileName(family)}-${file}`, text: await answer.text() };
   }
   return undefined;
 }
+
+/** How a family starts the names of the files it's saved as: "IBM Plex Sans" as IBMPlexSans-600.ttf. @param {string} family */
+const fileName = (family) => family.replace(/\s+/g, "");
+
+/**
+ * Whether `file` in brand/theme/fonts is one googleFont saved for `family`: a weight or the licence. Files of a font
+ * added by hand stay when --font replaces the family.
+ * @param {string} family
+ * @param {string} file
+ */
+export const savedFor = (family, file) => file.startsWith(fileName(family)) && SAVED.test(file.slice(fileName(family).length));
 
 /** @param {typeof fetch} get @param {string} url */
 async function request(get, url) {

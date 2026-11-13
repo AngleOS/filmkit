@@ -43,12 +43,14 @@ npx filmkit brand --font 'IBM Plex Sans'
   the studio's theme's, built-in, a folder or set in `filmkit.json`, else Pear.
 - `--font`: a family from [Google Fonts](https://fonts.google.com), named as it spells it, for titles and text; code
   stays in Geist Mono. Google's fonts are all under open licences (OFL, Apache 2.0 or the Ubuntu Font Licence), so
-  `brand` downloads the family's regular, medium, semibold and bold (those it has) into `brand/theme/fonts`, with its
-  licence from [google/fonts](https://github.com/google/fonts), and writes them into the theme's `fonts`. Titles take
-  the semibold, or the heaviest weight there is. The files are whole TrueType fonts, not subsets, so text in any script
-  the family covers renders, and films never fetch a font while they render. The font stays when `brand` runs again
-  without `--font`. For a font that isn't on Google Fonts, put its files in `brand/theme/fonts` and name them in the
-  theme's `fonts` yourself (see [a theme folder](#a-theme-folder)), keeping to fonts whose licence lets them ship.
+  `brand` downloads the family's regular, medium, semibold and bold (those it has) into `brand/theme/fonts`, as
+  `Inter-600.ttf` and so on, with its licence from [google/fonts](https://github.com/google/fonts) as `Inter-OFL.txt`,
+  and writes them into the theme's `fonts`. Titles take the semibold, or the heaviest weight there is. The files are
+  whole TrueType fonts, not subsets, so text in any script the family covers renders, and films never fetch a font
+  while they render. The font stays when `brand` runs again without `--font`; another `--font` deletes the files the
+  last one downloaded and replaces the theme's `fonts`. For a font that isn't on Google Fonts, put its files in
+  `brand/theme/fonts` and name them in the theme's `fonts` yourself (see [a theme folder](#a-theme-folder)), keeping
+  to fonts whose licence lets them ship: `--font` leaves those files alone, but a later `--font` rewrites `fonts`.
 - `--name`: the studio's `name` in `filmkit.json`, set beside the mark, and the brand theme's label.
 
 The palette is a theme folder, `brand/theme/theme.json`, over `default` on a dark ground or `paper` on a light one,

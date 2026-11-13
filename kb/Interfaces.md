@@ -59,7 +59,7 @@ the MCP server share one implementation: MCP tools call the same functions the C
 { "ok": true, "studio": "/abs/acme-films", "name": "Acme", "files": ["/abs/acme-films/brand/logo.svg", "/abs/acme-films/brand/theme/theme.json", "/abs/acme-films/filmkit.json"],
   "palette": { "accent": "#ff5a1f", "ground": "dark",
     "adjusted": [{ "key": "accentOn.paper", "brand": "#ff5a1f", "used": "#cf4919", "ratio": 3.11 }] },   // where the brand's accent is under 4.5:1 for text, the colour used
-  "font": { "family": "Inter", "weights": [400, 500, 600, 700], "licence": "OFL.txt" } }   // licence null when google/fonts has none under the family's name
+  "font": { "family": "Inter", "weights": [400, 500, 600, 700], "licence": "Inter-OFL.txt" } }   // licence null when google/fonts has none under the family's name
 
 // new  (`filmkit new <film> [--template t] --json`)
 { "ok": true, "film": "launch", "template": "statement", "files": ["/abs/films/launch/brief.md", "/abs/films/launch/index.html", "/abs/CLAIMS.md"] }

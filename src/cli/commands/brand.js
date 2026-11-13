@@ -1,6 +1,6 @@
 import { relative } from "node:path";
 import { googleFont } from "../../brand/fonts.js";
-import { writeBrand } from "../../brand/write.js";
+import { checkAnswers, writeBrand } from "../../brand/write.js";
 import { studioDir } from "../../studio.js";
 
 export const usage = "brand [--name n] [--logo file] [--accent hex] [--ground dark|light] [--font family]";
@@ -15,8 +15,11 @@ export async function run({ options, log }) {
   const given = (key) => /** @type {string | undefined} */ (options[key]);
   // setup passes on its --brand-url; reading a site is still to come, so say the URL went unused rather than drop it.
   if (given("from-url")) log(`· ${given("from-url")} isn't read yet: this version of filmkit brand takes the name, logo, accent, ground and font`);
+  const answers = { name: given("name"), logo: given("logo"), accent: given("accent"), ground: given("ground") };
+  // A mistyped option should fail at once, not after the font's download.
+  checkAnswers(root, { ...answers, font: given("font") });
   const font = given("font") ? await googleFont(/** @type {string} */ (given("font"))) : undefined;
-  const result = writeBrand(root, { name: given("name"), logo: given("logo"), accent: given("accent"), ground: given("ground"), font });
+  const result = writeBrand(root, { ...answers, font });
   log(`✓ ${result.name}'s brand in ${root}`);
   const { palette } = result;
   if (palette) log(`  the accent ${palette.accent} on a ${palette.ground} ground`);
