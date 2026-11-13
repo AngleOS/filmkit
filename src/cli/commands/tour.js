@@ -14,7 +14,7 @@ export async function run(ctx) {
   const film = args[0] ?? FIRST_FILM.name;
   if (!isAsking(ctx)) {
     const result = await tour(studio, film, { ask: fromFlags(options), open: false }, { log, heading: (t) => log(`▸ ${t}`), json });
-    if (result.ok) log(next(film, studio.name).join("\n"));
+    if (result.ok) log(next(studio, film).join("\n"));
     return result;
   }
   const out = await start();
@@ -23,7 +23,7 @@ export async function run(ctx) {
   const result = await tour(studio, film, { ask, open: true }, { ...out, json });
   if (!result.ok) p.cancel("The tour stopped at the step above: fix it, then run filmkit tour again.");
   else {
-    const lines = next(film, studio.name);
+    const lines = next(studio, film);
     out.log(lines.slice(0, -1).join("\n"));
     p.outro(lines.at(-1));
   }

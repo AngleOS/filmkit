@@ -1,9 +1,9 @@
 // filmkit tour (Design §8, D-008): the first film made one command at a time, each explained before it runs, so a
 // person learns what their agent will be running. Its steps are the CLI's own commands; `ask` says whether to run
 // each one, and tests swap the steps that reach for HyperFrames.
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { newFilm } from "./create.js";
+import { newFilm, plainName } from "./create.js";
 import { STEPS as SETUP, FIRST_FILM } from "./setup.js";
 
 /**
@@ -33,13 +33,13 @@ export const STEPS = {
   open: SETUP.open,
 };
 
-/** @param {string} film */
-export const stops = (film) => ({
+/** @param {string} film @param {boolean} made  whether the tour makes the film, from the statement template */
+export const stops = (film, made) => ({
   new: {
     title: "A film",
     explain: [
       `A film is one HTML page, films/${film}/index.html: scenes from the kit on a timeline, with their words,`,
-      "in your studio's theme. The statement template is the shortest: one line, then the endcard.",
+      `in your studio's theme.${made ? " The statement template is the shortest: one line, then the endcard." : ""}`,
     ],
     command: `filmkit new ${film} --template ${FIRST_FILM.template}`,
   },
@@ -82,7 +82,9 @@ export const stops = (film) => ({
 export async function tour(studio, film, { ask, open }, { log, heading, json }, steps = STEPS) {
   /** @param {string[]} args @returns {Context} */
   const ctx = (args) => ({ args, options: { studio: studio.dir }, json, log });
-  const stop = stops(film);
+  plainName(film);
+  const made = !existsSync(join(studio.dir, "films", film));
+  const stop = stops(film, made);
   /** @type {Record<string, any>} */
   const result = { ok: true, film, new: null, check: null, contact: null, render: null };
   /** @param {Stop} s */
@@ -97,7 +99,7 @@ export async function tour(studio, film, { ask, open }, { log, heading, json }, 
   };
 
   show(stop.new);
-  if (existsSync(join(studio.dir, "films", film))) log(`✓ films/${film}, already there: the tour uses it`);
+  if (!made) log(`✓ films/${film}, already there: the tour uses it`);
   else if (await ask("new", stop.new)) {
     result.new = { ok: true, ...newFilm(studio, film, FIRST_FILM.template) };
     log(`✓ films/${film} from the ${FIRST_FILM.template} template`);
@@ -115,9 +117,16 @@ export async function tour(studio, film, { ask, open }, { log, heading, json }, 
   return result;
 }
 
-/** What to do after the tour, with the brand's name in the agent's first ask. @param {string} film @param {string} name */
-export const next = (film, name) => [
-  `Change the line: it's the promise scene's "text" in films/${film}/index.html.`,
+/**
+ * What to do after the tour, with the brand's name in the agent's first ask. The statement template's line is its
+ * promise scene; another film's words are in each scene's variables.
+ * @param {import("./studio.js").Studio} studio
+ * @param {string} film
+ */
+export const next = (studio, film) => [
+  readFileSync(join(studio.dir, "films", film, "index.html"), "utf8").includes('id="promise"')
+    ? `Change the line: it's the promise scene's "text" in films/${film}/index.html.`
+    : `Change the words: they're each scene's data-variable-values in films/${film}/index.html.`,
   `Watch the film as you edit it with filmkit preview ${film}.`,
-  `Or ask your agent, "Make a 30-second launch film for ${name}". It follows the filmkit skill.`,
+  `Or ask your agent, "Make a 30-second launch film for ${studio.name}". It follows the filmkit skill.`,
 ];

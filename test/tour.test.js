@@ -5,10 +5,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
-import { initStudio } from "../src/create.js";
+import { initStudio, newFilm } from "../src/create.js";
 import { openStudio } from "../src/studio.js";
 import { fromFlags } from "../src/cli/commands/tour.js";
-import { tour } from "../src/tour.js";
+import { next, tour } from "../src/tour.js";
 
 const CLI = fileURLToPath(new URL("../src/cli/index.js", import.meta.url));
 
@@ -80,15 +80,33 @@ test("a no ends the tour at that step, with what ran so far", async () => {
   assert.equal(calls.check.length, 1);
 });
 
-test("the tour uses a film that's already there without asking to make it", async () => {
+test("the tour uses a film that's already there without asking to make it, or naming a template it didn't use", async () => {
   const s = studio();
-  mkdirSync(join(s.dir, "films/hello"), { recursive: true });
+  newFilm(s, "launch", "explainer");
   /** @type {string[]} */
   const asked = [];
-  const { result, lines } = await run(s, async (step) => (asked.push(step), true));
+  const { result, lines } = await run(s, async (step) => (asked.push(step), true), undefined, "launch");
   assert.equal(result.new, null);
   assert.ok(!asked.includes("new"));
   assert.ok(lines.some((l) => l.includes("already there")));
+  assert.ok(!lines.some((l) => l.includes("statement")));
+});
+
+test("the closing hint points at the promise scene only in a film that has one", () => {
+  const s = studio();
+  newFilm(s, "hello", "statement");
+  newFilm(s, "launch", "explainer");
+  assert.match(next(s, "hello")[0], /promise scene's "text" in films\/hello\/index\.html/);
+  assert.match(next(s, "launch")[0], /data-variable-values in films\/launch\/index\.html/);
+  assert.match(next(s, "launch").at(-1) ?? "", /launch film for Acme/);
+});
+
+test("a film name that isn't plain fails before the tour looks for it, even when the path is there", async () => {
+  const s = studio();
+  mkdirSync(join(s.dir, "x"));
+  const { steps, calls } = stubs();
+  await assert.rejects(run(s, undefined, steps, "../x"), { code: "bad_film_name" });
+  assert.equal(calls.check.length, 0);
 });
 
 test("a failed check stops the tour with exit 1, before the contact sheet", async () => {
