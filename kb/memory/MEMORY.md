@@ -9,3 +9,4 @@
 - [Ci runners](ci-runners.md) — Where filmkit's CI jobs can run and why — Chrome for Testing is x64-only on Linux, npm provenance needs a GitHub-hosted runner
 - [Theme colours in films](theme-colours-in-films.md) — A film sees only theme.css's custom properties (no --destructive or other shadcn tokens), and *accent* marks one word, not a phrase
 - [Scene fonts before layout](scene-fonts-before-layout.md) — A HyperFrames scene's script runs before the theme's web fonts load, so text measured there (canvas measureText) gets the fallback face's width
+- [Gif from render](gif-from-render.md) — A GIF made from a filmkit MP4 renders every frame anew (the MP4's noise), so a mostly still film comes out megabytes; mpdecimate first, and -final_delay to keep the last hold
