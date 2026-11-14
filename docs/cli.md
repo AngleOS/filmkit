@@ -18,7 +18,8 @@ renders/            git-ignored: <film>-<format>.mp4, <film>.srt and .vtt, <film
 `filmkit.json` is checked against `schema/filmkit.schema.json` whenever a command opens the studio: `name`, the
 default `formats`, the `theme` (a built-in name, a theme folder, or single values over one: see
 [themes](themes.md)) and `renders`, the folder renders go to (`renders` by default). A key it doesn't know, or a value
-it can't use, is a usage error (exit 2) that says what the value should be.
+it can't use, is a usage error (exit 2) that says what the value should be. [The studio](studio.md) walks through each
+part, and [troubleshooting](troubleshooting.md) through what goes wrong.
 
 | Command | What it does |
 |---|---|

@@ -1,16 +1,29 @@
 # Themes
 
-A theme is the brand as data. The kit reads only its custom properties and its `KB`, so no brand lives in kit code
-(D-007).
+A theme is the brand as data: grounds, an accent, type, a logo and a motif. The kit reads only its custom properties
+and its `KB`, so no brand lives in kit code.
+
+## Which theme
+Out of the box, Angle Filmkit's films have Angle's look. Which theme you use depends on whose films they are:
+
+- **`default`, for your films with Angle's look.** The Night, Castleton and Paper grounds, the Pear accent, Geist and
+  the brand lines, with **your** logo (`brand/logo.svg`) beside your studio's `name`. `init` starts every studio on
+  it. `paper` is the same on a white ground, with Night type, a Pear second ground and a Castleton accent.
+- **Your own theme, for your brand.** `filmkit brand` makes one from your accent, ground, logo and font, or reads them
+  from your website ([below](#your-brand-filmkit-brand)). It keeps Angle's motion and motif and changes the rest. To
+  change more, write [a theme folder](#a-theme-folder).
+- **`angle`, for Angle's own films only.** The complete Angle brand: the Night, Castleton, Jet and Paper grounds and
+  the ANGLE lockup. Angle Filmkit's [example studio](../examples/studio) uses it. The Angle name, logo, mark and
+  wordmark are Angle's trademarks and aren't covered by the MIT licence: use `angle` only for films about Angle or
+  Angle Filmkit, never as your own brand. See [TRADEMARKS.md](../TRADEMARKS.md).
+
+Every theme's end cards carry a small "Made with Angle Filmkit" line, which you may keep on films you make with the
+kit, or turn off with `"credit": false` (see [`credit`](#a-theme-folder)).
 
 ## Choosing one
 `filmkit.json`'s `theme` is one of:
 
-- **a built-in theme:**
-  - `"default"`: Angle's look (the Night, Castleton and Paper grounds, the Pear accent, Geist and the lines motif) with
-    the studio's own logo, `brand/logo.svg`, beside the studio's `name`;
-  - `"paper"`: the same on a white ground, with Night type, a Pear second ground and a Castleton accent;
-  - `"angle"`: Angle's own brand and lockup, for Angle's films;
+- **a built-in theme:** `"default"`, `"paper"` or `"angle"`;
 - **a theme folder in the studio:** `"brand/theme"`, a folder with a `theme.json` (a name with a slash or a dot is a
   folder, from the studio);
 - **single values over either:** `{ "extends": "angle", "accent": "#ff5a1f" }`. Without `extends`, the values go over
