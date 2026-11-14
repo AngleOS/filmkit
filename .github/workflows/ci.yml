@@ -112,6 +112,9 @@ jobs:
               node src/cli/index.js check "$name" --studio "$studio"; } || failed=1
           done
           exit "$failed"
+      # The README's quick start, verbatim, in a clean temp dir, with npx's filmkit being this checkout.
+      - name: the quick start
+        run: FILMKIT_RENDER=1 node --test test/quickstart.test.js
       - name: render two seconds
         run: |
           studio=$(mktemp -d)
