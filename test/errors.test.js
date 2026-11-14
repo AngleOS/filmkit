@@ -267,6 +267,11 @@ test("each entry says why, for explain, in Angle's voice", () => {
   }
 });
 
+// HyperFrames 0.8.186's layout audit reads the flag on the text it would report, whatever its own docs say.
+test("text_occluded puts data-layout-allow-occlusion on the covered text, where HyperFrames reads it", () => {
+  assert.match(CATALOGUE.text_occluded.why, /data-layout-allow-occlusion on the covered text/);
+});
+
 test("the fix for a missing requirement is the install command for the OS", () => {
   assert.equal(describe("ffmpeg_missing", { platform: "darwin" }).fix, "brew install ffmpeg");
   assert.equal(describe("ffmpeg_missing", { platform: "linux" }).fix, "sudo apt install ffmpeg");
