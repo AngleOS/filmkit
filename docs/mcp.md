@@ -27,7 +27,7 @@ carries only the protocol: what a command would print goes to stderr, which the 
 | Tool | Input | Returns |
 |---|---|---|
 | `list_films` | none | `{ films: [{ name, formats, loop, duration }] }`; a film that doesn't open has `error` instead |
-| `list_scenes` | `{ name? }` | `filmkit scenes --json`: each scene, what it does and its variables |
+| `list_scenes` | `{ name? }` | `filmkit scenes --json`: each scene, what it does and its variables ([scenes](scenes.md)) |
 | `new_film` | `{ name, template? }` | `filmkit new --json`: the film, its template and the files it wrote |
 | `check_film` | `{ film, formats? }` | `filmkit check --json`: per format, its errors and warnings, and the sound. A failed check is a result, not a tool error |
 | `snapshot_film` | `{ film, format?, at }` | a text item with `filmkit snapshot --json`'s times and paths, then a PNG image per time (`at`: 1 to 12 times in seconds), scaled to at most 1568 px on the long side |

@@ -35,7 +35,7 @@ it can't use, is a usage error (exit 2) that says what the value should be.
 | `render <film> [formats…] [--force]` | `check`, then `renders/<film>-<format>.mp4` at delivery quality, plus the captions; keeps an MP4 that's still current |
 | `captions <film>` | only the captions: `renders/<film>.srt` and `.vtt` |
 | `stills <film> <t> [formats…]` | `check`, then a poster per format at `t` seconds, `renders/<film>-<format>.png`, and a 1280 × 720 `renders/<film>-thumbnail.png` from 16x9 |
-| `scenes [name]` | the kit's scenes, each with the first line of what it does; with a name, all of it and its variables: type, default, label and an enum's options. Read from the scenes themselves: each one's comment and `data-composition-variables` |
+| `scenes [name]` | the kit's scenes, each with the first line of what it does; with a name, all of it and its variables: type, default, label and an enum's options. Read from the scenes themselves: each one's comment and `data-composition-variables`, as [scenes](scenes.md) is |
 | `skills` | the filmkit skill and the skills the pinned HyperFrames ships (`hyperframes`, `hyperframes-cli`, `media-use`) into `.claude/skills/`, each replacing its older copy; the studio's other skills are left alone. The HyperFrames ones are git-ignored, since `skills` makes them again from the pin, and an `AGENTS.md` without a pointer to them gets one. Run it again after upgrading filmkit |
 | `doctor` | Node ≥ 20.12, ffmpeg and ffprobe (HyperFrames' render needs both), the pinned HyperFrames and its Chrome, each with a hint when it's missing, and npx's own words when HyperFrames doesn't run |
 | `mcp` | the MCP server over stdio, with the commands as tools for any agent: see [mcp](mcp.md) |
