@@ -64,3 +64,20 @@ The 9:16 hook. Its two lines are the README's and the product demo's; the frames
 | Your agent makes the film. | claim | README.md, "Your AI agent makes the film." |
 | Your agent makes the film. · 16:9 · 1:1 · 4:5 · 9:16 | example | the same line, re-laid in each frame and not cropped (README.md, "laid out for its own frame, never cropped") |
 | Brief in. Film out. | claim | README.md, "Write a brief. The agent … renders." |
+
+## setup
+
+The README's install GIF: `filmkit setup`'s walkthrough. Every row is the walkthrough's own output; the run's paths,
+versions and timings are illustrative.
+
+| On screen | Kind | Source |
+|---|---|---|
+| $ npx -y filmkit setup | UI | README.md, "Install (one line)" |
+| ╱◣ ANGLE FILMKIT brand films in HTML | brand | the walkthrough's banner (src/cli/banner.js) |
+| Requirements · Agent tools · Studio · Brand · First film | UI | setup's steps (src/setup.js) |
+| ✓ Node.js v22.23.4 · ✓ ffmpeg ffmpeg version 6.1.1 · ✓ ffprobe ffprobe version 6.1.1 · ✓ HyperFrames hyperframes@0.8.186 · ✓ Chrome headless shell 152.0.7977.30, in HyperFrames' cache | UI | `filmkit doctor`'s checks, run 2026-11-13 |
+| Connect Filmkit to these agent tools? (space toggles one) · Claude Code · Codex · Cursor · MCP server: npx -y filmkit mcp · ✓ Claude Code configured: claude mcp add -s user filmkit -- npx -y filmkit mcp; ~/.claude/skills/filmkit · ✓ Codex configured: ~/.codex/config.toml mcp_servers.filmkit; ~/.agents/skills/filmkit · ✓ Cursor configured: ~/.cursor/mcp.json mcpServers.filmkit | UI | `filmkit setup`'s output with three tools installed, run 2026-11-13 (src/cli/commands/setup.js, src/agents/register.js) |
+| Your brand or product's name · Acme · Where should the studio go? · ./acme-films · ✓ a studio for Acme in /Users/you/acme-films | UI | the same run; the brand and the path are illustrative |
+| Your brand's website, … · Your logo, … · Your accent colour, as a hex … · #ff5a1f · On a dark ground or a light one? · A Google Fonts family … · ✓ Acme's brand in /Users/you/acme-films · the accent #ff5a1f on a dark ground · accentOn.paper is #cf4919: #ff5a1f is 3.11:1 on paper, under the 4.5:1 text needs · wrote brand/theme/theme.json, filmkit.json · Look right? (no to change it) | UI | the same run (src/cli/commands/brand.js); the accent is illustrative and its contrast is what `brand` worked out for it |
+| Make a first film, films/hello, and check it in every format? (a few minutes) · ✓ films/hello from the statement template · 4x5 ✓ 98.6 s … · ✓ hello: 16x9, 9x16, 1x1, 4x5 · build/hello/contact-16x9.png | UI | the same run (src/setup.js `firstFilm`) |
+| Next: ask your agent, "Make a 30-second launch film for Acme". It follows the filmkit skill. | UI | setup's last line (src/cli/commands/setup.js) |

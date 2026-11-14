@@ -68,6 +68,10 @@ It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you t
 - **setting up your brand:** from your website, or by answering a few questions;
 - **making a first film.**
 
+<img src="docs/assets/setup.gif" alt="A terminal runs npx -y filmkit setup. Under the ANGLE FILMKIT banner it ticks the requirements, finds Claude Code, Codex and Cursor and registers Filmkit in each, makes a studio for Acme, sets up the brand from a few answers (an accent of #ff5a1f on a dark ground), then makes films/hello and checks it in all four formats. Its last line: Next: ask your agent, &quot;Make a 30-second launch film for Acme&quot;.">
+<sub>The walkthrough, from the command to a first film (<a href="examples/studio/films/setup">its source</a> is a film
+too).</sub>
+
 `--yes` runs it unattended, and `npx -y filmkit setup --remove` undoes it. In the studio, `filmkit tour`
 walks through the first film one command at a time, explaining each.
 
