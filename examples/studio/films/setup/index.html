@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="kit/vendor/gsap.min.js"></script>
+    <link rel="stylesheet" href="kit/theme/theme.css" />
+    <link rel="stylesheet" href="kit/film.css" />
+  </head>
+  <body>
+    <!-- Setup: filmkit setup's walkthrough, from the command to a first film (brief.md), for the README's install
+         section as a GIF. 16:9 only and silent: it's a terminal, read on GitHub. -->
+    <div id="root" data-composition-id="main" data-start="0" data-duration="36.6" data-width="1920" data-height="1080" data-formats="16x9">
+      <div id="walkthrough" data-composition-id="walkthrough" data-composition-src="compositions/walkthrough.html" data-start="0" data-duration="36.6" data-track-index="1" data-track-kind="graphics"></div>
+    </div>
+    <script src="kit/layout.js"></script>
+    <script src="kit/motion.js"></script>
+    <script src="kit/theme/brand.js"></script>
+    <script>
+      window.__timelines = window.__timelines || {};
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>

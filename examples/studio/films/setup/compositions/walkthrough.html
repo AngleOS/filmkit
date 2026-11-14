@@ -1,0 +1,149 @@
+<template>
+  <!-- filmkit setup's walkthrough in a terminal, screen by screen: each screen drops the prompt just answered (as the
+       prompt library redraws it) and prints its own rows, scrolling as a terminal does once they pass the window.
+       The rows are the walkthrough's own, captured from `filmkit setup` in a 100-column terminal (a longer row breaks
+       at a space here); only the paths and timings are a made-up user's. It holds still while a prompt waits for its
+       answer, as setup does. 16:9 only. -->
+  <style>
+    #root { position: absolute; inset: 0; overflow: hidden; }
+    #wt-box { position: absolute; left: 80px; top: 73px; width: 1760px; background: var(--fk-card); border: 2px solid var(--fk-border); border-radius: 22px; overflow: hidden; }
+    #wt-bar { display: flex; gap: 12px; padding: 18px 24px; border-bottom: 2px solid var(--fk-border); }
+    #wt-bar i { width: 16px; height: 16px; border-radius: 50%; background: var(--fk-border); }
+    #wt-view { position: relative; height: 840px; margin: 20px 28px; overflow: hidden; }
+    #wt-tape { position: absolute; left: 0; top: 0; margin: 0; color: var(--foreground); font: 400 28px/42px var(--font-mono); white-space: pre; }
+    .wt-row { height: 42px; }
+    .wt-gutter, .wt-muted { color: var(--muted-foreground); }
+    .wt-accent { color: var(--accent); }
+    .wt-banner { color: var(--accent); font-weight: 500; }
+  </style>
+  <div id="root" data-composition-id="walkthrough">
+    <div id="wt-box" data-hold>
+      <div id="wt-bar"><i></i><i></i><i></i></div>
+      <div id="wt-view"><pre id="wt-tape" data-layout-allow-overflow></pre></div>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const tl = gsap.timeline({ paused: true });
+      const $ = (id) => document.getElementById(id);
+      AL.ground($("root"), "ink");
+      const VISIBLE = 20;
+      const ROW = 42;
+      // Each screen: when it shows, how many rows of the last it drops, its new rows and how fast they print. ⟨…⟩ is
+      // typed, ⟦…⟧ a dimmed placeholder.
+      const screens = [
+        { at: 0, drop: 0, pace: 0, rows: ["$ ⟨npx -y filmkit setup⟩"] },
+        { at: 2.4, drop: 0, pace: 0, rows: [
+          "┌  ╱◣ ANGLE FILMKIT  brand films in HTML", "│", "◇  Requirements",
+          "│  ✓ Node.js     v22.23.4", "│  ✓ ffmpeg      ffmpeg version 6.1.1", "│  ✓ ffprobe     ffprobe version 6.1.1",
+          "│  ✓ HyperFrames hyperframes@0.8.186", "│  ✓ Chrome      headless shell 152.0.7977.30, in HyperFrames' cache", "│",
+          "◇  Agent tools", "│", "◆  Connect Filmkit to these agent tools? (space toggles one)",
+          "│  ◼ Claude Code", "│  ◼ Codex", "│  ◼ Cursor", "│  ↑/↓ to navigate • Space: select • Enter: confirm", "└",
+        ] },
+        { at: 6.0, drop: 6, pace: 0, rows: [
+          "◇  Connect Filmkit to these agent tools? (space toggles one)", "│  Claude Code, Codex, Cursor",
+          "│  MCP server: npx -y filmkit mcp",
+          "│  ✓ Claude Code  configured: claude mcp add -s user filmkit -- npx -y filmkit mcp;", "│  ~/.claude/skills/filmkit",
+          "│  ✓ Codex        configured: ~/.codex/config.toml mcp_servers.filmkit; ~/.agents/skills/filmkit",
+          "│  ✓ Cursor       configured: ~/.cursor/mcp.json mcpServers.filmkit",
+          "│", "◇  Studio", "│", "◆  Your brand or product's name", "│  ⟨Acme⟩", "└",
+        ] },
+        { at: 8.4, drop: 3, pace: 0, rows: [
+          "◇  Your brand or product's name", "│  Acme", "│", "◆  Where should the studio go?", "│  ./acme-films", "└",
+        ] },
+        { at: 10.2, drop: 3, pace: 0, rows: [
+          "◇  Where should the studio go?", "│  ./acme-films", "│  ✓ a studio for Acme in /Users/you/acme-films",
+          "│", "◇  Brand", "│",
+          "◆  Your brand's website, to read its logo, colours and font from (empty to answer a few questions ", "instead)",
+          "│  ⟦acme.com⟧", "└",
+        ] },
+        { at: 15.0, drop: 4, pace: 0, rows: [
+          "◇  Your brand's website, to read its logo, colours and font from (empty to answer a few questions ", "instead)",
+          "│", "◇  Your logo, an SVG or a PNG (empty keeps the one there)", "│",
+          "◆  Your accent colour, as a hex (empty keeps the brand's)", "│  ⟨#ff5a1f⟩", "└",
+        ] },
+        { at: 18.2, drop: 3, pace: 0, rows: [
+          "◇  Your accent colour, as a hex (empty keeps the brand's)", "│  #ff5a1f", "│",
+          "◆  On a dark ground or a light one?", "│  ● dark", "│  ○ light", "│  ↑/↓ to navigate • Enter: confirm", "└",
+        ] },
+        { at: 20.6, drop: 5, pace: 0, rows: [
+          "◇  On a dark ground or a light one?", "│  dark", "│",
+          "◇  A Google Fonts family for titles and text (empty keeps the type)", "│",
+          "│  ✓ Acme's brand in /Users/you/acme-films", "│    the accent #ff5a1f on a dark ground",
+          "│    accentOn.paper is #cf4919: #ff5a1f is 3.11:1 on paper, under the 4.5:1 text needs",
+          "│    wrote brand/theme/theme.json, filmkit.json", "│  · a still in the brand, a few seconds",
+          "│    build/brand-still/still.png, open", "│", "◆  Look right? (no to change it)", "│  ● Yes / ○ No", "└",
+        ] },
+        { at: 24.2, drop: 3, pace: 0, rows: [
+          "◇  Look right? (no to change it)", "│  Yes", "│", "◇  First film", "│",
+          "◆  Make a first film, films/hello, and check it in every format? (a few minutes)", "│  ● Yes / ○ No", "└",
+        ] },
+        { at: 28.3, drop: 3, pace: 0, rows: [
+          "◇  Make a first film, films/hello, and check it in every format? (a few minutes)", "│  Yes",
+          "│  ✓ films/hello from the statement template",
+        ] },
+        // The check takes a few minutes, cut to a format every half second.
+        { at: 29.0, drop: 0, pace: 0.5, rows: [
+          "│  4x5 ✓ 98.6 s", "│  16x9 ✓ 102.6 s", "│  1x1 ✓ 104.1 s", "│  9x16 ✓ 105.3 s", "│  ✓ hello: 16x9, 9x16, 1x1, 4x5",
+          "│  /Users/you/acme-films/build/hello/contact-16x9.png",
+          "└  Next: ask your agent, \"Make a 30-second launch film for Acme\". It follows the filmkit skill.", "$ ",
+        ] },
+      ];
+      const STEPS = ["Requirements", "Agent tools", "Studio", "Brand", "First film"];
+
+      const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;");
+      /** A row as the walkthrough colours it: its gutter dim, the open prompt, steps and ticks in the accent. */
+      const paint = (row) => {
+        if (row.startsWith("┌")) return '<span class="wt-gutter">┌  </span><span class="wt-banner">╱◣ ANGLE FILMKIT</span>  <span class="wt-muted">brand films in HTML</span>';
+        if (row.startsWith("$ ")) return `<span class="wt-accent">$ </span>${row.slice(2).replace(/⟨(.*)⟩/, '<span class="wt-typed"></span><span class="fk-caret"></span>')}`;
+        const glyph = /^[│◇◆└]/.test(row) ? row[0] : "";
+        let rest = esc(row.slice(glyph.length));
+        if (glyph === "◇" && STEPS.includes(rest.trim())) rest = `<span class="wt-accent">${rest}</span>`;
+        rest = rest.replace(/[✓◼●]/g, (m) => `<span class="wt-accent">${m}</span>`).replace(/○/g, '<span class="wt-muted">○</span>')
+          .replace(/⟦(.*)⟧/, '<span class="wt-muted">$1</span><span class="fk-caret"></span>')
+          .replace(/⟨(.*)⟩/, '<span class="wt-typed"></span><span class="fk-caret"></span>');
+        return glyph ? `<span class="${glyph === "◆" ? "wt-accent" : "wt-gutter"}">${glyph}</span>${rest}` : rest;
+      };
+      const typed = (row) => /⟨(.*)⟩/.exec(row)?.[1];
+
+      // One tape of rows: a screen hides the rows it drops and prints its own under the rest, and the tape scrolls to
+      // keep the last row in view.
+      const tape = $("wt-tape");
+      /** @type {HTMLElement[]} */
+      let live = [];
+      // Rows above the window are hidden as well as cut off: the check reads text under the title bar as covered.
+      const above = new Set();
+      const scroll = (t) => {
+        const top = Math.max(0, live.length - VISIBLE);
+        tl.set(tape, { y: -top * ROW }, t);
+        live.forEach((line, n) => {
+          if ((n < top) === above.has(line)) return;
+          tl.set(line, { visibility: n < top ? "hidden" : "visible" }, t);
+          if (n < top) above.add(line);
+          else above.delete(line);
+        });
+      };
+      screens.forEach((screen, i) => {
+        const dropped = live.splice(live.length - screen.drop, screen.drop);
+        if (dropped.length) tl.set(dropped, { display: "none" }, screen.at);
+        scroll(screen.at);
+        screen.rows.forEach((row, n) => {
+          const line = document.createElement("div");
+          line.className = "wt-row";
+          line.innerHTML = paint(row);
+          tape.appendChild(line);
+          live.push(line);
+          const t = screen.at + n * screen.pace;
+          if (t > 0) tl.fromTo(line, { opacity: 0 }, { opacity: 1, duration: 0.01, ease: "none" }, t);
+          scroll(t);
+          // The terminal's one cursor leaves a row when the next screen prints.
+          const caret = line.querySelector(".fk-caret");
+          if (caret && screens[i + 1]) tl.set(caret, { display: "none" }, screens[i + 1].at);
+          const answer = typed(row);
+          if (answer) KM.type(tl, line.querySelector(".wt-typed"), answer, screen.at + screen.rows.length * screen.pace + 0.5, 15);
+        });
+      });
+      window.__timelines["walkthrough"] = tl;
+    })();
+  </script>
+</template>
