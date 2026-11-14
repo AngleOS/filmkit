@@ -4,8 +4,11 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 ## In Review
 
-- [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
 - [Use the npm package now that filmkit@0.1.0 is published](https://github.com/AngleOS/filmkit/issues/135) `filmkit#135`
+
+## In Progress
+
+- [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
 
 ## Todo
 
