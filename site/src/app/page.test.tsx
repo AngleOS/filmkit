@@ -22,7 +22,7 @@ describe("the one page", () => {
 
   it("shows the install command and every install path", () => {
     render(<Home />);
-    expect(screen.getAllByText("npx -y github:AngleOS/filmkit setup").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("npx -y filmkit setup").length).toBeGreaterThan(0);
     for (const tab of ["Your agent", "npx", "macOS & Linux", "Windows"]) {
       expect(screen.getByRole("tab", { name: tab })).toBeInTheDocument();
     }
@@ -61,5 +61,6 @@ describe("the one page", () => {
     expect(
       results.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target).join(", ")}`),
     ).toEqual([]);
-  });
+    // axe over the whole page takes about 5 s in jsdom on a busy runner, right at vitest's default timeout.
+  }, 20_000);
 });

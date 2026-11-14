@@ -123,7 +123,7 @@ export const kit = [
 ] as const;
 
 const FALLBACK_PROMPT =
-  "Install Angle Filmkit for me and set it up with my brand. Run `npx -y github:AngleOS/filmkit setup --yes --agents auto`, then ask me for my brand name, website and logo, set up the brand, make a first film, check it in every format, look at its contact sheet, and show me the renders. Docs: https://github.com/AngleOS/filmkit";
+  "Install Angle Filmkit for me and set it up with my brand. Run `npx -y filmkit setup --yes --agents auto`, then ask me for my brand name, website and logo, set up the brand, make a first film, check it in every format, look at its contact sheet, and show me the renders. Docs: https://github.com/AngleOS/filmkit";
 
 // The agent setup prompt is docs/install-with-your-agent.md's fenced block, read at build so the site and the repo
 // never disagree.
@@ -151,12 +151,12 @@ export function installPaths(prompt: string): InstallPath[] {
     {
       id: "npx",
       tab: "npx",
-      command: "npx -y github:AngleOS/filmkit setup",
+      command: "npx -y filmkit setup",
       notes: [
         "Any OS with Node 20 or newer.",
         "A guided setup: agent tools, a studio, your brand, a first film.",
         "Add --yes to run it unattended.",
-        "Installs straight from the GitHub repo, so it stays current.",
+        "Runs the latest release from npm.",
       ],
     },
     {
@@ -168,7 +168,7 @@ export function installPaths(prompt: string): InstallPath[] {
         "Installs Node and ffmpeg with Homebrew, apt, dnf or pacman if they're missing. It asks first.",
         "Then runs the guided setup.",
         "Add -s -- --yes to run it unattended.",
-        "Undo it any time with npx -y github:AngleOS/filmkit setup --remove.",
+        "Undo it any time with npx -y filmkit setup --remove.",
       ],
     },
     {
@@ -179,7 +179,7 @@ export function installPaths(prompt: string): InstallPath[] {
         "Installs Node and ffmpeg with winget if they're missing. It asks first.",
         "Then runs the guided setup.",
         "Works in Windows Terminal and PowerShell 7.",
-        "Undo it any time with npx -y github:AngleOS/filmkit setup --remove.",
+        "Undo it any time with npx -y filmkit setup --remove.",
       ],
     },
   ];

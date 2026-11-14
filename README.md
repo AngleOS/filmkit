@@ -59,7 +59,7 @@ Their sources are in [`brand/films/`](brand/films). The header animation is a fi
 ```sh
 curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh     # macOS, Linux
 irm https://raw.githubusercontent.com/AngleOS/filmkit/master/install.ps1 | iex           # Windows
-npx -y github:AngleOS/filmkit setup                                                      # anywhere with Node 20.12+
+npx -y filmkit setup                                                                     # anywhere with Node 20.12+
 ```
 It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you through:
 - **connecting Filmkit to your agent tools:** it detects Claude Code, Claude Desktop, Codex, Cursor, VS Code (Copilot),
@@ -68,24 +68,22 @@ It installs Node and ffmpeg if they're missing. Then `filmkit setup` walks you t
 - **setting up your brand:** from your website, or by answering a few questions;
 - **making a first film.**
 
-`--yes` runs it unattended, and `npx -y github:AngleOS/filmkit setup --remove` undoes it. In the studio, `filmkit tour`
+`--yes` runs it unattended, and `npx -y filmkit setup --remove` undoes it. In the studio, `filmkit tour`
 walks through the first film one command at a time, explaining each.
 
-> Filmkit isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
-
 ### Or let your agent do it
-Paste [this prompt](docs/install-with-your-agent.md) into your agent (or run `npx -y github:AngleOS/filmkit prompt`). It installs and
+Paste [this prompt](docs/install-with-your-agent.md) into your agent (or run `npx -y filmkit prompt`). It installs and
 configures Filmkit, asks you only for your brand, and finishes with a first film.
 
 ## Use it
 <!-- quickstart -->
 ```sh
-npx -y github:AngleOS/filmkit init acme-films --name Acme        # a studio for your brand
+npx -y filmkit init acme-films --name Acme       # a studio for your brand
 cd acme-films
-npx -y github:AngleOS/filmkit new launch --template statement   # or ask your agent: "Make a 30-second launch film for …"
-npx -y github:AngleOS/filmkit check launch                       # every format; non-zero on failure
-npx -y github:AngleOS/filmkit contact launch                     # contact sheets to review
-npx -y github:AngleOS/filmkit render launch                      # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
+npx -y filmkit new launch --template statement   # or ask your agent: "Make a 30-second launch film for …"
+npx -y filmkit check launch                      # every format; non-zero on failure
+npx -y filmkit contact launch                    # contact sheets to review
+npx -y filmkit render launch                     # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
 ```
 Requirements: Node ≥ 20.12 and ffmpeg. The installer handles both. [Getting started](docs/getting-started.md) walks
 through each way in, and a first film by hand or with your agent.

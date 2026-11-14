@@ -8,10 +8,10 @@
 # --yes), then runs `filmkit setup` with the same arguments. Setup registers Filmkit's MCP server with your agent tools,
 # makes a studio, sets up your brand and makes a first film.
 #
-# FILMKIT_PKG picks what npx runs: `github:AngleOS/filmkit` until Filmkit is on npm, then `filmkit`.
+# FILMKIT_PKG picks what npx runs: `filmkit` from npm, or another spec such as `filmkit@0.1.0`.
 set -eu
 
-FILMKIT_PKG=${FILMKIT_PKG:-github:AngleOS/filmkit}
+FILMKIT_PKG=${FILMKIT_PKG:-filmkit}
 NODE_MIN=20.12
 YES=0
 for a in "$@"; do [ "$a" = "--yes" ] || [ "$a" = "-y" ] && YES=1; done

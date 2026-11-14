@@ -190,7 +190,7 @@ esac
   assert.ok(existsSync(join(home, ".claude", "skills", "filmkit", "SKILL.md")));
   assert.deepEqual(claude().changes, [], "already set up");
   assert.deepEqual(claude({ dryRun: true }).changes, []);
-  assert.deepEqual(claude({ command: { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] }, dryRun: true }).changes, ["claude mcp add -s user filmkit -- npx -y github:AngleOS/filmkit mcp"]);
+  assert.deepEqual(claude({ command: { command: "npx", args: ["-y", "filmkit@0.1.0", "mcp"] }, dryRun: true }).changes, ["claude mcp add -s user filmkit -- npx -y filmkit@0.1.0 mcp"]);
   const removed = claude({ remove: true });
   assert.deepEqual([removed.status, removed.changes], ["removed", ["claude mcp remove -s user filmkit", join(home, ".claude", "skills", "filmkit")]]);
   assert.equal(claude({ remove: true }).status, "skipped");
@@ -242,16 +242,25 @@ test("a backup never replaces an earlier one, even within the same second", () =
   assert.match(read(`${files.cursor}.filmkit-backup-1-2`), /"filmkit"/);
 });
 
+test("an entry from before Filmkit was on npm is replaced, and --remove takes it out", () => {
+  const OLD = { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] };
+  const { host, files } = fixtureHome("linux");
+  registerAgents({ host, command: OLD, only: ["cursor", "codex"] });
+  assert.deepEqual(entry(files.cursor, ["mcpServers", "filmkit"]).args, OLD.args);
+  assert.deepEqual(registerAgents({ host, command: NPX, only: ["cursor", "codex"] }).map((t) => t.status), ["configured", "configured"]);
+  assert.deepEqual(entry(files.cursor, ["mcpServers", "filmkit"]).args, NPX.args);
+  assert.doesNotMatch(read(files.codex), /github:/);
+  registerAgents({ host, command: OLD, only: ["cursor", "codex"] });
+  assert.deepEqual(registerAgents({ host, remove: true, only: ["cursor", "codex"] }).map((t) => t.status), ["removed", "removed"]);
+  assert.doesNotMatch(read(files.cursor), /filmkit/);
+  assert.doesNotMatch(read(files.codex), /filmkit/);
+});
+
 test("the server command follows how filmkit was run", () => {
   const checkout = mkdtempSync(join(tmpdir(), "filmkit-checkout-"));
   assert.deepEqual(mcpCommand(checkout), { command: "node", args: [join(checkout, "src", "cli", "index.js"), "mcp"] });
-  const npxCache = mkdtempSync(join(tmpdir(), "filmkit-npx-"));
-  const lock = (/** @type {string} */ resolved) => write(join(npxCache, "node_modules", ".package-lock.json"), JSON.stringify({ packages: { "node_modules/filmkit": { resolved } } }));
-  lock("git+ssh://git@github.com/AngleOS/filmkit.git#2e08116e27ef9ebfa013c5113c325d221d1258eb");
-  assert.deepEqual(mcpCommand(join(npxCache, "node_modules", "filmkit")), { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] });
-  lock("https://registry.npmjs.org/filmkit/-/filmkit-0.1.0.tgz");
-  assert.deepEqual(mcpCommand(join(npxCache, "node_modules", "filmkit")), { command: "npx", args: ["-y", "filmkit", "mcp"] });
-  assert.deepEqual(parseCommand(" npx -y github:AngleOS/filmkit mcp "), { command: "npx", args: ["-y", "github:AngleOS/filmkit", "mcp"] });
+  assert.deepEqual(mcpCommand(join(tmpdir(), "_npx", "1a2b", "node_modules", "filmkit")), NPX);
+  assert.deepEqual(parseCommand(" npx -y filmkit mcp "), NPX);
   assert.deepEqual(parseCommand(`node "/Users/x/My Projects/filmkit/src/cli/index.js" mcp`), { command: "node", args: ["/Users/x/My Projects/filmkit/src/cli/index.js", "mcp"] });
   assert.deepEqual(parseCommand(`'C:\\Program Files\\nodejs\\node.exe' cli.js mcp`), { command: "C:\\Program Files\\nodejs\\node.exe", args: ["cli.js", "mcp"] });
 });
@@ -261,10 +270,10 @@ test("filmkit agents: --json, --mcp-command and --dry-run, and an unknown tool i
   const env = { ...process.env, HOME: host.home, USERPROFILE: host.home, APPDATA: join(host.home, "AppData", "Roaming"), PATH: `${host.vars.PATH}${process.platform === "win32" ? ";" : ":"}${dirname(process.execPath)}` };
   delete env.XDG_CONFIG_HOME;
   const run = (/** @type {string[]} */ args) => spawnSync(process.execPath, [CLI, "agents", ...args], { env, encoding: "utf8" });
-  const dry = run(["cursor", "--dry-run", "--json", "--mcp-command", "npx -y github:AngleOS/filmkit mcp"]);
+  const dry = run(["cursor", "--dry-run", "--json", "--mcp-command", "npx -y filmkit@0.1.0 mcp"]);
   assert.equal(dry.status, 0, dry.stderr);
   const result = JSON.parse(dry.stdout);
-  assert.deepEqual([result.dryRun, result.command.args, result.tools.length], [true, ["-y", "github:AngleOS/filmkit", "mcp"], 1]);
+  assert.deepEqual([result.dryRun, result.command.args, result.tools.length], [true, ["-y", "filmkit@0.1.0", "mcp"], 1]);
   assert.doesNotMatch(read(files.cursor), /filmkit/);
   const real = run(["cursor"]);
   assert.match(real.stdout, /✓ Cursor {2}configured: ~[/\\].cursor[/\\]mcp\.json mcpServers\.filmkit/);

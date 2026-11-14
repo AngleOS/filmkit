@@ -171,8 +171,7 @@ prompt to their agent**.
 - **One line:**
   - macOS and Linux: `curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh`;
   - Windows: `irm …/install.ps1 | iex`;
-  - with Node: `npx -y filmkit setup`. While the repo is private, collaborators use `npx -y github:AngleOS/filmkit setup`
-    with their git credentials.
+  - with Node: `npx -y filmkit setup`.
 
   The script:
   1. checks Node ≥ 20.12 and installs it if it's missing (brew, apt, dnf or winget; it asks first, or not with `--yes`);
