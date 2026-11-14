@@ -387,8 +387,8 @@ export const CATALOGUE = {
     message: (p) => `${when(p)}: ${p.label} is covered by ${p.other}${p.covered ?? ""}.`,
     fix: showing("See it with"),
     why: "Text under something opaque can't be read. Later hosts paint over earlier ones, so a scene over another " +
-      "covers its words. Move one, end the lower one first, or put data-layout-allow-occlusion on the element " +
-      "that's meant to cover the text.",
+      "covers its words. Move one, end the lower one first, or, when the covering is meant, put " +
+      "data-layout-allow-occlusion on the covered text: that's where HyperFrames reads it, not on what covers it.",
   },
   contrast_aa_failure: {
     exit: 1,

@@ -75,8 +75,10 @@ renders. With the MCP server registered, its tools return the frames as images, 
 [MCP](mcp.md).
 
 ## Next
+- [The studio](studio.md): what's in it, `filmkit.json`, a film's folder, claims and posting.
 - [The CLI](cli.md): every command, its flags, its `--json` output and exit codes.
-- [Themes](themes.md): `default`, `paper` and your own brand.
+- [Themes](themes.md): `default`, `paper`, your own brand, and `angle`, for Angle's films only.
 - [Scenes](scenes.md): every scene and its variables.
 - [Sound](sound.md): the sound built from a film's motion.
 - [MCP](mcp.md): the tools an agent uses.
+- [Troubleshooting](troubleshooting.md): setup problems, what `check` finds, and the gotchas of writing a scene.
