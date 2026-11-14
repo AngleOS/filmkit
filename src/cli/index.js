@@ -8,6 +8,7 @@ import { parseArgs } from "node:util";
 import { FilmkitError, fail } from "../errors.js";
 import { PACKAGE } from "../studio.js";
 import { banner } from "./banner.js";
+import { GLOBAL } from "./options.js";
 
 /**
  * @typedef {{ args: string[], options: Record<string, string | boolean | undefined>, json: boolean,
@@ -19,8 +20,6 @@ import { banner } from "./banner.js";
  */
 
 const COMMANDS = new URL("commands/", import.meta.url);
-/** Options every command takes, before or after the command's name. */
-const GLOBAL = { json: { type: /** @type {const} */ ("boolean") }, studio: { type: /** @type {const} */ ("string") } };
 
 async function help() {
   const names = readdirSync(COMMANDS).filter((f) => f.endsWith(".js")).map((f) => f.slice(0, -3)).sort();

@@ -70,9 +70,11 @@ In your studio, ask your agent for the film: "Make a 30-second launch film for A
 The filmkit skill in the studio's `.claude/skills/` takes it from brief to render: it researches the claims, builds the
 film from the kit's scenes, checks every format, looks at the contact sheets itself and fixes what it sees, then
 renders. With the MCP server registered, its tools return the frames as images, so the agent sees what it made: see
-[MCP](mcp.md).
+[MCP](mcp.md). [The agent workflow](agent-workflow.md) walks through each step, and where the agent stops to ask
+you.
 
 ## Next
+- [The agent workflow](agent-workflow.md): how your agent goes from a brief to the renders.
 - [The studio](studio.md): what's in it, `filmkit.json`, a film's folder, claims and posting.
 - [The CLI](cli.md): every command, its flags, its `--json` output and exit codes.
 - [Themes](themes.md): `default`, `paper`, your own brand, and `angle`, for Angle's films only.
