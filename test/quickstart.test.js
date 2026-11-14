@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 
 const ROOT = fileURLToPath(new URL("..", import.meta.url));
 const CLI = join(ROOT, "src/cli/index.js");
-const SPEC = /^npx -y (?:github:AngleOS\/filmkit|filmkit) /;
+const SPEC = /^npx -y filmkit /;
 // These start HyperFrames' Chrome (or a server, for preview), so they run only with FILMKIT_RENDER=1, as CI's films job does.
 const NEEDS_CHROME = /^npx -y \S+ (?:check|contact|render|snapshot|stills|preview)\b/;
 const RENDER = process.env.FILMKIT_RENDER === "1";
@@ -33,7 +33,7 @@ function run(block) {
   mkdirSync(bin);
   writeFileSync(join(bin, "npx"), `#!/bin/sh
 case "$1 $2" in
-  "-y github:AngleOS/filmkit" | "-y filmkit") shift 2; exec "${process.execPath}" "${CLI}" "$@" ;;
+  "-y filmkit") shift 2; exec "${process.execPath}" "${CLI}" "$@" ;;
 esac
 exec "${NPX}" "$@"
 `);

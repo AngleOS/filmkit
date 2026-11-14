@@ -20,8 +20,7 @@ comes from the motion. Cover: the frame at 2.5 s, the three file names under "Ev
   > Films are code. One master, four frames, every word sourced. Your AI agent makes the film.
   > https://filmkit.anglehq.net/
 
-Pinned reply, for "is it on npm?": "Not yet. Filmkit is pre-alpha; the site says when it ships." (README.md, "Filmkit
-isn't on npm yet")
+Pinned reply, for "is it on npm?": "Yes: `npx -y filmkit setup`. Filmkit is pre-alpha." (README.md, "Install")
 
 ### brief-in-film-out (36 s, every format)
 The demo a person forwards: a studio made in one command, the brief handed to the agent, the agent checking every

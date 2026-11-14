@@ -4,13 +4,13 @@
 #   & ([scriptblock]::Create((irm …/install.ps1))) --yes --agents auto
 #
 # It checks Node >= 20.12 and ffmpeg, installs what's missing with winget (it asks first, unless --yes), then runs
-# `filmkit setup` with the same arguments. Like install.sh, FILMKIT_PKG picks what npx runs: `github:AngleOS/filmkit`
-# until Filmkit is on npm, then `filmkit`.
+# `filmkit setup` with the same arguments. Like install.sh, FILMKIT_PKG picks what npx runs: `filmkit` from npm,
+# or another spec such as `filmkit@0.1.0`.
 # Everything runs in its own scope: under `irm | iex` an `exit` would close the user's PowerShell window, and its
 # variables, functions and ErrorActionPreference would leak into their session.
 & {
   $ErrorActionPreference = 'Stop'
-  $pkg = if ($env:FILMKIT_PKG) { $env:FILMKIT_PKG } else { 'github:AngleOS/filmkit' }
+  $pkg = if ($env:FILMKIT_PKG) { $env:FILMKIT_PKG } else { 'filmkit' }
   $yes = $args -contains '--yes' -or $args -contains '-y'
 
   function Step($text) { Write-Host '> ' -ForegroundColor Yellow -NoNewline; Write-Host $text }

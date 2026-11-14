@@ -74,10 +74,7 @@ export default function Home() {
                 it like code.
               </p>
               <div className="mt-8 flex max-w-[34rem] flex-col gap-4 sm:mt-9">
-                <CopyCommand
-                  command="npx -y github:AngleOS/filmkit setup"
-                  label="install command"
-                />
+                <CopyCommand command="npx -y filmkit setup" label="install command" />
                 <div className="flex flex-wrap items-center gap-x-6 gap-y-3 text-[15px]">
                   <a href="#install" className="link-arrow">
                     Or paste one prompt into your agent

@@ -4,8 +4,6 @@ Angle Filmkit needs Node ≥ 20.12 and ffmpeg. The installer adds both when they
 which checks and renders the films, comes down on first use. There are three ways in; each ends in the same place:
 Filmkit registered with your agent tools, a studio for your brand and a first film.
 
-> Filmkit isn't on npm yet, so run it as `npx -y github:AngleOS/filmkit …`, never an unscoped `npx filmkit`.
-
 ## 1. The one-line installer
 ```sh
 curl -fsSL https://raw.githubusercontent.com/AngleOS/filmkit/master/install.sh | sh     # macOS, Linux
@@ -18,7 +16,7 @@ It checks Node and ffmpeg, installs what's missing with your system's package ma
 ## 2. `npx … setup`
 With Node already there:
 ```sh
-npx -y github:AngleOS/filmkit setup
+npx -y filmkit setup
 ```
 Setup walks through five steps, asking each choice its flag doesn't make:
 1. **the requirements:** Node, ffmpeg and HyperFrames' Chrome, fetched once when it's missing;
@@ -29,12 +27,12 @@ Setup walks through five steps, asking each choice its flag doesn't make:
    browser.
 
 Run it again and it keeps the studio and the film. `--yes` asks nothing, and `setup --remove` takes Filmkit out of
-every agent tool, leaving the studio alone. In the studio, `npx -y github:AngleOS/filmkit tour` makes the first film
+every agent tool, leaving the studio alone. In the studio, `npx -y filmkit tour` makes the first film
 again one command at a time, explaining each. Every flag is in the [CLI reference](cli.md).
 
 ## 3. With your agent
 Paste [the install prompt](install-with-your-agent.md) into Claude Code, Codex, Cursor or another coding agent, or
-print it with `npx -y github:AngleOS/filmkit prompt`. The agent runs the installer, asks you only for your brand, sets
+print it with `npx -y filmkit prompt`. The agent runs the installer, asks you only for your brand, sets
 it up and finishes the first film with you.
 
 ## Your agent tools
@@ -48,12 +46,12 @@ tool's page says what it changes, how to check it worked and how to remove it:
 ## A first film by hand
 <!-- quickstart -->
 ```sh
-npx -y github:AngleOS/filmkit init acme-films --name Acme        # a studio for your brand
+npx -y filmkit init acme-films --name Acme       # a studio for your brand
 cd acme-films
-npx -y github:AngleOS/filmkit new launch --template statement   # or ask your agent: "Make a 30-second launch film for …"
-npx -y github:AngleOS/filmkit check launch                       # every format; non-zero on failure
-npx -y github:AngleOS/filmkit contact launch                     # contact sheets to review
-npx -y github:AngleOS/filmkit render launch                      # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
+npx -y filmkit new launch --template statement   # or ask your agent: "Make a 30-second launch film for …"
+npx -y filmkit check launch                      # every format; non-zero on failure
+npx -y filmkit contact launch                    # contact sheets to review
+npx -y filmkit render launch                     # renders/launch-{16x9,1x1,4x5,9x16}.mp4 + .srt/.vtt
 ```
 - **`init`** makes the studio: `filmkit.json`, `brand/logo.svg` (put your own logo there), `CLAIMS.md`, `POSTING.md`,
   `AGENTS.md` and the filmkit skill. `filmkit brand` sets your colours, font and logo: see [themes](themes.md).
@@ -64,7 +62,7 @@ npx -y github:AngleOS/filmkit render launch                      # renders/launc
 - **`contact`** writes a contact sheet per format into `build/launch/`. Look at them before you render.
 - **`render`** checks again, then writes the four MP4s, with sound, and the captions into `renders/`.
 
-`npx -y github:AngleOS/filmkit preview launch` opens the film in HyperFrames Studio, reloading as you save; `f` shows
+`npx -y filmkit preview launch` opens the film in HyperFrames Studio, reloading as you save; `f` shows
 the next format. The scenes you can build with are in the [scenes reference](scenes.md).
 
 ## A first film with your agent
