@@ -13,6 +13,14 @@ updates:
     ignore:
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+  # The marketing site's pnpm lockfile (site/), which the entry above at / doesn't reach
+  - package-ecosystem: npm
+    directory: /site
+    schedule:
+      interval: weekly
+    groups:
+      site:
+        patterns: ["*"]
   # The SHA-pinned actions in .github/workflows
   - package-ecosystem: github-actions
     directory: /
