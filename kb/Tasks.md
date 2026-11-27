@@ -6,11 +6,11 @@ _Mirror of the [Angle board](https://github.com/orgs/AngleOS/projects/5) — gen
 
 - [Weekly dependency / CVE review (2026-W46)](https://github.com/AngleOS/filmkit/issues/1) `filmkit#1`
 - [filmkit v0.1: AI agents make brand films in HTML](https://github.com/AngleOS/filmkit/issues/2) `filmkit#2` · High
-- [sound: cues from the picture, the pad and the mix in Node (port cues.py, pad.mjs, mix.sh, sound-sheet)](https://github.com/AngleOS/filmkit/issues/4) `filmkit#4` · High
-- [scenes: chat, code, terminal, composer and a generic app frame, themed](https://github.com/AngleOS/filmkit/issues/6) `filmkit#6` · High
-- [scenes: infographics — bars, counter, stat, grid, cards, timeline, mesh, meter](https://github.com/AngleOS/filmkit/issues/7) `filmkit#7` · High
-- [studio and themes: filmkit init, new --template, filmkit.json brand themes, skills install](https://github.com/AngleOS/filmkit/issues/8) `filmkit#8` · High
-- [contact sheets: filmkit contact renders one review image per format](https://github.com/AngleOS/filmkit/issues/9) `filmkit#9` · High
 - [MCP server: filmkit mcp — tools that make, check, show and render films for any agent](https://github.com/AngleOS/filmkit/issues/10) `filmkit#10` · High
 - [examples: a complete example studio with two films for a fictional brand](https://github.com/AngleOS/filmkit/issues/12) `filmkit#12` · High
-- [CI: tests, type check and film checks on the self-hosted runners; release workflow](https://github.com/AngleOS/filmkit/issues/13) `filmkit#13` · High
+- [docs: getting started, studio, themes, scenes reference, CLI, MCP and the agent workflow](https://github.com/AngleOS/filmkit/issues/14) `filmkit#14` · High
+- [Owner: make filmkit public and publish it to npm](https://github.com/AngleOS/filmkit/issues/15) `filmkit#15` · Medium
+- [setup: `filmkit setup` walkthrough — requirements, agents, studio, brand, first film; `--yes`, `--remove`, `prompt`, `tour`](https://github.com/AngleOS/filmkit/issues/19) `filmkit#19` · High
+- [brand: `filmkit brand` — your brand in Filmkit from a website or a few questions](https://github.com/AngleOS/filmkit/issues/22) `filmkit#22` · High
+- [install: one-line installers and the agent setup prompt](https://github.com/AngleOS/filmkit/pull/18) `filmkit#18`
+- [brand: Angle Filmkit — the angle theme, the README hero, trademarks](https://github.com/AngleOS/filmkit/pull/16) `filmkit#16`
